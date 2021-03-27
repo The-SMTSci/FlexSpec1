@@ -9,8 +9,9 @@
 INTRODUCTION
 ============
 
-Ramifications of 3D printing leading to NA1: 
-Introducing the North America  I
+Ramifications of 3D printing leading to FS1: 
+
+Introducing the "Flexible Spectrograph One" (FS1)
 Small Telescope Spectrograph.
 
 
