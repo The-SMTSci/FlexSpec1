@@ -2,7 +2,7 @@ ABSTRACT
 ========
 
 Title: Ramifications of 3D printing Spectrographs: Introducing the Flexible
-Spectrograph I (FS1) Small Telescope Spectrograph
+Spectrograph I (FlexSpec1) Small Telescope Spectrograph
 
 Authors : Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony
           Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager
@@ -10,7 +10,7 @@ Authors : Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony
 Contributors: Paul Gerlach
 
 Abstract: Here we present the engineering and science case for the
-Flexible Spectrograph Small Telescope Spectrograph I (FS1).  In Paper
+Flexible Spectrograph Small Telescope Spectrograph I (FlexSpec1).  In Paper
 I, we explored the 3D printing of the LOWSPEC 1 for general science
 use. In Paper II, we presented technical issues and solutions related
 to the LOWSPEC 2.  Here, in Paper III, we take the general design one
