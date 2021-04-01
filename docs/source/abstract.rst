@@ -19,7 +19,7 @@ flexibility through choices of materials, resolutions and optics
 needed to match observing needs and capabilities related to small
 telescope spectroscopy. We lay the foundation for remote operation of
 the instrument. The full design will be available via GitHUB, the
-documentation is at readthedocs.io/SASFS1.
+documentation is at readthedocs.io/FlexSpec1.
 
 Note to Editor:
 
