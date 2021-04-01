@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'SASFS1'
+project = 'FlexSpec1'
 copyright = '2021, Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager'
 author = 'Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager'
 
