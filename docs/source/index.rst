@@ -13,7 +13,10 @@ Ramifications of 3D printing leading to the Flexible Spectrograph
 Small Telescope Spectrograph I or FlexSpec1:
 
 Introducing the "Flexible Spectrograph One" (FS1)
-Small Telescope Spectrograph.
+Small Telescope Spectrograph. (Pending)
+
+(Accepted May, Proceedings of the Small Telescope Symposium 2021, Society
+for Astronomical Sciences).
 
 
 .. toctree::
