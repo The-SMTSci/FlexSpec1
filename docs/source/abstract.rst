@@ -4,6 +4,9 @@ ABSTRACT
 Title: Ramifications of 3D printing Spectrographs: Introducing the Flexible
 Spectrograph I (FlexSpec1) Small Telescope Spectrograph
 
+(Accepted May, Proceedings of the Small Telescope Symposium 2021, Society
+for Astronomical Sciences).
+
 Authors : Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony
           Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager
 
