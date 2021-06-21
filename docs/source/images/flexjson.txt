@@ -1,0 +1,40 @@
+
+%{
+/* need this for the call to atof() below */
+#include <math.h>
+#include <string>
+#include <iostream>
+using namespace std;
+%}
+
+// character tokens
+COLON      [:]
+COMMA      [,]
+OPENBRACE  [\{]
+CLOSEBRACE [\}]
+QUOTE      ["]
+DIGIT      [0-9]
+ID         [A-Za-z_]+[A-Za-z0-9_]*
+
+
+FlexJSON     := Dictionay
+             ;
+
+Dictionary   := '{' KeyValueList '}'
+             ;
+
+KeyValueList := KeyValue
+             |  KeyValueList COMMA Keyvalue
+             ;
+
+KeyValue     := Key COLON Value
+             ;
+
+Key          := STRING
+
+Value        := STRING
+             |  INTEGER
+             |  Float
+             |  Dictionary
+             ;
+

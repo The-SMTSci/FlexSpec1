@@ -1,0 +1,31 @@
+\def\myalphac{30}
+\def\mybetac{30}
+\def\mync{1.8}
+
+\tikzmath{\mybetac = asin(sin(\myalphac)*\mync);}
+
+\begin{tikzpicture}[>=latex,scale=1]
+  \fill[white] (-3,0) rectangle (3,3);
+  \fill[gray!70] (-3,-3) rectangle (3,0);
+%  \fill[pattern = north east lines] (-4,-0.5) rectangle (4,0);
+  \draw[thick, dashed] (0,-2.5) -- (0,2.5);
+  \coordinate (A) at (-90-\myalphac:3);
+  \coordinate (B) at (-90+\myalphac:3);
+  \coordinate (C) at (90-\mybetac:2.8);
+  \coordinate (O) at (0,0);
+  \coordinate (L) at (0,-3);
+  \draw[blue, ultra thick] (A) -- (O) --  (C);
+  \draw[blue, ultra thick,->] (A) -- ($ (A)!0.5!(O) $);
+  \draw[blue, ultra thick,->] (O) -- ($ (O)!0.5!(C) $);
+  \draw[blue] (O) -- (B);
+  \draw[blue, ->] (O) -- ($ (O)!0.6!(B) $);
+  \markangle{A}{O}{L}{126}{$\alpha$}
+  \markangle{L}{O}{B}{126}{$\alpha$}
+  \markangle{0,3}{O}{C}{126}{$\beta$}
+  \markangle{0,1}{O}{-3,0}{30}{$\cdot$}
+  \node () at (-2,0.5){$n_2$};
+  \node () at (2,-1.5){\footnotesize $n_1 > n_2$};
+  \node () at (-2,-0.5){$n_1$};
+  \node[fill=white,draw=red,ultra thick,rectangle,inner sep=5] at
+  (-1.6,1.7){\Large $\frac{\sin\alpha}{\sin\beta} = \frac{n_2}{n_1}$};
+\end{tikzpicture}

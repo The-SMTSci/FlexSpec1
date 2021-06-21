@@ -1,0 +1,55 @@
+\documentclass[crop,border=5,tikz,convert={outext=.svg,command=\unexpanded{pdf2svg
+    \infile\space\outfile}},multi=false]{standalone}
+\usetikzlibrary{math,calc,through,shapes,patterns}
+
+\newcommand{\markangle}[6][0.25]{
+  \begin{scope}
+    \clip (#2)--(#3)--(#4);
+    \node (ANG) [draw, circle, minimum size=#5] at (#3){};
+  \end{scope}
+  \coordinate (E1) at (intersection 0 of ANG and #3--#2);
+  \coordinate (E2) at (intersection 0 of ANG and #3--#4);
+  %\draw[thick] (E1) to [bend right=50] (E2);
+  \coordinate (EM) at ($ (E1)!0.5!(E2) $);
+  \coordinate (EM) at ($ (EM)!#1!(#3) $);
+  \node at (EM) {#6};
+}
+
+
+\def\myt{60}
+
+\begin{document}
+
+\def\myalpha{50}
+\def\mynb{1.8}
+\tikzmath{\mybeta = asin(sin(\myalpha)/\mynb);}
+
+\begin{tikzpicture}[>=latex,scale=1]
+  \fill[white] (-3,0) rectangle (3,3);
+  \fill[gray!70] (-3,-3) rectangle (3,0);
+  \node () at (1,1){\mybeta};
+%  \fill[pattern = north east lines] (-4,-0.5) rectangle (4,0);
+  \draw[thick, dashed] (0,-2.5) -- (0,2.5);
+  \coordinate (A) at (90+\myalpha:3);
+  \coordinate (B) at (90-\myalpha:3);
+  \coordinate (C) at (-90+\mybeta:3);
+  \coordinate (O) at (0,0);
+  \coordinate (L) at (0,3);
+  \draw[blue, ultra thick] (A) -- (O) --  (C);
+  \draw[blue, ultra thick,->] (A) -- ($ (A)!0.5!(O) $);
+  \draw[blue, ultra thick,->] (O) -- ($ (O)!0.5!(C) $);
+  \draw[blue, thick] (O) -- (B);
+  \draw[blue,->] (O) -- ($ (O)!0.55!(B) $);
+  \markangle{A}{O}{L}{126}{$\alpha$}
+  \markangle{L}{O}{B}{126}{$\alpha$}
+  \markangle{0,-3}{O}{C}{126}{$\beta$}
+  \markangle{0,-1}{O}{-3,0}{30}{$\cdot$}
+  \node () at (-2,0.5){$n_1$};
+  \node () at (2,-1.5){\footnotesize $n_1 < n_2$};
+  \node () at (-2,-0.5){$n_2$};
+  \node[fill=white,draw=red,ultra thick,rectangle,inner sep=5] at
+  (-1.6,-1.7){\Large $\frac{\sin\alpha}{\sin\beta} = \frac{n_2}{n_1}$};
+\end{tikzpicture}
+
+
+\end{document}

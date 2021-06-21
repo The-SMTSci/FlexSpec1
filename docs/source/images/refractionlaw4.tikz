@@ -1,0 +1,29 @@
+\def\myt{60}
+\def\myalphad{50}
+\def\mybetad{90}
+\def\mync{1.8}
+\tikzmath{\myalphad = asin(1/\mync);}
+\begin{tikzpicture}[>=latex,scale=1]
+  \fill[white] (-3,0) rectangle (3,3);
+  \fill[gray!70] (-3,-3) rectangle (3,0);
+  % \fill[pattern = north east lines] (-4,-0.5) rectangle (4,0);
+  \draw[thick, dashed] (0,-2.5) -- (0,2.5);
+  \coordinate (A) at (-90-\myalphad:3);
+  \coordinate (B) at (-90+\myalphad:3);
+  \coordinate (C) at (90-\mybetad:3);
+  \coordinate (O) at (0,0);
+  \coordinate (L) at (0,-3);
+  \draw[blue, ultra thick] (A) -- (O);
+  \draw[blue, ultra thick, dotted] (O) -- (C);
+  \draw[blue, ultra thick,->] (A) -- ($ (A)!0.5!(O) $);
+  \draw[blue, ultra thick,->] (O) -- ($ (O)!0.6!(B) $);
+  \draw[blue, ultra thick] (O) -- (B);
+  \markangle{A}{O}{L}{126}{$\alpha_{\rm t}$}
+  \markangle{L}{O}{B}{126}{$\alpha_{\rm t}$}
+  \markangle{0,1}{O}{3,0}{30}{$\cdot$}
+  \node () at (-2,0.5){$n_2$};
+  \node () at (2,-1.5){\footnotesize $n_1 > n_2$};
+  \node () at (-2,-0.5){$n_1$};
+  \node[fill=white,draw=red,ultra thick,rectangle,inner sep=5] at
+  (-1.6,1.7){\large $\sin\alpha_{\rm t} > \frac{n_2}{n_1}$};
+\end{tikzpicture}
