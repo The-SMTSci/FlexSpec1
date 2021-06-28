@@ -130,38 +130,37 @@ class BokehGrating(object):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.display      = display
-        self.name         = name
-        self.wwidth       = width
-        self.grating      = grating     # Start with a default 300 l/mm
-        self.startwave    = 100         # start range current grating
-        self.endwave      = 200         # end   range current grating
-        self.cwave        = 50          # current selected range.
-        self.slit         = "20"
-        self.state        = "undefined"
-        self.homed        = False       # don't know.
-        self.validp       = False       # wake up in false position
+        self.display       = display
+        self.name          = name
+        self.wwidth        = width
+        self.grating       = grating     # Start with a default 300 l/mm
+        self.startwave     = 100         # start range current grating
+        self.endwave       = 200         # end   range current grating
+        self.cwave         = 50          # current selected range.
+        self.slit          = "20"
+        self.state         = "undefined"
+        self.homed         = False       # don't know.
+        self.validp        = False       # wake up in false position
 
 
         # Handle startup the easy way. Proper will be to query before instantiation.
-        entry             =  BokehGrating.GratingsTable.get(grating,None)
+        entry              =  BokehGrating.GratingsTable.get(grating,None)
         if(entry is not None):
             grating = entry
             self.cwave    = self.startwave   = entry[0]
             self.endwave  = entry[1]
 
-        self.slitchoices  = Select  (title=f"Gratings",value='20',options=self.GratingInserts, width=self.wwidth)
-        self.cwavechoice  = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
+        self.slitchoices   = Select  (title=f"Gratings",value='20',options=self.GratingInserts, width=self.wwidth)
+        self.cwavechoice   = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
                                      value = self.cwave, start = self.startwave,  
                                      end = self.endwave+1, step = 10, width=self.wwidth)
-        self.procesbutton = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
+        self.processbutton = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
 
-        self.homebutton   = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
-# align='end',
-        self.slitchoices  .on_change('value', lambda attr, old, new: self.update_slitchoice   (attr, old, new))
-        self.cwavechoice  .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
-        self.homebutton   .on_click (lambda : self.update_processbutton())
-        self.homebutton   .on_click (lambda : self.update_homebutton())
+        self.homebutton    = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
+        self.slitchoices     .on_change('value', lambda attr, old, new: self.update_slitchoice   (attr, old, new))
+        self.cwavechoice     .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
+        self.processbutton   .on_click (lambda : self.update_processbutton())
+        self.homebutton      .on_click (lambda : self.update_homebutton())
         self.send_state()
 
     ### BokehGrating.__init__()
@@ -174,7 +173,8 @@ class BokehGrating(object):
             self.grating           = grating
             self.startwave         = entry[0]             # set our values first
             self.endwave           = entry[0]
-            self.cwave             = entry[1]
+            if(self.cwave == 50):
+                self.cwave             = entry[1]
             self.slitchoices.value = f"{self.startwave}"  # update with current values.
             #self.slitchoices.start = f"{self.endwave}"
             #self.slitchoices.end   = f"{self.cwave}"
@@ -225,7 +225,7 @@ class BokehGrating(object):
         """Get the layout in gear"""
         return(row ( column ( self.slitchoices,
                               self.cwavechoice,
-                              self.procesbutton,
+                              self.processbutton,
                               self.homebutton
                             )  ))
 
