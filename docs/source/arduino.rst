@@ -1,11 +1,33 @@
 Arduino Chips
 *************
 
+Follow the instructions:
+
+`Seeeduino XIAO <https://wiki.seeedstudio.com/Seeeduino-XIAO/>`_
+
+
 Arduino chips come in several flavors. Here we are using Arm -Core :index:`Arm` processors.
 
+Download the Arduino IDE (here 1.8.15)
 
-Physical
+Under **File -> Preferences**
+
+Into the **Additional Boards Manager URLs** enter:
+
+"https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json"
+
+**Tools -> Board -> Boards Manager**
+
+Search/select **Seeed SAMD Boards** (see that it includes
+Seeeduino XAIO M0, and install it. (here 1.21.1) Takes a beat.
+
+The real trick is to start with the raw IDE and add the **Blink**
+program. This shows the 'loop' is closed with respect to development.
+
+
+Pin Outs
 --------
+
 ..  code-block:: none
     :linenos:
 
