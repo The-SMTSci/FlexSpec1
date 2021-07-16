@@ -22,7 +22,7 @@ from bokeh.models         import Select
 from bokeh.models.widgets import Tabs, Panel
 
 from SlitBokeh            import BokehOVIOSlit
-from LampBokeh            import BokehFlexLamp
+from KzinBokeh            import BokehKzinRing
 from ParallacticAngle     import FlexOrientation
 from GratingBokeh         import BokehGrating
 from Guider               import Guider
@@ -91,7 +91,7 @@ if (1):  # This is main! leave set to 1
 
     curdoc().theme = 'dark_minimal'
     curdoc().title = "FlexSpec1 Spectrograph"
-    kzin1          = BokehFlexLamp("Tony",display=display,width=350)
+    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=350)
     l1             = kzin1.layout()
     tab1           = Panel(child=l1,title='Kzin Calibration')
 
