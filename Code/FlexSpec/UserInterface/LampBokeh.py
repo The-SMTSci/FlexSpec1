@@ -218,7 +218,7 @@ class BokehFlexLamp(object):
                          ])
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehFlexLamp.send_state()
 
@@ -235,7 +235,7 @@ class BokehFlexLamp(object):
                          ])
         d2      = dict([("Kzin", dict([("Process", cmddict)]))])
         jdict   = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
         return jdict
 
     ### BokehFlexLamp.send_off(()

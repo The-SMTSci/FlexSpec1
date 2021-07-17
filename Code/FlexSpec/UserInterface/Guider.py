@@ -204,7 +204,7 @@ class Guider(object):
                          ])
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### Guider.send_home()
 
@@ -216,7 +216,7 @@ class Guider(object):
                         ])
         d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict   = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### Guider.send_state()
 

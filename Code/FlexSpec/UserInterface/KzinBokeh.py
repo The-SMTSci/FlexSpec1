@@ -39,6 +39,7 @@ from bokeh.models.widgets import Tabs, Panel
 # α
 # β
 # λ
+# μ
 # (wg-astroconda3-pdb)      # CONDA Python3
 #
 # (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
@@ -264,7 +265,7 @@ class BokehKzinRing(object):
                          ])
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehKzinRing.send_state()
 
@@ -283,7 +284,7 @@ class BokehKzinRing(object):
 #                         ])
 #        d2      = dict([("Kzin", dict([("Process", cmddict)]))])
 #        jdict   = json.dumps(d2)
-#        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreciept" : 1 }}')
+#        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 #        return jdict
 #
 #    ### BokehKzinRing.send_off(()

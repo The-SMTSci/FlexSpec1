@@ -195,7 +195,7 @@ class Collimator(object):
                          ])
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### Collimator.send_home()
 
@@ -207,7 +207,7 @@ class Collimator(object):
                         ])
         d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict   = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### Collimator.send_state()
 

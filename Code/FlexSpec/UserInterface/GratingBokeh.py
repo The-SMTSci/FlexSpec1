@@ -205,7 +205,7 @@ class BokehGrating(object):
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
         if(self.display):
-            self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+            self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehGrating.send_home()
 
@@ -217,7 +217,7 @@ class BokehGrating(object):
         d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
         if(self.display):
-            self.display.display(f'{{ {jdict} , "returnreciept" : 1 }}')
+            self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehGrating.send_state()
 

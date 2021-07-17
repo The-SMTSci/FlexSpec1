@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# change the if stmt at bottom from if(0) to if(1) for regression.
 # bokeh serve ./BlinkyBokeh.py
 # (wg-python-fix-pdbrc)
 
@@ -179,7 +180,7 @@ class BokehFlexBlinky(object):
                          ])
         d2 = dict([("Process", cmddict)])
         jdict = json.dumps(d2)
-        self.display(f'{{ "{self.name}" : {jdict} , "returnreciept" : 1 }}')
+        self.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehFlexBlinky.send_state()
 
