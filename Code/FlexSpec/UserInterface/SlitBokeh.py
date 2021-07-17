@@ -160,7 +160,7 @@ class BokehOVIOSlit(object):
         self.slitchoices = Select(title=f"OVIO Slits",value='20',options=self.oviodropdowns, width=self.wwidth)
         self.slitchoices .on_change('value',lambda attr, old, new: self.update_dropdown   (attr, old, new))
         self.slitlamp    .on_change('active', lambda attr, old, new: self.radio_handler   (attr, old, new))
-        self.send_state()
+        self.send_state()   # set the initial state.
 
     ### BokehOVIOSlit.__init__()
 

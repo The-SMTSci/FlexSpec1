@@ -169,9 +169,9 @@ class BokehKzinRing(object):
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
         self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.augflatslider  = Slider(title=f"Augflat Intensity", bar_color='firebrick',
+        self.augflatslider  = Slider(title=f"Augmented Flat Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.nearslider     = Slider(title=f"Near Intensity", bar_color='firebrick',
+        self.nearslider     = Slider(title=f"NeAr Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
 
         self.wheatslider   .on_change('value', lambda attr, old, new: self.update_slider (self.wheat_value  , attr, old, new))
@@ -190,9 +190,9 @@ class BokehKzinRing(object):
                                                   active=[0]*len(self.CBLabels)
                                                  ) # create/init them
         self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
-                                                   button_type="success", width=self.wwidth)
+                                                   button_type="success", width=self.wwidth//2)
         self.offbutton      = Button    (align='end', label=f"{self.name} Off",  disabled=False,
-                                                   button_type="primary", width=self.wwidth)
+                                                   button_type="primary", width=self.wwidth//2)
 
         self.LampCheckBoxes .on_change('active', lambda attr, old, new: self.lampcheckboxes_handler   (attr, old, new))
         self.process        .on_click (lambda : self.update_process())

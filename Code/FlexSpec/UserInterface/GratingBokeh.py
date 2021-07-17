@@ -178,7 +178,7 @@ class BokehGrating(object):
             self.slitchoices.value = f"{self.startwave}"  # update with current values.
             #self.slitchoices.start = f"{self.endwave}"
             #self.slitchoices.end   = f"{self.cwave}"
-        self.send_state()
+        #self.send_state()
 
     ### BokehGrating.slitchoice()
 
