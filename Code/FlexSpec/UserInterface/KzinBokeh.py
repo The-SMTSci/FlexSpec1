@@ -115,16 +115,26 @@ class BokehKzinRing(object):
     RUN         = 2  # BokehKzinRing.RUN
     SateText    = ["Off","On","Illegal"]
     brre        = re.compile(r'\n')                         # used to convert newline to <br/>
-    postmessage = { "name"    : "Unassigned",
-                    "near"    : None ,
-                    "osram"   : None ,
-                    "hα"      : None ,
-                    "oiii"    : None ,
-                    "hβ"      : None ,
-                    "flat"    : None ,
-                    "augflat" : None
-                    }
 
+
+    ##################################################################
+    #  SliderValues an Internal instance placeholder to sidestep
+    #  call by reference in python.
+    ##################################################################
+    class SliderValues(object):
+        """Manage object values"""
+        def __init__(self):
+            self.values = dict((
+            ("wheat_value"   ,"0"),
+            ("osram_value"   ,"0"),
+            ("hbeta_value"   ,"0"),
+            ("oiii_value"    ,"0"),
+            ("halpha_value"  ,"0"),
+            ("flat_value"    ,"0"),
+            ("augflat_value" ,"0"),
+            ("near_value"    ,"0")
+            ))
+    # SliderValues
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
@@ -146,15 +156,16 @@ class BokehKzinRing(object):
         self.augflatcheck_value  = 0
         self.nearcheck_value     = 0
 
-        self.wheat_value         = 0
-        self.osram_value         = 0
-        self.hα_value            = 0
-        self.oiii_value          = 0
-        self.hβ_value            = 0
-        self.flat_value          = 0
-        self.augflat_value       = 0
-        self.near_value          = 0
-        self.onoff               = 0                # Off
+#        self.wheat_value         = 0
+#        self.osram_value         = 0
+#        self.hα_value            = 0
+#        self.oiii_value          = 0
+#        self.hβ_value            = 0
+#        self.flat_value          = 0
+#        self.augflat_value       = 0
+#        self.near_value          = 0
+#        self.onoff               = 0                # Off
+        self.slider_values = BokehKzinRing.SliderValues()
 
         # Labels merge spaces into one space.
         self.wheatslider    = Slider(title=f"Incandescent Intensity", bar_color='firebrick',
@@ -174,27 +185,27 @@ class BokehKzinRing(object):
         self.nearslider     = Slider(title=f"NeAr Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
 
-        self.wheatslider   .on_change('value', lambda attr, old, new: self.update_slider (self.wheat_value  , attr, old, new))
-        self.osramslider   .on_change('value', lambda attr, old, new: self.update_slider (self.osram_value  , attr, old, new))
-        self.hβslider      .on_change('value', lambda attr, old, new: self.update_slider (self.hβ_value , attr, old, new))
-        self.oiiislider    .on_change('value', lambda attr, old, new: self.update_slider (self.oiii_value   , attr, old, new))
-        self.hαslider      .on_change('value', lambda attr, old, new: self.update_slider (self.hα_value , attr, old, new))
-        self.flatslider    .on_change('value', lambda attr, old, new: self.update_slider (self.flat_value   , attr, old, new))
-        self.augflatslider .on_change('value', lambda attr, old, new: self.update_slider (self.augflat_value, attr, old, new))
-        self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider (self.near_value   , attr, old, new))
+        self.wheatslider   .on_change('value', lambda attr, old, new: self.update_slider ("wheat_value"  , attr, old, new))
+        self.osramslider   .on_change('value', lambda attr, old, new: self.update_slider ("osram_value"  , attr, old, new))
+        self.hβslider      .on_change('value', lambda attr, old, new: self.update_slider ("hbeta_value"  , attr, old, new))
+        self.oiiislider    .on_change('value', lambda attr, old, new: self.update_slider ("oiii_value"   , attr, old, new))
+        self.hαslider      .on_change('value', lambda attr, old, new: self.update_slider ("halpha_value" , attr, old, new))
+        self.flatslider    .on_change('value', lambda attr, old, new: self.update_slider ("flat_value"   , attr, old, new))
+        self.augflatslider .on_change('value', lambda attr, old, new: self.update_slider ("augflat_value", attr, old, new))
+        self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
 
         # // coordinate with lampcheckboxes_handler
-        self.CBLabels=["Wheat", "Osram", "H-α", "O[iii]", "Flat", "Blue Flat", "NeAr" ]
+#        self.CBLabels=["Wheat", "Osram", "H-α", "O[iii]", "Flat", "Blue Flat", "NeAr" ]
+#        self.LampCheckBoxes = CheckboxButtonGroup(labels=self.CBLabels,
+#                                                  active=[0]*len(self.CBLabels)
+#                                                 ) # create/init them
 
-        self.LampCheckBoxes = CheckboxButtonGroup(labels=self.CBLabels,
-                                                  active=[0]*len(self.CBLabels)
-                                                 ) # create/init them
         self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
                                                    button_type="success", width=self.wwidth//2)
         self.offbutton      = Button    (align='end', label=f"{self.name} Off",  disabled=False,
                                                    button_type="primary", width=self.wwidth//2)
 
-        self.LampCheckBoxes .on_change('active', lambda attr, old, new: self.lampcheckboxes_handler   (attr, old, new))
+#        self.LampCheckBoxes .on_change('active', lambda attr, old, new: self.lampcheckboxes_handler   (attr, old, new))
         self.process        .on_click (lambda : self.update_process())
         self.offbutton      .on_click (lambda : self.update_offbutton())
 
@@ -205,7 +216,7 @@ class BokehKzinRing(object):
         """Get the new slider value and send it.
         This is a call by a lambda from many sliders, sending its
         corresponding value into the mix."""
-        memberval = new
+        self. slider_values.values[memberval] = new
 
     ### BokehGrating.cwave()
 
@@ -227,18 +238,18 @@ class BokehKzinRing(object):
 
     ### BokehKzinRing.update_process()
 
-    def lampcheckboxes_handler(self,attr, old, new):            # BokehKzinRing::lampcheckboxes_handler()
-        """Handle the checkboxes, new is a list of indices into
-        self.CBLabels for their purpose"""
-        msg = f"attr {attr}, old {old}, new {new}"
-        self.wheatcheck_value   = 1 if 0 in new else 0
-        self.osramcheck_value   = 1 if 1 in new else 0
-        self.hαcheck_value      = 1 if 2 in new else 0
-        self.oiiicheck_value    = 1 if 3 in new else 0
-        self.flatcheck_value    = 1 if 4 in new else 0
-        self.augflatcheck_value = 1 if 5 in new else 0
-        self.nearcheck_value    = 1 if 6 in new else 0
-        #self.display(msg)
+#    def lampcheckboxes_handler(self,attr, old, new):            # BokehKzinRing::lampcheckboxes_handler()
+#        """Handle the checkboxes, new is a list of indices into
+#        self.CBLabels for their purpose"""
+#        msg = f"attr {attr}, old {old}, new {new}"
+#        self.wheatcheck_value   = 1 if 0 in new else 0
+#        self.osramcheck_value   = 1 if 1 in new else 0
+#        self.hαcheck_value      = 1 if 2 in new else 0
+#        self.oiiicheck_value    = 1 if 3 in new else 0
+#        self.flatcheck_value    = 1 if 4 in new else 0
+#        self.augflatcheck_value = 1 if 5 in new else 0
+#        self.nearcheck_value    = 1 if 6 in new else 0
+#        #self.display(msg)
 
     ### BokehKzinRing.lampcheckboxes_handler()
 
@@ -253,17 +264,17 @@ class BokehKzinRing(object):
 
     def send_state(self):                                       # BokehKzinRing::send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "wheat"   , self.wheat_value),
-                          ( "osram"   , self.osram_value),
-                          ( "hβ"      , self.hβ_value),
-                          ( "oiii"    , self.oiii_value),
-                          ( "hα"      , self.hα_value),
-                          ( "flat"    , self.flat_value),
-                          ( "augflat" , self.augflat_value),
-                          ( "near"    , self.near_value),
+        cmddict = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]),
+                          ( "osram"   , self.slider_values.values["osram_value"   ]),
+                          ( "hbeta"   , self.slider_values.values["hbeta_value"   ]),
+                          ( "oiii"    , self.slider_values.values["oiii_value"    ]),
+                          ( "halpha"  , self.slider_values.values["halpha_value"  ]),
+                          ( "flat"    , self.slider_values.values["flat_value"    ]),
+                          ( "augflat" , self.slider_values.values["augflat_value" ]),
+                          ( "near"    , self.slider_values.values["near_value"    ]),
                           ( "state"   , self.onoff)
                          ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
+        d2    = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict = json.dumps(d2)
         self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 

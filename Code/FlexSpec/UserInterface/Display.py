@@ -10,12 +10,13 @@ import optparse
 import sys
 import re
 import time
-
-
+import socket
 
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import Button, Div
 
+HOST = '127.0.0.1'  # The server's hostname or IP address
+PORT = 65432        # The port used by the server
 
 #############################################################################
 #
@@ -152,12 +153,20 @@ class FlexDisplay(object):
 
     ### FlexDisplay.clear
 
+    def send(self,msg):
+       """Connect to socket and send the message."""
+       with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+          s.connect((HOST, PORT))
+          s.sendall(msg.encode())
+          data = s.recv(1024)
+
     def display(self,msg : str = "\n",color='Bisque'):                 # FlexDisplay.display
         """append to conent display to the div """
         self.panel.background = color
         ts                    = fulltimestamp()
         self.message          = self.message  + f'\n--- {ts}\n' + msg + "\n"
         self.panel.text       = FlexDisplay.brre.sub("<br/>",f"{self.message}")
+        self.send(msg)
         return self
 
     ### FlexDisplay.display()
