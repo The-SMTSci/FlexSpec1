@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# Test with:
 # bokeh serve KzinBokeh.py --unused-session-lifetime 3600000
 # (wg-python-fix-pdbrc)
 
@@ -11,7 +12,7 @@ import sys
 import io
 import re
 import json
-from Display          import fakedisplay
+from Display              import fakedisplay
 
 
 from bokeh                import events
@@ -44,20 +45,30 @@ from bokeh.models.widgets import Tabs, Panel
 #
 # (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
 #
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
-#
-# https://docs.bokeh.org/en/latest/docs/user_guide/interaction/widgets.html#paragraph
-#
-#
 # (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['BokehKzinRing','KzinRingException']   # list of quoted items to export
+# class KzinRingException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class BokehKzinRing(object):
+#     class SliderValues(object):
+#         def __init__(self):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self, name : str = "Default",
+#     def update_slider(self,memberval,attr,old,new):             # BokehGrating::cwave()
+#     def update_offbutton(self):                                 # BokehKzinRing::update_offbutton()
+#     def update_process(self):                                   # BokehKzinRing::update_button_in()
+#     def update_debugbtn(self):                                  # BokehKzinRing::update_button_in()
+#     def send_state(self):                                       # BokehKzinRing::send_state()
+#     def layout(self):                                           # BokehKzinRing::layout()
+#     def debug(self,msg="",skip=[],os=sys.stderr):               # BokehKzinRing::debug()
+#
+#
 #
 #############################################################################
 __doc__ = """
@@ -156,15 +167,6 @@ class BokehKzinRing(object):
         self.augflatcheck_value  = 0
         self.nearcheck_value     = 0
 
-#        self.wheat_value         = 0
-#        self.osram_value         = 0
-#        self.hα_value            = 0
-#        self.oiii_value          = 0
-#        self.hβ_value            = 0
-#        self.flat_value          = 0
-#        self.augflat_value       = 0
-#        self.near_value          = 0
-#        self.onoff               = 0                # Off
         self.slider_values = BokehKzinRing.SliderValues()
 
         # Labels merge spaces into one space.
@@ -172,11 +174,11 @@ class BokehKzinRing(object):
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
         self.osramslider    = Slider(title=f"Osram Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.hβslider   = Slider(title=f"Hβ Finder Intensity", bar_color='firebrick',
+        self.hβslider       = Slider(title=f"Hβ Finder Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
         self.oiiislider     = Slider(title=f"O[III] Finder Intensity", bar_color='firebrick',
                                      value = -1, start = -1, end = 100, step = 1, width=self.wwidth)
-        self.hαslider   = Slider(title=f"Hα Finder Intensity", bar_color='firebrick',
+        self.hαslider       = Slider(title=f"Hα Finder Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
         self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
@@ -195,17 +197,11 @@ class BokehKzinRing(object):
         self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
 
         # // coordinate with lampcheckboxes_handler
-#        self.CBLabels=["Wheat", "Osram", "H-α", "O[iii]", "Flat", "Blue Flat", "NeAr" ]
-#        self.LampCheckBoxes = CheckboxButtonGroup(labels=self.CBLabels,
-#                                                  active=[0]*len(self.CBLabels)
-#                                                 ) # create/init them
-
         self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
                                                    button_type="success", width=self.wwidth//2)
         self.offbutton      = Button    (align='end', label=f"{self.name} Off",  disabled=False,
                                                    button_type="primary", width=self.wwidth//2)
 
-#        self.LampCheckBoxes .on_change('active', lambda attr, old, new: self.lampcheckboxes_handler   (attr, old, new))
         self.process        .on_click (lambda : self.update_process())
         self.offbutton      .on_click (lambda : self.update_offbutton())
 
@@ -219,7 +215,6 @@ class BokehKzinRing(object):
         self. slider_values.values[memberval] = new
 
     ### BokehGrating.cwave()
-
 
     def update_offbutton(self):                                 # BokehKzinRing::update_offbutton()
         """Set internal variables to off."""
@@ -237,21 +232,6 @@ class BokehKzinRing(object):
         msg = self.send_state()
 
     ### BokehKzinRing.update_process()
-
-#    def lampcheckboxes_handler(self,attr, old, new):            # BokehKzinRing::lampcheckboxes_handler()
-#        """Handle the checkboxes, new is a list of indices into
-#        self.CBLabels for their purpose"""
-#        msg = f"attr {attr}, old {old}, new {new}"
-#        self.wheatcheck_value   = 1 if 0 in new else 0
-#        self.osramcheck_value   = 1 if 1 in new else 0
-#        self.hαcheck_value      = 1 if 2 in new else 0
-#        self.oiiicheck_value    = 1 if 3 in new else 0
-#        self.flatcheck_value    = 1 if 4 in new else 0
-#        self.augflatcheck_value = 1 if 5 in new else 0
-#        self.nearcheck_value    = 1 if 6 in new else 0
-#        #self.display(msg)
-
-    ### BokehKzinRing.lampcheckboxes_handler()
 
     def update_debugbtn(self):                                  # BokehKzinRing::update_button_in()
         """update_debugbtn Button via an event lambda"""
@@ -274,31 +254,12 @@ class BokehKzinRing(object):
                           ( "near"    , self.slider_values.values["near_value"    ]),
                           ( "state"   , self.onoff)
                          ])
-        d2    = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
+
+        d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
+        jdict   = json.dumps(d2)
         self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehKzinRing.send_state()
-
-#    def send_off(self):                                         # BokehKzinRing::send_off()
-#        """Don't change the internal variables, fake a message to make
-#        the lamps off."""
-#        cmddict = dict( [ ( "wheat"   , 0),
-#                          ( "osram"   , 0),
-#                          ( "hβ"      , 0),
-#                          ( "oiii"    , 0),
-#                          ( "hα"      , 0),
-#                          ( "flat"    , 0),
-#                          ( "augflat" , 0),
-#                          ( "near"    , 0),
-#                          ( "state"   , self.onoff))
-#                         ])
-#        d2      = dict([("Kzin", dict([("Process", cmddict)]))])
-#        jdict   = json.dumps(d2)
-#        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
-#        return jdict
-#
-#    ### BokehKzinRing.send_off(()
 
     def layout(self):                                           # BokehKzinRing::layout()
         """Get the layout in gear"""
@@ -336,7 +297,6 @@ class BokehKzinRing(object):
 
     __BokehKzinRing_debug = debug  # really preserve our debug name if we're inherited
 
-   # (wg-python-properties properties)
 
 # class BokehKzinRing
 

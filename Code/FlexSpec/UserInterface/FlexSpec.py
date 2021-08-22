@@ -78,6 +78,14 @@ __version__ = '0.1'
 if (1):  # This is main! leave set to 1
     opts = optparse.OptionParser(usage="%prog "+__doc__)
 
+    opts.add_option("--host", action="store", dest="host",
+                   default='localhost',
+                   help="<IP address>  The address to use.")
+
+    opts.add_option("--port", action="store", dest="port",
+                   default=5006,
+                   help="<IP Port>    The IP Port to use ")
+
     opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
                    default=False,
                    help="<bool>     be verbose about work.")
@@ -115,6 +123,11 @@ if (1):  # This is main! leave set to 1
 
     tabs           = Tabs(tabs=[tab2,tab1,   tabn])
 
-    curdoc().add_root(row(tabs))
+    try:
+        curdoc().add_root(row(tabs))
+    except Exception as e:
+        print("FlexSpec: Main. Terminating.")
+        display.display(b'end')
+
 
 

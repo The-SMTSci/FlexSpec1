@@ -27,8 +27,6 @@ from bokeh.models         import RadioGroup
 from bokeh.models         import Select
 from bokeh.models.widgets import Tabs, Panel
 
-
-
 from typing import NewType, TypeVar
 npRadianArray = NewType('bpRadianArray',np.array)  # define some better module types
 millimeter    = TypeVar('millimeter',int, float)
@@ -113,15 +111,18 @@ class Guider(object):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.display     = display
-        self.name        = name
-        self.wwidth      = width
-        self.position    = float(position)
-        self.speed       = 0.10
-        self.maxrange    = float(maxrange)
-        self.direction   = 1
-        self.spacer      = Spacer(width=self.wwidth, height=5, background='black') # None #
+        self.name        = name              # name this instance recognizes
+        self.display     = display           # where to put debug info
 
+        self.position    = float(position)   # state variables
+        self.direction   = 1                 # tied to step/in step/out buttons
+        self.speed       = 0.10              # fraction of the speed to move
+        self.homestate   = -1                # a tristate by convention
+
+        self.wwidth      = width             # interval variables
+        self.maxrange    = float(maxrange)
+
+        self.spacer      = Spacer(width=self.wwidth, height=5, background='black') # None #
 
         self.guider      = Slider    (title=f"Guider Position", bar_color='firebrick',
                                            value = self.position, start = 0,  end = self.maxrange,
@@ -133,11 +134,11 @@ class Guider(object):
         self.stepout     = Button    ( label="Step Out", disabled=False, button_type="warning", width=self.wwidth//2)
         self.homebutton  = Button    ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
 
-        self.guider       .on_change('value', lambda attr, old, new: self.update_guider      (attr, old, new))
-        self.guiderspeed  .on_change('value', lambda attr, old, new: self.update_speed       (attr, old, new))
-        self.stepin       .on_click (lambda : self.update_stepin())
-        self.stepout      .on_click (lambda : self.update_stepout())
-        self.homebutton   .on_click (lambda : self.update_homebutton())
+        self.guider       .on_change ('value', lambda attr, old, new: self.update_guider      (attr, old, new))
+        self.guiderspeed  .on_change ('value', lambda attr, old, new: self.update_speed       (attr, old, new))
+        self.stepin       .on_click  (lambda : self.update_stepin()     )
+        self.stepout      .on_click  (lambda : self.update_stepout()    )
+        self.homebutton   .on_click  (lambda : self.update_homebutton() )
 
     ### Guider.__init__()
 
@@ -194,17 +195,18 @@ class Guider(object):
 
     def update_homebutton(self):                                # Guider.update_homebutton()
         """Send a home command"""
-        self.send_home()
+        self.homestate = 1
+        self.send_state()
 
     ### Guider.update_homebutton()
 
-    def send_home(self):                                        # Guider.send_home()
-        """Send a Home Command"""
-        cmddict = dict( [ ( "home"  , 1)      # just a home command
-                         ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+#    def send_home(self):                                        # Guider.send_home()
+#        """Send a Home Command"""
+#        cmddict = dict( [ ( "guiderhome"  , 1)      # just a home command
+#                         ])
+#        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
+#        jdict = json.dumps(d2)
+#        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
 
     ### Guider.send_home()
 
