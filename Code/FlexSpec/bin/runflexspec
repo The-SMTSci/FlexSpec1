@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /home/astroberry/git/external/FlexSpec1/Code/FlexSpec/UserInterface
+export BOKEH_ALLOW_WS_ORIGI=Nastroberry.local:5006
+bokeh serve --allow-websocket-origin=astroberry.local:5006 FlexSpec.py
+
