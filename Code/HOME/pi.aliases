@@ -1,0 +1,119 @@
+#############################################################################
+# .my.aliases
+#############################################################################
+
+PROMPT_COMMAND='echo -ne "\033]0;${PWD}\007"'
+
+alias grep="grep -s"
+alias h='history'
+alias j='jobs -l'
+alias liii='ls $iii'
+alias ll='ls -ld $1'
+alias ls='ls -FC'
+alias lsd='file * | grep directory | grep -Eo "^.*:" | tr  ":" "/" | sort | column -x'
+alias lsize="ls -l | sort -nr -k 5 | tac"
+alias m=more
+alias mroe=more
+alias o="popd"
+alias popd="popd"
+alias pwd='pwd -P'   # physical, full path irrespective of links
+alias s='. ~/pi.aliases'
+alias u="pushd"
+
+alias xiii='iii=`pwd`'
+alias liii='ls $iii'
+alias myterm='xgterm -font -*-fixed-medium-r-*-*-17-*-*-*-*-*-iso8859-* -sb -fg'
+
+# keep to repair fits file names
+function fixnames () { for f in *; do if [[ "$f" =~ " " ]] ; then mv "$f" ${f// /_} ; fi  ; done }
+
+function nospaces { 
+   (for f in *; do if [[ "$f" =~ " " ]] ; then mv "$f" ${f// /_} ; fi ; done)
+   (shopt -s nullglob; for f in *.*.*fit    ; do mv  $f  ${f//./_}        ; done)
+   (shopt -s nullglob; for f in *-*fit      ; do mv  $f  ${f//-/m}        ; done)
+   (shopt -s nullglob; for f in *+*fit      ; do mv  $f  ${f//+/p}        ; done)
+   (shopt -s nullglob; for f in *_fit       ; do mv  $f  ${f/%_fit/.fits} ; done)
+   (shopt -s nullglob; for f in *.fit       ; do mv  $f  ${f/%.fit/.fits} ; done)
+   (shopt -s nullglob; for f in *           ; do if test -x $f ; then chmod -x $f; fi; done)
+}
+
+
+function rrecent()            { find . -type f -mtime -2 | xargs ls -l --time-style=+%Y_%m_%d_%H.%M.%S | awk -e '{print $6,$7;}' | sort -r ; }
+
+# cd to the directory of a a qualified path to a file;
+function cdd()                { cd $(dirname $1);}
+function ..()                 { cd ../$1;            echo ""; }
+function ...()                { cd ../../$1;         echo ""; }
+function ....()               { cd ../../..$1;       echo ""; }
+function .....()              { cd ../../../..$1;    echo ""; }
+function ......()             { cd ../../../../..$1; echo ""; }
+
+
+# mv some.file to `timestamp`.some.file
+# handy `timestamp` or $(timestamp) to add various
+# timestampes to bash command line parts (filenames).
+function timestamp()     { date --iso-8601=seconds | tr ":" "-" ; }
+function jpldate()       { date +%d%b%Y; }
+function jpldatetime()   { date +%d%b%Y_%H.%M.%S; }
+# guard the /bin/dd function anyway  .
+
+function dd                   { diff -w $1 `pwd` | less; }
+
+# I HATE COLORS (can't see that blue too well anyway.
+unset LS_COLORS
+
+# the prompt the way I like it.
+function sp {
+   PROMPT_DIRTRIM=3 
+   export PS1='(\j) \w [\!]...>'
+}
+
+if [ "$SSH_TTY" ]; then
+   PS1='(\j) \h \w [\!] ';
+else
+   PS1='(\j) \w [\!] ';
+#export PROMPT_DIRTRIM=3
+fi
+
+# if this thing runs as root give me a sign.
+if [ "$HOME" == "/root" ]; then
+PS1="$PS1 # "
+fi
+
+# when way down in a tree, shorten the prompt up.
+
+function longprompt { if [ "$SSH_TTY" ]; then
+PS1='(\j) \h \w [\!] ';
+else
+PS1='(\j) \w [\!] ';
+fi;
+}
+
+# things I want exported:
+# Some IDIOT thinks waking up on some cold curb other other than
+# $HOME is NOT STUPID.
+if [ "`pwd`" == "$HOME/Desktop" ]; then cd; fi
+
+# some *ixes pester you when mail shows up.
+unset MAILCHECK  # stop pesky mail messages
+
+# WARNING here HISTIGNORE '<space><tab>' lines starting with
+# HISTIGNORE characters are not saved in history.
+export HISTIGNORE="[ 	]*"
+
+# make sure we have a $HOME/bin or force one.
+if [[ ! "$PATH" =~  "$HOME/bin" ]] ; then
+   if test ! -e $HOME/bin ; then mkdir -p $HOME/bin; fi; # add one
+   export PATH=$PATH:$HOME/bin;                          # put on path
+fi
+
+# make the default editor the standard Unix vi and not some castrated
+# wimp editor.
+export EDITOR=/usr/bin/vi
+
+
+# maintain all history. Not restart each session
+shopt -s histappend
+
+# make ls treat [a-z] shell wildcards as case sensitive !!!YOU IDIOTS!!!
+export LC_ALL=C
