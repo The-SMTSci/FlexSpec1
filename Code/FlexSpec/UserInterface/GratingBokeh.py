@@ -123,7 +123,8 @@ class BokehGrating(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name : str = "Grating",
                  display = fakedisplay,
                  grating : str = "300 l/mm",
                  width=200): # BokehGrating::__init__()
@@ -131,7 +132,8 @@ class BokehGrating(object):
         #super().__init__()
         # (wg-python-property-variables)
         self.display       = display
-        self.name          = name
+        self.flexname      = flexname    # Name of associated instrument
+        self.name          = name        # Name of this instance
         self.wwidth        = width
         self.grating       = grating     # Start with a default 300 l/mm
         self.startwave     = 100         # start range current grating
@@ -139,6 +141,7 @@ class BokehGrating(object):
         self.cwave         = 50          # current selected range.
         self.slit          = "20"
         self.state         = "undefined"
+        self.homestate     = 0
         self.homed         = False       # don't know.
         self.validp        = False       # wake up in false position
 
@@ -150,14 +153,14 @@ class BokehGrating(object):
             self.cwave    = self.startwave   = entry[0]
             self.endwave  = entry[1]
 
-        self.slitchoices   = Select  (title=f"Gratings",value='20',options=self.GratingInserts, width=self.wwidth)
+        self.gratingchoices   = Select  (title=f"Gratings",value='20',options=self.GratingInserts, width=self.wwidth)
         self.cwavechoice   = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
                                      value = self.cwave, start = self.startwave,  
                                      end = self.endwave+1, step = 10, width=self.wwidth)
         self.processbutton = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
 
         self.homebutton    = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
-        self.slitchoices     .on_change('value', lambda attr, old, new: self.update_slitchoice   (attr, old, new))
+        self.gratingchoices     .on_change('value', lambda attr, old, new: self.update_slitchoice   (attr, old, new))
         self.cwavechoice     .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
         self.processbutton   .on_click (lambda : self.update_processbutton())
         self.homebutton      .on_click (lambda : self.update_homebutton())
@@ -167,7 +170,7 @@ class BokehGrating(object):
 
     def update_slitchoice(self,attr,old,new):                    # BokehGrating::update_slitchoice()
         """update_debugbtn Button via an event lambda"""
-        grating = new # self.slitchoices.value
+        grating = new # self.gratingchoices.value
         entry   = BokehGrating.GratingsTable.get(grating)
         if(entry):
             self.grating           = grating
@@ -175,9 +178,9 @@ class BokehGrating(object):
             self.endwave           = entry[0]
             if(self.cwave == 50):
                 self.cwave             = entry[1]
-            self.slitchoices.value = f"{self.startwave}"  # update with current values.
-            #self.slitchoices.start = f"{self.endwave}"
-            #self.slitchoices.end   = f"{self.cwave}"
+            self.gratingchoices.value = f"{self.startwave}"  # update with current values.
+            #self.gratingchoices.start = f"{self.endwave}"
+            #self.gratingchoices.end   = f"{self.cwave}"
         #self.send_state()
 
     ### BokehGrating.slitchoice()
@@ -190,7 +193,9 @@ class BokehGrating(object):
 
     def update_homebutton(self):                                # BokehGrating::update_homebutton()
         """Send a home command"""
-        self.send_home()
+        self.homestate = 1
+        self.send_state()
+        self.homestate = 0
 
     def update_processbutton(self):                                # BokehGrating::update_homebutton()
         """Send a home command"""
@@ -198,32 +203,24 @@ class BokehGrating(object):
 
     ### BokehGrating.update_homebutton()
 
-    def send_home(self):                                        # BokehGrating:send_home()
-        """Send a Home Command"""
-        cmddict = dict( [ ( "home"  , 1)      # just a home command
-                         ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
-        if(self.display):
-            self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
-
-    ### BokehGrating.send_home()
-
     def send_state(self):                                       # BokehGrating::send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "grating", self.grating),
-                          ( "cwave"  , self.cwave)
+        devstate = dict( [ ( "grating"   , self.grating),
+                          ( "cwave"     , self.cwave),
+                          ( "homestate" , self.homestate)
                         ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
-        if(self.display):
-            self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        self.display.display(f'{jdict}')
 
     ### BokehGrating.send_state()
 
     def layout(self):                                           # BokehGrating::layout()
         """Get the layout in gear"""
-        return(row ( column ( self.slitchoices,
+        return(row ( column ( self.gratingchoices,
                               self.cwavechoice,
                               self.processbutton,
                               self.homebutton

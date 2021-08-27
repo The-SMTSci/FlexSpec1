@@ -96,22 +96,23 @@ class Collimator(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name : str = "Collimator",
                  display = fakedisplay,
-                 instrumentname="Collimator",
                  position : str = "0.0",
                  maxrange : float = 1.5, width : int = 200):  # Collimator::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
+        self.flexname        = flexname
         self.name            = name
         self.display         = display
-        self.instrumentname  = instrumentname
         self.wwidth          = width
         self.position        = float(position)
         self.speed           = 0.10
         self.maxrange        = float(maxrange)
         self.direction       = 1
+        self.homestate       = 0
         self.spacer          = Spacer(width=self.wwidth, height=5, background='black') #None #
 
         self.collimator      = Slider    (title=f"Collimator Position", bar_color='firebrick',
@@ -191,23 +192,24 @@ class Collimator(object):
 
     def send_home(self):                                        # Collimator::send_home()
         """Send a Home Command"""
-        cmddict = dict( [ ( "home"  , 1)      # just a home command
-                         ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
-
+        self.home = 1
+        self.send_state()
+        self.homestate = 0
     ### Collimator.send_home()
 
     def send_state(self):                                       # Collimator::send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "position" , f"{self.position:7.4f}"),
-                          ( "direction", int(self.direction)),
-                          ( "speed"    , self.speed)
+        devstate = dict( [ ( "position" , f"{self.position:7.4f}"),
+                           ( "direction", int(self.direction)),
+                           ( "speed"    , self.speed),
+                           ( "home"     , self.homestate)
                         ])
-        d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict   = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        self.display.display(f'{jdict}')
 
     ### Collimator.send_state()
 

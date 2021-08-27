@@ -119,9 +119,10 @@ class FlexDisplay(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self,name : str = "",
-                 display = fakedisplay,
-                 width : int = 300):               # FlexDisplay::__init__()
+    def __init__(self, 
+                 name    : str = "",
+                 display : str = fakedisplay,
+                 width   : int = 300):               # FlexDisplay::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
@@ -155,17 +156,22 @@ class FlexDisplay(object):
 
     def send(self,msg):
        """Connect to socket and send the message."""
-       with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-          s.connect((HOST, PORT))
-          s.sendall(msg.encode())
-          data = s.recv(1024)
+       try:
+           with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+               s.connect((HOST, PORT))
+               s.sendall(msg.encode())
+               data = s.recv(1024)
+       except Exception as e:
+           print(f"Display Send Error: {HOST} {PORT}\n{msg}")
+           print(f"{e.__str__()}")
+           s.close()
 
     def display(self,msg : str = "\n",color='Bisque'):                 # FlexDisplay.display
         """append to conent display to the div """
         self.panel.background = color
         ts                    = fulltimestamp()
         self.message          = self.message  + f'\n--- {ts}\n' + msg + "\n"
-        self.panel.text       = FlexDisplay.brre.sub("<br/>",f"{self.message}")
+        self.panel.text       = FlexDisplay.brre.sub("<br/>",f'{self.message}')
         self.send(msg)
         return self
 

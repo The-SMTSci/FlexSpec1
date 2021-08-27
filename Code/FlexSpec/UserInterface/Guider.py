@@ -104,20 +104,22 @@ class Guider(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name : str = "Guider",
                  display = fakedisplay,
                  position : str = "0.0",
                  maxrange : float = 1.5, width : int = 200):  # Guider::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
+        self.flexname    = flexname          # name of this instrument
         self.name        = name              # name this instance recognizes
         self.display     = display           # where to put debug info
 
         self.position    = float(position)   # state variables
         self.direction   = 1                 # tied to step/in step/out buttons
         self.speed       = 0.10              # fraction of the speed to move
-        self.homestate   = -1                # a tristate by convention
+        self.homestate   = 0                 # a tristate by convention
 
         self.wwidth      = width             # interval variables
         self.maxrange    = float(maxrange)
@@ -197,6 +199,7 @@ class Guider(object):
         """Send a home command"""
         self.homestate = 1
         self.send_state()
+        self.homestate = 0         # clear home, it should have been sent.
 
     ### Guider.update_homebutton()
 
@@ -212,13 +215,17 @@ class Guider(object):
 
     def send_state(self):                                       # Guider.send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "position" , f"{self.position:7.4f}"),
+        devstate = dict( [( "position" , f"{self.position:7.4f}"),
                           ( "direction", int(self.direction)),
-                          ( "speed"    , self.speed)
+                          ( "speed"    , self.speed),
+                          ( "home"     , self.homestate)
                         ])
-        d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict   = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        self.display.display(f'{jdict}')
 
     ### Guider.send_state()
 

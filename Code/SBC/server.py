@@ -6,7 +6,7 @@
 ### HEREHEREHERE
 import socket
 import time
-import systemd.daemon
+#import systemd.daemon
 
 import optparse             # flexibility for non-systemd starting.
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     print("server.py: FlexSpec1 server started.")
     time.sleep(100)
-    systemd.daemon.notify('READY=1')
+    #systemd.daemon.notify('READY=1')
 
     while(flag):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

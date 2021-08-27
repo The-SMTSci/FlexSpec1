@@ -149,7 +149,8 @@ class BokehKzinRing(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name : str = "Default",
                  display = fakedisplay,
                  width=250,pin=4): # BokehKzinRing::__init__()
         """Initialize this class."""
@@ -157,6 +158,7 @@ class BokehKzinRing(object):
         # (wg-python-property-variables)
         self.wwidth              = width
         self.display             = display
+        self.flexname            = flexname
         self.name                = name
         self.display             = display
         self.wheatcheck_value    = 1                 # add a variable for each lamp
@@ -244,7 +246,7 @@ class BokehKzinRing(object):
 
     def send_state(self):                                       # BokehKzinRing::send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]),
+        devstate = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]),
                           ( "osram"   , self.slider_values.values["osram_value"   ]),
                           ( "hbeta"   , self.slider_values.values["hbeta_value"   ]),
                           ( "oiii"    , self.slider_values.values["oiii_value"    ]),
@@ -255,9 +257,12 @@ class BokehKzinRing(object):
                           ( "state"   , self.onoff)
                          ])
 
-        d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict   = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        self.display.display(f'{jdict}')
 
     ### BokehKzinRing.send_state()
 

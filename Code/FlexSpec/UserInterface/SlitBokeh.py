@@ -140,19 +140,21 @@ class BokehOVIOSlit(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name : str = "OvioSlit",
                  display = fakedisplay,
                  width=200): # BokehOVIOSlit::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
         self.display     = display
-        self.name        = name
-        self.wwidth      = width
-        self.slit        = "20"
-        self.state       = 'undefined'
-        self.lamp        = 0
-        self.validp      = False                   # wake up in false position
+        self.flexname    = flexname         # the name of the instrument for this instance
+        self.name        = name             # the name of the device in this instrument
+        self.wwidth      = width            # display width for its Bokeh widgets
+        self.slit        = "20"             # initial condition
+        self.state       = 'undefined'      # haven't started yet
+        self.lamp        = 0                # the illumination lamp associated
+        self.validp      = False            # wake up in false position
         self.spacer      = Spacer(width=self.wwidth, height=5, background='black')
         self.slitlamp    = RadioGroup(labels=[f"Illuminator Off", f"Illuminator On" ],
                                       height=50, width=self.wwidth, active=0, orientation='horizontal')
@@ -182,14 +184,30 @@ class BokehOVIOSlit(object):
 
     def send_state(self):                                       # BokehOVIOSlit::send_state()
         """Several ways to send things"""
-        cmddict = dict( [ ( "slit"  , self.slit),  # ascii text of the slit width.
-                          ( "illuminator"  , self.lamp)
+        devstate = dict( [ ( "slit"         , self.slit),  # ascii text of the slit width.
+                          (  "illuminator"  , self.lamp)
                          ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
-        self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        #self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
+        self.display.display(f'{jdict}')
 
     ### BokehOVIOSlit.send_state()
+
+    def dumper(self,ddict):                                     # BokehOVIOSlit::dumper()
+        """Given a dictionary, display the results"""
+        for fsname,payload in ddict.items():
+            print(f"FS1 Name: {fsname}")
+            for command, cmdkey in payload.items():
+                print(f"  cmd: {command}")
+                for var,value in cmdkey.items():
+                    print(f"      {cmd} {value}")
+        return self
+
+    # BokehOVIOSlit.dumper()
 
     def layout(self):                                           # BokehOVIOSlit::layout()
         """Get the layout in gear"""

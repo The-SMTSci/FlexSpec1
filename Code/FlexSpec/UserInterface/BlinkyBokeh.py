@@ -171,15 +171,18 @@ class BokehFlexBlinky(object):
 
     def send_state(self):
         """Several ways to send things"""
-        cmddict = dict( [ ( "pin"     , self.pin),
+        devstate = dict( [ ( "pin"     , self.pin),
                           ( "ontime"  , self.ontime),
                           ( "offtime" , self.offtime),
                           ( "rate"    , self.rate),
                           ( "rate"    , self.rate),
                           ( "state"   , self.state),
                          ])
-        d2 = dict([("Process", cmddict)])
-        jdict = json.dumps(d2)
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
         self.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehFlexBlinky.send_state()
