@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#############################################################################
+# FlexSpec1
+# bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000
+#############################################################################
+
+__version="0.0.1"
+
+
+function usage {
+   echo "FlexSpec1 ... switches"
+   echo "Run the $__version spectrograph interface."
+   echo "Hint: ps aux | grep RunFlexSpec amd kill -i the pid as needed."
+}
+
+mswitch=""
+intervaltime="3600000"
+verboseflag=""
+showflag=""
+currpid=""
+
+sigimt_handler()
+{
+   if [ "$currpid" != ""];  then kill -i "$pid"; fi
+   echo "RunFlexSpec: Terminated $pid."
+}
+
+trap handler SIGINT
+
+
+# leading colon is silent. ":hb:" h has no option, b has an option.
+while getopts ":bhv" opt ; do     # request to use master bib
+   case $opt in
+   b)
+      PROJECTBASE=${OPTARG}
+      ;;
+   h)
+      usage
+      exit 1
+      ;; # process a two part parm
+   s)
+       showeflag="show"
+      ;;
+   v)
+      verboseflag="-v"
+      ;;
+   esac
+done
+
+../../SBC/server.py "$verboseflag" &
+
+# Finally! The command we want to run.
+currpid=$(echo $$; exec bokeh serve $show ./FlexSpec.py $mswitch --unused-session-lifetime $intervaltime)
