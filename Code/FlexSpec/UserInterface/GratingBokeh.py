@@ -141,7 +141,7 @@ class BokehGrating(object):
         self.cwave         = 50          # current selected range.
         self.slit          = "20"
         self.state         = "undefined"
-        self.homestate     = 0
+        self.home     = 0
         self.homed         = False       # don't know.
         self.validp        = False       # wake up in false position
 
@@ -206,9 +206,9 @@ class BokehGrating(object):
     def send_state(self):                                       # BokehGrating::send_state()
         """Several ways to send things"""
         devstate = dict( [ ( "grating"   , self.grating),
-                          ( "cwave"     , self.cwave),
-                          ( "homestate" , self.homestate)
-                        ])
+                           ( "cwave"     , self.cwave),
+                           ( "homestate" , self.home)
+                         ])
         slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
         slitcmd['Receipt'] = 1                             # set the receipt as desired
         d2 = dict([(f"{self.name}", slitcmd)])

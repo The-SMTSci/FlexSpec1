@@ -82,7 +82,6 @@ Treat this as Kzin Ring Assy.
 The buttons are:
 
    near     --  Calibration Lamp
-   osram    --  OSRAM Lamp HV bulb
    hα       --  Reference Red LED
    oiii     --  Reference ND OIII region
    flat     --  Flat Assy
@@ -137,7 +136,6 @@ class BokehKzinRing(object):
         def __init__(self):
             self.values = dict((
             ("wheat_value"   ,"0"),
-            ("osram_value"   ,"0"),
             ("hbeta_value"   ,"0"),
             ("oiii_value"    ,"0"),
             ("halpha_value"  ,"0"),
@@ -162,7 +160,6 @@ class BokehKzinRing(object):
         self.name                = name
         self.display             = display
         self.wheatcheck_value    = 1                 # add a variable for each lamp
-        self.osramcheck_value    = 0                 # installed.
         self.hαcheck_value       = 0
         self.oiiicheck_value     = 0
         self.flatcheck_value     = 0
@@ -171,32 +168,29 @@ class BokehKzinRing(object):
 
         self.slider_values = BokehKzinRing.SliderValues()
 
-        # Labels merge spaces into one space.
+        # Labels merge spaces into one space.  (7 different 'lamps' for use )
         self.wheatslider    = Slider(title=f"Incandescent Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.osramslider    = Slider(title=f"Osram Intensity", bar_color='firebrick',
+        self.nearslider     = Slider(title=f"NeAr Lamp", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.hβslider       = Slider(title=f"Hβ Finder Intensity", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.oiiislider     = Slider(title=f"O[III] Finder Intensity", bar_color='firebrick',
-                                     value = -1, start = -1, end = 100, step = 1, width=self.wwidth)
-        self.hαslider       = Slider(title=f"Hα Finder Intensity", bar_color='firebrick',
+        self.augflatslider  = Slider(title=f"Blue Boost LEDs", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
         self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.augflatslider  = Slider(title=f"Augmented Flat Intensity", bar_color='firebrick',
+        self.hβslider       = Slider(title=f"Hβ Finder LED", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.nearslider     = Slider(title=f"NeAr Intensity", bar_color='firebrick',
+        self.oiiislider     = Slider(title=f"O[III] Finder LED", bar_color='firebrick',
+                                     value = -1, start = -1, end = 100, step = 1, width=self.wwidth)
+        self.hαslider       = Slider(title=f"Hα Finder LED", bar_color='firebrick',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
 
+        self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
         self.wheatslider   .on_change('value', lambda attr, old, new: self.update_slider ("wheat_value"  , attr, old, new))
-        self.osramslider   .on_change('value', lambda attr, old, new: self.update_slider ("osram_value"  , attr, old, new))
+        self.augflatslider .on_change('value', lambda attr, old, new: self.update_slider ("augflat_value", attr, old, new))
+        self.flatslider    .on_change('value', lambda attr, old, new: self.update_slider ("flat_value"   , attr, old, new))
         self.hβslider      .on_change('value', lambda attr, old, new: self.update_slider ("hbeta_value"  , attr, old, new))
         self.oiiislider    .on_change('value', lambda attr, old, new: self.update_slider ("oiii_value"   , attr, old, new))
         self.hαslider      .on_change('value', lambda attr, old, new: self.update_slider ("halpha_value" , attr, old, new))
-        self.flatslider    .on_change('value', lambda attr, old, new: self.update_slider ("flat_value"   , attr, old, new))
-        self.augflatslider .on_change('value', lambda attr, old, new: self.update_slider ("augflat_value", attr, old, new))
-        self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
 
         # // coordinate with lampcheckboxes_handler
         self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
@@ -245,38 +239,42 @@ class BokehKzinRing(object):
     ### BokehKzinRing.update_edebugbtn()
 
     def send_state(self):                                       # BokehKzinRing::send_state()
-        """Several ways to send things"""
-        devstate = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]),
-                          ( "osram"   , self.slider_values.values["osram_value"   ]),
-                          ( "hbeta"   , self.slider_values.values["hbeta_value"   ]),
-                          ( "oiii"    , self.slider_values.values["oiii_value"    ]),
-                          ( "halpha"  , self.slider_values.values["halpha_value"  ]),
-                          ( "flat"    , self.slider_values.values["flat_value"    ]),
-                          ( "augflat" , self.slider_values.values["augflat_value" ]),
-                          ( "near"    , self.slider_values.values["near_value"    ]),
-                          ( "state"   , self.onoff)
+        """Several ways to send things
+           schematic  2021-08-27T11:32:01-0600
+        """
+        # dropped
+                        #   ( "flat"    , self.slider_values.values["flat_value"    ]), 
+                        #   ( "near"    , self.slider_values.values["near_value"    ]), # Relco
+        #                    JSON TXT      Bokeh                    PY Variable
+        devstate = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]), # Tungstun
+                           ( "callamp" , self.slider_values.values["near_value"    ]), # CAL Relco
+                           ( "hbeta"   , self.slider_values.values["hbeta_value"   ]), # M3 BLUE LED
+                           ( "oiii"    , self.slider_values.values["oiii_value"    ]), # M2 GREEN LED
+                           ( "halpha"  , self.slider_values.values["halpha_value"  ]), # M1 RED LED
+                           ( "uvboost" , self.slider_values.values["augflat_value" ]), # Blue boost
+                           ( "flat"    , self.slider_values.values["flat_value"    ]), # MID WHITE LED
+                           ( "state"   , self.onoff)                                   # State  ON/OFF
                          ])
 
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
-        self.display.display(f'{jdict}')
+        slitcmd  = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                                  # set the receipt as desired
+        d2       = dict([(f"{self.name}", slitcmd)])            # Add in my decice (instance with in one instrument) name
+        d3       = dict([(f"{self.flexname}", d2)])             # Add in my 'Instrument' name (vis-a-vis other instruments)
+        jdict    = json.dumps(d3)                               # make string image
+        self.display.display(f'{jdict}')                        # send it to browser DIV, and off to communications port.
 
     ### BokehKzinRing.send_state()
 
     def layout(self):                                           # BokehKzinRing::layout()
         """Get the layout in gear"""
-        return(row ( column ( #self.LampCheckBoxes,
-                              self.wheatslider,
-                              self.osramslider,
-                              self.hβslider,
-                              self.oiiislider,
-                              self.hαslider,
-                              self.flatslider,
-                              self.augflatslider,
-                              self.nearslider,
+        return(row ( column ( #self.LampCheckBoxes,             # Physical layout the user.
+                              self.nearslider,                  # Relco - 
+                              self.wheatslider,                 # Tungstun flat
+                              self.augflatslider,               # ... add in some BLUE LED boost
+                              self.flatslider,                  # ... and/or toss in WHITE LIGHT LED
+                              self.hβslider,                    # Marker for BLUE  LED  - broad band led
+                              self.oiiislider,                  # Marker for GREEN LED
+                              self.hαslider,                    # Marker for REF   LED
                               row(self.process,self.offbutton)
                             )  ))
         return self
@@ -319,16 +317,16 @@ if(0):
 
     (options, args) = opts.parse_args()
 
-    kzin1 = BokehKzinRing("Tony")
+    kzin1  = BokehKzinRing("Tony")
     kzin2  = BokehKzinRing("Woody")
     if(0):
         with open('/tmp/debug1.txt','w') as os:
             blink1.debug(msg="Starting with...", os=os)
-    l1 = kzin1.layout()
-    l2 = kzin2.layout()
-    tab1 = Panel(child=l1,title='Tony')
-    tab2 = Panel(child=l2,title='Woody')
-    tabs = Tabs(tabs=[tab1,tab2])
+    l1     = kzin1.layout()
+    l2     = kzin2.layout()
+    tab1   = Panel(child=l1,title='Tony')
+    tab2   = Panel(child=l2,title='Woody')
+    tabs   = Tabs(tabs=[tab1,tab2])
     curdoc().add_root(tabs)
 
 #    curdoc().add_root(column(kzin1.layout(), kzin2.layout()))
