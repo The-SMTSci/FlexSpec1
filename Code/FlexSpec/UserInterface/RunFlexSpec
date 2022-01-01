@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 #############################################################################
-# FlexSpec1
+# RunFlexSpec
+# /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/RunFlexSpec
 # bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000
+# uses: /home/git/external/FlexSpec1/Code/SBC/server.py
 #############################################################################
 
 __version="0.0.1"
 
-
 function usage {
-   echo "FlexSpec1 ... switches"
+   echo "Version $__version"
+   echo "RunFlexSpec ... switches"
+   echo "  -t <intervaltime> in microseconds 3600000 is one hour."
+   echo "  -s - use show flag with bokeh."
+   echo "  -v - pass verbose flag to FlexSpec."
+   echo "  -h - show help an quit."
    echo "Run the $__version spectrograph interface."
-   echo "Hint: ps aux | grep RunFlexSpec amd kill -i the pid as needed."
+   echo "Hint: ps aux | grep RunFlexSpec; # and kill -9 the pid as needed."
+   echo "sudo ss -lptn 'sport = :5006' # find pid for a port to kill -9"
 }
 
 mswitch=""
@@ -19,21 +26,18 @@ verboseflag=""
 showflag=""
 currpid=""
 
-sigimt_handler()
+sigint_handler()
 {
    if [ "$currpid" != ""];  then kill -i "$pid"; fi
    echo "RunFlexSpec: Terminated $pid."
 }
 
-trap handler SIGINT
+trap sigint_handler SIGINT
 
 
 # leading colon is silent. ":hb:" h has no option, b has an option.
-while getopts ":bhv" opt ; do     # request to use master bib
+while getopts ":hsvt:" opt ; do     # request to use master bib
    case $opt in
-   b)
-      PROJECTBASE=${OPTARG}
-      ;;
    h)
       usage
       exit 1
@@ -43,6 +47,9 @@ while getopts ":bhv" opt ; do     # request to use master bib
       ;;
    v)
       verboseflag="-v"
+      ;;
+   t)
+       intervaltime=${OPTARG}
       ;;
    esac
 done

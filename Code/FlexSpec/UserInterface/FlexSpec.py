@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000
+# (compile "bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000")
 # (wg-python-fix-pdbrc)
-
+# /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/FlexSpec.py
 ### HEREHEREHERE
 
 import os

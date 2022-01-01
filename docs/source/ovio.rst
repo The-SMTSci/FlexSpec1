@@ -1,5 +1,5 @@
 OVIO Slit
-*********
+=========
 
 The OVIO slit is a chrome-plated 1.5mm glass substrate and has 12
 positions/widths:

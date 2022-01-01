@@ -3,7 +3,21 @@ User Software
 
 The overall goal of the project is to utilize free (as in money) software
 that is platform agnostic (Capable of running or being made to run) on
-all operating systems. 
+all operating systems. One main sub-goal is to create an simple architecture
+using basic web enabled applications, inexpensive Single Board Computers (SBCs)
+(Raspberry Pi running the Astroberry suite), inexpensive Single Board
+Microprocessors (SBMs). Another sub-goal is to leverage the best tools
+for collaboration including Github, and Sphinx -- the package that
+creates this documentation tied to Readthedocs.io.
+
+The basic philosophy is to used 'mirrored' object-oriented classes written
+in Python/Bokeh for managing the instructins from its users, relaying
+those instructions via JSON to C/C++ classes running on the SBM. We use
+the Raspberry Pi mounted to the telescope's OTA to offer the web interface
+and to direct messages to other Pi's and arduinos within the full instrumentation
+for the Pier and its OTAs.
+
+
 
 Remote Desktop
 --------------
@@ -135,3 +149,10 @@ TODO: Cite the trademarks etc.
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
 
+Other Packages
+--------------
+
+Here is a collectin or very random links to other coding projects.
+
+Mostly in PERL
+`DragonFly <https://github.com/robertoabraham/ProjectDragonfly/tree/master/scripts>`_

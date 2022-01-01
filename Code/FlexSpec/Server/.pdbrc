@@ -1,0 +1,5 @@
+alias z until
+alias ls p glob.glob('*')
+alias lsd p [d for d in glob.glob('*') if os.path.isdir(d)]
+alias pwd p os.getcwd()
+b 198

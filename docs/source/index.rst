@@ -75,6 +75,8 @@ It is a continuous in progress. Bear with us. Better yet, collaborate with us.
    outstanding
    references
    youtube
+   printer
+   merlin
    
 Indices and tables
 ------------------

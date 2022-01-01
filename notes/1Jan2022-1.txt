@@ -1,0 +1,179 @@
+Hey,
+
+I am working on a set of notes. I tried to get X11 and IRAF runnning
+in a docker container. Big Fail(tm). I dug into making interfaces
+using REST and WEBApp tech -- in a container -- on a webhotel.
+
+Some GUI stuff works, and it now may work better.  There was a tonne
+of docker internal arcanae I needed to know, learned some, and with
+the help from some wizards -- we never figured out the problem. As it
+was so tedious I dropped the effort -- it was designed to make an
+older macbook run IRAF for a professor. Nothing beats learning how to
+get mice from the barn like taking on elephant hunting.
+
+For Django: --- Here, Corey Schafer, describes putting together a
+simple blog app- down to the nuts and bolts. The app is real easy and
+the django is pretty easy too.
+
+The database stuff is wrapped up in django managed 'migrations'.
+PostgreSQL (a docker container itself!) is a ORM -- a
+Object/Relational Model database.
+
+Corey Schafer Great Django overview, see 
+
+git clone https://github.com/CoreyMSchafer/code_snippets.git
+
+with video:
+
+https://www.youtube.com/watch?v=UmljXZIypDc&list=PL-osiE80TeTtoQCKZ03TU5fNfx2UY6U4p&index=1
+
+Lots of good stuff appears to be in this guy's repo.
+
+---
+Practical steps: Start with something that mostly runs, related
+to astronomy: Astrometry.net. A real easy way is down below.
+
+Download and play with the Astrometry.net framework. Dockers are
+containers for 'server' side deployment (RPi/Astroberry is our
+'server side'!).
+
+1) Get a docker account (free) https://hub.docker.com/
+2) Download the docker desktop for Win10 or Linux (whatev)
+3) clone https://github.com/dstndstn/astrometry.net.git
+4) peek into the 'net' directory. That is a django app
+   more or less. Some missing bits.
+
+As you know, I work command-line under Linux; and I am venturing
+into Win10. I do have docker running in Win10, low milage.
+
+As for the database, it is taken care of by a django concept called
+'migrations'. This cuts the code from the underlying DB. You can test
+with sqlite and deploy on enterprise PostgreSQL. Django uses the
+python manage.py migrations' command-script that does the
+'migrations'. There is some bother to brew that up -- this is where
+the stuff wanted by django meets the stuff needed for you purpose.
+
+---
+
+A few of my personal definitions:
+
+PMachine (the machine I can touch 'Physical Machine'
+
+CMachine (the code that thinks it is a pmachine but is a CMachine
+  a 'Container Machine'. The PMachine and CMachine keeps me
+  sane when thinking about what is what. They are essentially
+  indistinguishable at the prompt.
+
+I've attached my docker.aliases file for Linux.
+easy to type commands for longwinded docker image blah....
+
+I don't have a decent youtube I can recommend for docker -- I cut my
+teeth on docker about 2 years ago. Advantages are:
+
+1) it can make a 'virtual' machine (sans GUI Capability for the most part)
+2) you can really mangle the CMachine in that machine and then kill it
+   and remake with lessons learned.
+Disadvantages:
+A) IPSec is a basterd
+B) Be real careful accepting docker pull images -- they are known
+   to be Evil(tm).
+C) A few little things can bog you down until a wizard helps. I have
+   some magic -- and my real wizard has 4 new birds heading for orbit
+   and is a bit saturated right now! His first time with new birds.
+
+-----------------------------------------------------------------------------
+Real easy test: Get astropy running in a container. A two line Dockerfile
+    from continuumio/anaconda3:latest
+    CMD  /bin/bash
+
+
+mkdir a directory somewhere, say ~/play/playpen
+cd ~/play/playpen
+Whip up a Dockerfile (capital D, no extension)
+I have one that greatly extends a 'working' base for all sorts
+of programs. For AN base -> solver and webservice. It brings
+in a compiler, vi the editor, a python together with fitsio
+etc.
+
+Another one is continuumio/anaconda3:latest
+
+A cut/paste from a terminal window.
+    /home/git/external/astrometry.net/docker [1984] docker login
+    /home/git/external/astrometry.net/docker [1985] cd ~/play/wayne
+    (base) A (0) ~/play/wayne [1987] mkdir wgconda
+    (base) A (0) ~/play/wayne [1988] cd wgconda
+
+    (base) A (0) ~/play/wayne/wgconda [1989] cat > Dockerfile
+    from continuumio/anaconda3:latest
+    CMD  /bin/bash
+    ^D
+
+    (base) A (0) ~/play/wayne/wgconda [1990] docker build -t wgconda .
+    Sending build context to Docker daemon  2.048kB
+    Step 1/2 : from continuumio/anaconda3:latest
+     ---> 0d5b39aeafc2
+    Step 2/2 : CMD  /bin/bash
+     ---> Running in ab739d5e6167
+    Removing intermediate container ab739d5e6167
+     ---> 16e9145a4ad0
+    Successfully built 16e9145a4ad0
+    Successfully tagged wgconda:latest
+    (base) A (0) ~/play/wayne/wgconda [1991] docker run -it wgconda /bin/bash
+    (base) root@5ccd081540e4:/# python
+    Python 3.9.7 (default, Sep 16 2021, 13:09:58) 
+    [GCC 7.5.0] :: Anaconda, Inc. on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> from astropy.io import fits
+    >>> 
+    (base) root@5ccd081540e4:/# exit
+    exit
+    (base) A (0) ~/play/wayne/wgconda [1992] 
+    
+---
+Viola! note astropy.io.fits.open!
+
+Oh ifrinn! Kill that:
+
+ 1993  docker ps -a
+ 1994  docker rm -f 5ccd081540e4
+ 1995  docker ps -a
+ 1996  dils
+ 1997  docker rmi -f 16e9145a4ad0
+
+ 1993  - see what containers are 'active' (same as unix ps)
+ 1994 Note the unique container id5ccd081540e4 ...
+ 1995 ...  docker rm -f 5ccd081540e4 remove it!
+ 1996 dils my alias to make long list of images ...
+ 1997 ... docker rmi -f 16e9145a4ad0 to remove that 'image'
+
+Now all is as it was before.
+So all the cruft that may have been loaded was never intertwined
+within my PMachine.
+
+
+(base) A (0) ~/play/wayne/wgconda [1993] docker ps -a
+CONTAINER ID   IMAGE     COMMAND       CREATED         STATUS                     PORTS     NAMES
+5ccd081540e4   wgconda   "/bin/bash"   4 minutes ago   Exited (0) 3 minutes ago             reverent_ramanujan
+(base) A (0) ~/play/wayne/wgconda [1994] docker rm -f 5ccd081540e4
+5ccd081540e4
+(base) A (0) ~/play/wayne/wgconda [1995] docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+(base) A (0) ~/play/wayne/wgconda [1996] dils
+REPOSITORY                      TAG       IMAGE ID       CREATED         SIZE
+wgconda                         latest    16e9145a4ad0   5 minutes ago   3.27GB
+astrometrynet/solver            latest    41e7ff84ad75   5 days ago      1.15GB
+(base) A (0) ~/play/wayne/wgconda [1994] docker rm -f 5ccd081540e4
+5ccd081540e4
+(base) A (0) ~/play/wayne/wgconda [1995] docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+(base) A (0) ~/play/wayne/wgconda [1996] dils
+REPOSITORY                      TAG       IMAGE ID       CREATED         SIZE
+wgconda                         latest    16e9145a4ad0   5 minutes ago   3.27GB
+astrometrynet/solver            latest    41e7ff84ad75   5 days ago      1.15GB
+
+(base) A (0) ~/play/wayne/wgconda [1997] docker rmi -f 16e9145a4ad0
+Untagged: wgconda:latest
+Deleted: sha256:16e9145a4ad0cc6fefa385d29af38a71c9d5c12d0e5b981857f8efaffd4a99ca
+
+
+
