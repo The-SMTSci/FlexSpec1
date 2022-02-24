@@ -157,7 +157,10 @@ class BokehOVIOSlit(object):
         self.validp      = False            # wake up in false position
         self.spacer      = Spacer(width=self.wwidth, height=5, background='black')
         self.slitlamp    = RadioGroup(labels=[f"Illuminator Off", f"Illuminator On" ],
-                                      height=50, width=self.wwidth, active=0, orientation='horizontal')
+                                      active=0,
+                                      height=50,
+                                      #orientation='horizontal',
+                                      width=self.wwidth)
 
         self.slitchoices = Select(title=f"OVIO Slits",value='20',options=self.oviodropdowns, width=self.wwidth)
         self.slitchoices .on_change('value',lambda attr, old, new: self.update_dropdown   (attr, old, new))
