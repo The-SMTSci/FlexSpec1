@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# (wg-astroconda3-pdb)      # CONDA Python3
+#
+# (wg-python-fix-pdbrc)
+
+### HEREHEREHERE
+
+import os
+import optparse
+import sys
+import re
+import numpy as np
+from astropy.io import fits
+
+
+#############################################################################
+#
+#  bin/fixgain
+#
+#emacs helpers
+# (insert (format "\n# %s " (buffer-file-name)))
+#
+# (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['','']   # list of quoted items to export
+# class ASI294_CameraException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class ASI294_Camera(object):
+#     def __init__(self, filename, switches={}):          # ASI294_Camera::__init__()
+#     def load(self):                                     # ASI294_Camera::load()
+#     def fixDN(self):                                    # ASI294_Camera.fixDN()
+#     def randomize(self, offset=None):                   # ASI294_Camera::randomize()
+#     def close(self):                                    # ASI294_Camera.close()
+#     def debug(self,msg="",skip=[],os=sys.stderr):       # ASI294_Camera::debug()
+# if __name__ == "__main__":
+#
+#
+#
+#############################################################################
+
+__doc__ = """/home/wayne/bin/fixgain  [options] files...
+
+Options:
+
+--camera "ASI 294"
+
+-a --adc         <int>       Power of 2
+-b --backup      <bool>      Let fits write make backup   [False]
+-c --camera      <str>       Known name of camera         [INSTURME keyword]
+-g --gain        <float>     Gain                         [None]
+-s --shiftcount  <int>       Number of zeros found in LSB [4]
+-w --welldepth   <int/float> The welldepth                [14000]
+-v --verbose     <bool>      Be chatty about work         [False]
+--notshifted     <bool>      There are no shifted values  [False]
+--nowarnings     <bool>      Turn off warnings            [False]
+
+Current camera choices are ASI294
+
+All software so far has shifted.
+
+The fixgain code, rewrites BITPIX=16 files as a true value,
+adds GAIN=1, and PXSHIFT = <int> pads for the original data.
+
+We want some keywords:
+CMOSMODE
+CMOSGAIN
+
+"""
+
+__author__  = 'Wayne Green'
+__version__ = '0.1'
+__all__     = ['ASI294_Camera','ASI294_CameraException']   # list of quoted items to export
+
+
+##############################################################################
+# ASI294_CameraException
+#
+##############################################################################
+class ASI294_CameraException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(ASI294_CameraException,self).__init__("ASI294_Camera "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return f" ASI294_Camera: {e.__str__()}\n"
+# ASI294_CameraException
+
+
+##############################################################################
+# ASI294_Camera
+#
+##############################################################################
+class ASI294_Camera(object):
+    """ Handle the vagarities of this camera
+    Given the fits filename
+          and a dictionary of flats.
+    """
+
+    default_gain = 3.41796875
+    def __init__(self, filename, switches={}):          # ASI294_Camera::__init__()
+        """Initialize this class."""
+        #super().__init__()
+        # (wg-python-property-variables)
+        self.filename = filename
+        self.hdu      = None
+        self.data     = None
+        self.header   = None
+        self.switches = switches
+        self.gain     = switches.get("GAIN", 3.41796875) # force GAIN value to this
+        try:
+            self.gain     = float(self.gain)
+        except Exception as e:
+            raise ASI294_CameraException("Bad Gain Keyword {} expecting float".format(self.gain))
+
+    ### ASI294_Camera.__init__()
+
+    def load(self):                                     # ASI294_Camera::load()
+        """Delay loads"""
+        self.hdu      = fits.open(filename,
+                                  mode                    = 'update',
+                                  do_not_scale_image_data = True,
+                                  save_backup             = self.switches.get('backup',False),
+                                  output_verify           = 'silentfix')
+        self.data     = self.hdu[0].data
+        self.header   = self.hdu[0].header
+        if("GAIN" in self.header):
+            self.header["GAIN"] = (self.gain,"Corrected GAIN value")
+        else:
+            self.header.append(fits.Card(keyword="GAIN",value=self.gain,comment="Corrected GAIN value"))
+
+        return self
+
+    ### ASI294_Camera.load()
+
+    def fixDN(self):                                    # ASI294_Camera.fixDN()
+        """Interface to fix the DataNumbers"""
+        self.data  = self.data / 16.0 # shifts read/integer
+
+        return self
+
+    ### ASI294_Camera.fixDN()
+
+    def randomize(self, offset=None):                   # ASI294_Camera::randomize()
+        """Add a random 1,2,3 to each corrected DN"""
+        if(offset is None):
+            offset = self.default_gain
+
+        x,y        = self.data.shape
+        randoff    = np.random.rand(x,y) * offset # array of random values.
+        self.data += randoff
+
+        return self
+
+    ### ASI294_Camera.randomize()
+
+    def close(self):                                    # ASI294_Camera.close()
+        """Close the file when ready, updates"""
+        self.hdu[0].data  = self.data
+        self.hdu.close()   # close and convert the data to float.
+
+        return self
+
+    ### ASI294_Camera.close()
+
+    def debug(self,msg="",skip=[],os=sys.stderr):       # ASI294_Camera::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("ASI294_Camera - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### ASI294_Camera.debug()
+
+# class ASI294_Camera
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+#import optparse
+
+
+    opts = optparse.OptionParser(usage="%prog"+__doc__)
+
+
+    opts.add_option("-b", "--backup", action="store_true", dest="backup",
+                   default=False,
+                   help="<bool>     backup original files [False].")
+
+    opts.add_option("-a", "--adc",    action="store", dest="",
+                    default=4,
+                    help="<int>    the ADC shift value")
+
+    opts.add_option("-c", "--camera",    action="store", dest="camera",
+                    default=None,
+                    help="<str>    recognized name of camera [INSTRUME keyword]")
+
+    opts.add_option("-g", "--gain",    action="store", dest="gain",
+                    default=None,
+                    help="<float>      gain value to use.  ")
+
+    opts.add_option("-s", "--shiftcount",    action="store", dest="shiftcount",
+                    default=4,
+                    help="<int/float>   count of shifts to right [4]")
+
+    opts.add_option("-w", "--welldepth",    action="store", dest="welldepth",
+                    default=12,
+                    help="<int/float>   the ADC welldepth [16000]")
+
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    opts.add_option("--notshifted",    action="store_true", dest="notshifted",
+                    default=False,
+                    help="<bool>        the data is raw hasn't been tinkered with.")
+
+    opts.add_option("--nowarnings", action="store_true", dest="nowarnings",
+                   default=False,
+                   help="<bool>     activate Astropy warnings [False].")
+
+    (options, args) = opts.parse_args()
+    switches        = options.__dict__
+
+    if(options.nowarnings):
+        #from astropy.utils.exceptions import AstropyWarning
+        import warnings
+        from astropy.utils.exceptions import AstropyWarning
+        warnings.simplefilter('ignore', category=AstropyWarning)
+
+    knowncameras = {"ASI294" : ASI294_Camera}
+
+    files        = []
+    for v in args:
+        if('@' in v):
+            pre = ""
+            if("//" in v):
+                pre,v = v.split('//')
+            if('@' in v):
+                _,listname = v.split('@')
+            if(len(listname) == 2):
+                pre,listname = listname
+            with open(listname,'r') as listoffiles:
+                for f in listoffiles:
+                    files.append(pre+f.strip())
+        else:
+            files.append(v)
+
+    camera = options.camera
+    if(camera is None):
+        with fits.open(files[0]) as f:
+            camera = f[0].header.get("INSTRUME", None)
+
+        if(camera is None or camera not in knowncameras):
+            print("Aborting: camera unknown or INSTRUME key missing {}".format(camera),
+                   file=sys.stderr)
+            sys.exit(1)
+
+    # before we attempt to maths!
+    system_dtype = dict([('little', "<i2"), ("big", ">i2")]).get(sys.byteorder,None)
+    if(system_dtype is None):
+        print("System type {} is unknown, aborting.".format(sys.byteorder),file=sys.stderr)
+        sys.exit(1)
+
+    for filename in files:
+        try:
+            tool = knowncameras[camera](filename,switches)
+        except Exception as e:
+            raise e
+            print("oops, {}".format(e))
+        else:
+           tool.load().fixDN().randomize().close()

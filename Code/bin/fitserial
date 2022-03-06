@@ -1,0 +1,134 @@
+#!/usr/bin/env python2.7
+# -*- coding: utf8; *-*
+# HEREHEREHERE
+
+#############################################################################
+# 
+#  /home/wayne/bin
+#
+#emacs helpers
+# (insert (format "\n# %s " (buffer-file-name)))
+#
+# (set-input-method 'TeX' t)
+# (toggle-input-method)
+#
+# (wg-astroconda3-pdb)      # CONDA Python3
+#
+# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
+#
+# (ediff-current-file)
+# (find-file-other-frame "./.pdbrc")
+
+# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
+# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
+#
+# (wg-astroconda-pdb)       # IRAF27
+#
+# (set-background-color "light blue")
+#               
+# (wg-python-toc)
+#               
+#############################################################################
+from __future__ import print_function
+import os
+import optparse
+import sys
+from astropy.io import fits
+
+__author__  = 'Wayne Green'
+__version__ = '0.1'
+__all__     = ['fitserialize'] # of quoted items to export
+
+
+
+__doc__ = """
+       fitserial --start 117 [other options] # start at 117
+ Rename files by prepending a padded string to input list if files.
+ -s --start  <int> Optional starting value default 1000.
+
+"""
+def fitserialize(fileargs, start=1):
+   """Prepend a serial number to the file."""
+   dates   = {}  # organize the files in date order.
+   msgs    = []
+   files   = []
+   nodates = []
+   mias    = []    # missing files
+
+   for fn in fileargs:          # allow # files.
+      if('@' in fn):
+         if('//' in fn):
+            prefix,fn = fn.split('//@')
+         else:
+            prefix,fn = fn.split('@')
+         with open(fn,'r') as f:
+            for l in f:
+               files.append(prefix+l.strip())
+      else:
+         files.append(fn)
+
+   try:
+      for filename in files:
+
+         #print "trying |{}|".format(filename)
+         if(os.path.isfile(filename)):
+            with fits.open(filename) as f:
+               h = f[0].header
+               if('DATE-OBS' in h):
+                  dates.setdefault(filename,[]).append(h['DATE-OBS'])
+               else:
+                  nodates.append(filename)
+         else:
+            print("Not a file ", filename)
+            mias.append(filename)
+   except Exception as e:
+      print >> sys.stderr,"File %s failed, skipping." % filename + e.__str__()
+      #print files
+      #sys.exit(1)
+
+   keys = list(dates.keys())
+   keys.sort()
+   for fname in keys:
+      try:
+         with fits.open(fname):
+            h          = f[0].header
+            number     = "1"+("%d" % start).zfill(4)
+            h['serno'] = number
+            start     += 1
+            os.rename(fname,'a'+number+'_'+fname)
+      except Exception as e:
+         print("Bad fits:",fname,e)
+   for u in nodates:
+      print("{} skipped, no DATE-OBS".format(u))
+   for m in mias:
+      print("file not found: {}",format(m))
+
+# fitserialize
+
+
+##############################################################################
+# MAIN
+#
+##############################################################################
+if( __name__ == "__main__"):
+
+   opts = optparse.OptionParser("""%prog """+__doc__)
+
+   opts.add_option("-s", "--start",  action="store", dest="start",
+                   default='1000',
+                   help="<bool>        be verbose about work (default False).")
+
+   opts.add_option("-v", "--verbose",  action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>        be verbose about work (default False).")
+
+   (options, args) = opts.parse_args()
+
+   try:
+      start = int(options.start)
+   except Exception as e:
+      print >>sys.stderr,"Start option is not an integer. Aborting.",options.start
+      sys.exit(1)
+
+   fitserialize(args)
+

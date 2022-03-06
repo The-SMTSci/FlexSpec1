@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# (compile "rm *fits.bak*; ./fixheader -c camera.csv -c site.csv -c spectrograph.csv -c target.csv @l.l")
+# (wg-python-fix-pdbrc)
+
+### HEREHEREHERE
+from __future__ import print_function
+import os
+import optparse
+import sys
+import re
+import numpy as np
+import pandas as pd
+from astropy.io import fits
+import warnings
+from astropy.utils.exceptions import AstropyWarning
+warnings.simplefilter('ignore', category=AstropyWarning)
+
+#############################################################################
+#
+#  /home/wayne/iraf/smtsci/bin/fixheader
+#
+# (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['FixHeader','FixHeadersException']   # list of quoted items to export
+# class FixHeadersException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FixHeaders(object):
+#     def __init__(self,options,args):                        # FixHeaders::__init__()
+#     def fixfiles(self):                                     # FixHeaders::fixfiles()
+#     def debug(self,msg="",skip=[],os=sys.stderr):           # FixHeaders::debug()
+# if __name__ == "__main__":
+#
+#
+#############################################################################
+__doc__ = """bin/fixheader  [options] <...files...>
+
+fixheader -c site.csv -c camera.csv -c telescope.csv <files>
+
+-c --csv   <filename>    a csv file with the headers
+--nobackup <bool>        do not make a .bak file (default is make .bak)
+
+fixheader will not change 16-bit int data into floats.
+
+csv files control the work (easily composed)
+values that consists of a !KW or #KY have special meaning:
+! will let you add a synonym for the card with KY as a new key
+# will let you delete all matching cards from the header.
+
+Given a set of csv files; with three columns: with headers
+KEYWORD,  VALUE,  COMMENT  [ any other ones ignored]
+add to the mix to fix exch file's headers. Case of the
+header is critical, no spaces.
+
+The <files> may be a wildcard foo*fits or simply a long list
+of files.
+
+The CSV file must have the headers KEYWORD,VALUE,COMMENT.
+No test for valid keyword is performed.
+
+Two exceptions: (!) and (#) for values...
+
+If the row has a value that starts with an exclaimation point (!), the
+KEYWORD will be replaced with the existing header's !keyword (sans !)
+if keyword exists in header. Otherwise a warning statement is sent to
+stderr and processing will continue.
+
+This is put into place such that:
+OBSGEO-B,!BESS_LONG,Make Standard FITS location
+OBSGEO-L,!BESS_LAT,Make Standard FITS location
+OBSGEO-H,!BESS_ELEV,Make Standard FITS location
+
+If the row has a value that starts with an sharp (#), the
+KEYWORD will be deleted from the existing header's #keyword (sans #)
+if keyword exists in header.
+
+Here all the "-c file.csv" files are opened and merged into a
+pandas table -- one file at a time and thanks to python in the
+order they are entered. Thus the later overwrites the former
+with a warning.
+
+This is a standalone program: it may be renamed to program.py,
+imported to get the class.
+
+"""
+
+
+__author__  = 'Wayne Green'
+__version__ = '0.1'
+__all__     = ['FixHeader','FixHeadersException']   # list of quoted items to export
+
+
+##############################################################################
+# FixHeadersException
+#
+##############################################################################
+class FixHeadersException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(FixHeadersException,self).__init__("FixHeaders "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return " FixHeaders: {}\n".format(e.__str__())
+# FixHeadersException
+
+##############################################################################
+# FixHeaders
+#
+##############################################################################
+class FixHeaders(object):
+    """ Given a list of files, and options, fix headers in the files.
+    options is a dict {'nobackup' : bool,
+                       'cvsheaders' : [ ... list of csv filenames... ],
+                      }
+    """
+
+    floattest = re.compile(r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?')
+    nonfloat  = re.compile(r'[^0-9.Ee+-]+')
+    def __init__(self,options,args):                        # FixHeaders::__init__()
+        """Initialize this class."""
+        self.options   = options
+        infiles = [a for a in args if 'fit' in a or '@' in a]
+        self.fitsfiles = []
+        for filename in infiles:
+            if('@' in filename):
+                with open(filename[1:],'r') as f:
+                    for l in f:
+                        self.fitsfiles.append(l.strip())
+            else:
+                self.fitsfiles.append(filename)
+
+    ### FixHeaders.__init__()
+
+    def fixfiles(self):                                     # FixHeaders::fixfiles()
+        """Do the body of the operation"""
+        reqcolumns   = set(['KEYWORD','VALUE','COMMENT'])  # sligltly test the csv files
+        nreqcolumns  = set(['KEYWORD','COMMENT','VALUE'])
+        # set up one data frame from a one or more csv files. Makesure
+        # each frame has at least the requsite keywords
+        dataframes   = [ [f, pd.read_csv(f,sep=',')] for f in options.csvheaders]
+        for fn,df in dataframes:
+            if(not set(df.columns.values) == reqcolumns):
+                print("File {} does not have right columns {}".format(reqcolumns))
+                sys.exit()
+        frames       = [dataframes[i][1] for i in range(len(dataframes))]
+        worklist     = pd.concat(frames)                   # this melds all the files together
+        msg          = "keywords"                          # msg is for exceptions
+        try:
+            kwds     = worklist['KEYWORD'].values ; msg = "values"
+            values   = worklist['VALUE'].values   ; msg = "comments"
+            comments = worklist['COMMENT'].values
+        except Exception as e:
+            print("Pandas error: {}, {}".format(msg,e))
+            sys.exit(1)
+
+        backup = self.options['nobackup']
+        print(self.fitsfiles)
+        for fn in self.fitsfiles:
+            work = zip(kwds,values,comments)               # do this once
+            with fits.open(fn,                             # open with options
+                           mode                    = 'update',
+                           do_not_scale_image_data = True,
+                           save_backup             = backup,
+                           output_verify           = 'silentfix') as f:
+                h = f[0].header
+                for k,v,c in work:
+                    usev = v
+                    if('!' in v):  # copy the keyword referenced by v
+                        _,vk = v.split('!')
+                        vk = vk.strip()
+                        if(vk in h):
+                            usev = "{}".format(h[vk])
+                        else:
+                            print("!{} not replacable -- skipping",format(vk),file=sys.stderr)
+                            continue
+                    if('#' in v):
+                        _,vk = v.split('#')
+                        vk = vk.strip()
+                        if(vk in h):
+                            usev = "{}".format(h[vk])
+                            h.remove(k,ignore_missing=True,remove_all=True)
+                            continue
+                    usev = usev.strip()
+                    if(self.nonfloat.search(usev) is None and self.floattest.match(usev)):
+                        usev = float(usev)
+                    if(k in h):
+                        h[k]=(usev,c)
+                    else:
+                        h.append(fits.Card(keyword=k,value=v,comment=c))
+        return self
+
+    ### FixHeaders.fixfiles()
+
+    def debug(self,msg="",skip=[],os=sys.stderr):           # FixHeaders::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("FixHeaders - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### FixHeaders.debug()
+
+# class FixHeaders
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+    opts.add_option("--nobackup", action="store_false", dest="nobackup",
+                   default=True,
+                   help="<bool>     make bak[.n] files [True].")
+    opts.add_option("-c", "--csvheader", action="append", dest="csvheaders",
+                   default=[],
+                   help="<csv>     name of the csv.")
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    (options, args) = opts.parse_args()
+    if(len(args) > 0 and '*' in args[0]):
+        import glob
+        args = glob.glob(args[0])
+
+    app = FixHeaders(options.__dict__,args)
+    app.fixfiles()
+
