@@ -38,15 +38,19 @@ fixheader   - DEVELOPING: This takes one or more .csv files with
 trim        - Given a region described in FITS/NOAO/pro tradition
               of, say the DATASEC keyword; trim the images.
               A prefix is prepended to files, so originals and other
-              are kept. Prefix defaults to 't_'. 
+              are kept. Prefix defaults to "t_". 
+
               The region is for FITS images (ala ds9). The coordinates
               are 1-s based (ala FORTRAN). The splat ('*' asterisk)
               stands in for the whole axis, or a part of the range
               of an axis.
-              Example: [600:*,500,700] removes the left side and
+
+              Example: "[600:*,500,700]" removes the left side and
               keeps the middle 500-700 inclusive rows. 
+
               Created to chop a star trace and some sky region from
-              huge CMOS cameras.
+              huge CMOS camera's images.
+
               A logical/physical WCS is added to allow ds9 to say
               how the trimmed image related back to its original.
 
