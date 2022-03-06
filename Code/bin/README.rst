@@ -8,7 +8,7 @@ PyRAF processes). Pandas and Astropy have issues between the dialects
 and deference to Python 3x is made,
 
 
-fitserial   - rename fits files by prepending "a1NNNN_" to each
+fitserial   - rename fits files by prepending "a1NNNN\_" to each
               name based on DATE-OBS in the header. This makes
               them list in observation order, and disambiguates
               names.
