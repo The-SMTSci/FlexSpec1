@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
-# (wg-astroconda3-pdb)      # CONDA Python3
+# (compile "pydoc ./trim")
 #
 # (wg-python-fix-pdbrc)
 
@@ -19,65 +19,45 @@ import time
 
 #############################################################################
 #
-#  bin/trim
+#  /home/wayne/bin/section.py
+#
+#emacs helpers
+# (insert (format "\n# %s " (buffer-file-name)))
+#
+# (set-input-method 'TeX' t)
+# (toggle-input-method)
+#
+# (wg-astroconda3-pdb)      # CONDA Python3
+#
+# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
+#
+# (ediff-current-file)
+# (find-file-other-frame "./.pdbrc")
+
+# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
+# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
+#
+# (wg-astroconda-pdb)       # IRAF27
+#
+# (set-background-color "light blue")
+#
 # (wg-python-toc)
-#
-# __doc__ = """
-# __author__  = 'Wayne Green'
-# __version__ = '0.1'
-# __all__     = ['','']   # list of quoted items to export
-# class IRAFSectionException(Exception):
-#     def __init__(self,message,errors=None):
-#     @staticmethod
-#     def __format__(e):
-# class IRAFSection(object):
-#     #__slots__ = [''] # add legal instance variables
-#     def __init__(self,secdef="[*,*]",             # IRAFSection::__init__()
-#     def secslice(self):                                   # IRAFSection::secslice
-#     def compile(self,secdef=None):                        # IRAFSection::compile()
-#     def convert(self,str,default):                        # IRAFSection::convert()
-#     def __str__(self):                                    # IRAFSection.__str__()
-#     def debug(self,msg="",skip=[],os=sys.stderr):          # IRAFSection::debug()
-# def __regression__():
-# if __name__ == "__main__":
-#
-#
 #
 #############################################################################
 __doc__ = """
 
-bin/trim [options] files...
+/home/wayne/bin/trim [options] files...
 
-"-f", "--force"   <bool>           force -s over env; env over file
-"-p", "--prefix"  <str>            prefix string (t_).
-"-o", "--output"  <bool>           write a new file..
-"-s", "--section" <[X1:X2,Y1:Y2]>  section in IRAF/FITS coordinates.
-"-v", "--verbose" <bool>           be verbose about work.
+"-o", "--output"  <bool>       write a new file..
+"-p", "--prefix"  <str>        prefix string (t_).
+"-s", "--section" <[X:X,Y:Y]>  section in IRAF/FITS coordinates.
+"-v", "--verbose" <bool>       be verbose about work.
 
-The specified trim section may be in the file, specified by user
-via the -s switch or generically by an 'export TRIMSEC='[600:*,550:750]'
-or occur in the file.
+TRIMSEC may be in a header, or in the local envrionment.  Inside PyRAF
+os.environ['TRIMSEC'] = '[*,185:1120]' will do the trick. This in turn
+writes the TRIMSEC into the header.  Pay attention to numpy indexing!
+All files are presumed to be bigger than the section.
 
-Under normal usage: No -s switch will fall back to the file, then
-fall back to the env. The '-s' always takes precedence.
-
-The -f switch force env over any file definition. In essence
-rewrites the TRIMSEC keyword. You can always leave the -s
-switch off -- but if there -f will take it as last resort.
-None of header, -s or env will skip the file.
-
-The X and Y coordintes are 1s based. A splat ('*') may be used
-to stand in for the values, 
-
-*:1234      everything   upto/including 1234
-150:*       start at 150 upto/including end
-[*,500:600] all x, but 500-through 600 for y.
-
-TRIMSEC is the part of the image to keep.  It may be in a header, or
-in the local envrionment.  Inside PyRAF the Python os.environ['TRIMSEC'] =
-'[*,185:1120]' will do the trick. This in turn writes the TRIMSEC into
-the header.  Pay attention to numpy indexing!  All files are presumed
-to be bigger than the section.
 
 
 
@@ -108,25 +88,23 @@ class IRAFSectionException(Exception):
 #
 ##############################################################################
 class IRAFSection(object):
-    """Given a string with the section definition, make two np.slices to
-    handle operations. The goal is to make two slices 1 for X and one for
-    Y. 
-
+    """ Given a section, make two np.slices to handle operations
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
     _clean = re.compile(r'[\s[\]]+')
     _nobraces = re.compile
-    def __init__(self,header = {}, secdef="[*,*]"):
+    def __init__(self,secdef="[*,*]",             # IRAFSection::__init__()
+                      header = {}      ):
         """
            The IRAF section wildcard is *
-           its from:to inclusive. (Unlike numpy where the end is one more
-              than the index needed.
+           and from:to inclusive. (Unlike numpy where the end is one more
+           than the index needed.
            * *:10  10:* are the *:* acceptable forms.
            A leading "-" will transpose               (unimplemented)
            More than one section field for cubes etc. (unimplemented)
         """
-        self.secdef = self._clean.sub('',secdef)  # clear typo spaces to be sure
+        self.secdef = self._clean.sub('',secdef)  # to be sure
         self.header = header
         self.naxis1 = header.get('NAXIS1',None)
         self.naxis2 = header.get('NAXIS2',None)
@@ -221,7 +199,6 @@ def __regression__():
 
 # __regression__
 
-
 ##############################################################################
 #                                    Main
 #                               Regression Tests
@@ -238,10 +215,6 @@ if __name__ == "__main__":
                    default=None,
                    help="<[X:X,Y:Y]>     section in FITS IRAF/coordinates.")
 
-    opts.add_option("-f", "--force", action="store_true", dest="force",
-                   default=False,
-                   help="<bool>     force -s over env over file.")
-
     opts.add_option("-o", "--output", action="store_true", dest="output",
                    default=False,
                    help="<bool>     write a new file..")
@@ -252,87 +225,77 @@ if __name__ == "__main__":
 
     (options, args) = opts.parse_args()
 
-    if(options.section == None and os.getenv('TRIMESEC') is not None):
-        
-
-    usection       = options.section                       # user supplied section
-    envsection     = os.getenv('TRIMESEC')
-    sectionchoices = [usection, envsection, filesection]
-
-    prefix         = options.prefix
-
+    prefix   = options.prefix
+    usection = options.section
     if(len(args) == 0):
         print("No files given.")
 
     if(usection is None):
-        usection = os.getenv('TRIMESEC')             # check for environment variable
+        envsec = os.getenv('TRIMSEC')
+        if(envsec is None):
+            print ("Missing section, no action to take.",file=sys.stderr)
+            print (__doc__,file=sys.stderr)
+            sys.exit(1)
+        usection = envsec
 
-    files = []                                       # allow at-files with prefix concat
-    for v in args:
-        if('@' in v):
-            pre = ""
-            if("//" in v):
-                pre,v = v.split('//')
-            if('@' in v):
-                _,listname = v.split('@')
-            if(len(listname) == 2):
-                pre,listname = listname
-            with open(listname,'r') as listoffiles:
-                for f in listoffiles:
-                    files.append(pre+f.strip())
+    files = []                                      # allow at-files
+    for filename in args:
+        if('@' in filename):
+            with open(filename[1:],'r') as f:
+                for l in f:
+                    files.append(l.strip())
         else:
-            files.append(v)
+            files.append(filename)
 
-    convdate = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) # when we did the trims
+    if(options.verboseflag):
+        print(files)
 
+    convdate = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime())
+
+    section   = None
     filecount = 0
-
     for filename in files:
         if(options.verboseflag):
             print("Processing {}".format(filename))
         try:
-            hint    = "Opening file {}.format(filename)"
-            section = None
-            with fits.open(filename) as f:               # open the fits file
-                d                = f[0].data.T           # put into IRAF order (zero based!)
-                h                = f[0].header           # grab header naxis{1,2}
+            hint = "Opening file {}.format(filename)"
+            with fits.open(filename) as f:          # open the fits file
+                d                = f[0].data.T      # put into IRAF order (zero based!)
+                h                = f[0].header      # grab header naxis{1,2}
             hint   = "Critical checks:"
             if(h['NAXIS'] == 1):
                 raise SectionException("{} NAXIS1 and NAXIS2 are needed to trim".format(filename))
-            mychoices   = [x for x in sectionchoices if x is not None] + [h.get('TRIMSEC',None)]
-            if(force):
-                mysection.reverse()                      # reverse choices
-            use_section = mysection[0]
+            if(section is None):
+                section = IRAFSection(usection,h)
 
-            section = IRAFSection(h,use_section)         # brew up a value may be whole image
-                                                         
             hint = "Subsection of image {}".format(usection)
-            newslice = section.secslice()                # PDB-DEBUG
+            newslice = section.secslice()  # PDB-DEBUG
             newd             = d[newslice]
-
+            #print("{} newd.shape {} slice {}".format(filename,newd.shape,newslice))
             outname          = prefix + filename
             # fix up the header.
             hint = "Allocating FITS file with data shape={}".format(d.shape)
-            hdu              = fits.PrimaryHDU(newd.T)   # transpose back to FITS
-            newh             = hdu.header                # astropy.io.fits.header.Header
+            hdu              = fits.PrimaryHDU(newd.T)
+            newh             = hdu.header      # astropy.io.fits.header.Header
 
             hint = "Updating the header"
-            for c in h.cards:                            # PDB -DEBUG
-                if(c[0] not in newh):                    # c[0] is keyword
+            for c in h.cards:               # PDB -DEBUG
+                if(c[0] not in newh):
                     newh.append(c)
 
-            hint = "Adding a few descriptions"           # PDB-DEBUG
+            hint = "Adding a few descriptions"   # PDB-DEBUG
             newh['ORIGNAME'] = ("{}".format(filename), "Original File Name")
-            newh['TRIMSEC']  = ("{}".format(section),  "Section of original image")
+            newh['TRIMSEC' ] = ("{}".format(section),  "Section of original image")
             newh['TRIMDATE'] = (convdate, "date of trim operation")
+            newh['DATASEC' ] = (convdate, "update/fix DATASEC")
 
-            newh['WAT0_001'] = ('system=physical'),      # toss in a logical IMAGE WCS
+            newh['WAT0_001'] = ('system=physical'),
             newh['WAT1_001'] = ('wtype=linear')
             newh['WAT2_001'] = ('wtype=linear')
-            newh['LTV1']     = (- newslice[1].start  , "Lower X offset") # back to IRAF
-            newh['LTV2']     = (- newslice[0].start  , "Lower Y offset") # remember .T above
-            newh['LTM1_1']   = (1.0                  , "Scale X")
-            newh['LTM2_2']   = (1.0                  , "Scale Y")
+            newh['LTV1'    ] = (- newslice[1].start  , "Lower X offset") # back to IRAF
+            newh['LTV2'    ] = (- newslice[0].start  , "Lower Y offset") # remember .T above
+            newh['LTM1_1'  ] = (1.0                  , "Scale X")
+            newh['LTM2_2'  ] = (1.0                  , "Scale Y")
 
             hdu.writeto(outname,output_verify='fix',overwrite=True)
             filecount += 1
