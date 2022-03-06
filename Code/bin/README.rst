@@ -8,34 +8,40 @@ PyRAF processes). Pandas and Astropy have issues between the dialects
 and deference to Python 3x is made,
 
 
-fitserial   - rename fits files by prepending "a1NNNN\_" to each
-              name based on DATE-OBS in the header. This makes
+fitserial   - rename fits files by prepending "a1NNNN\_" to each name.
+              Based on DATE-OBS in the header. This makes
               them list in observation order, and disambiguates
               names.
 
-fixgain     - EXPERIMENTAL -- for a camera specified by command line or
-              the CAMERA keyword, change the data. This removes the
-              silly shift by 4 and replaces with an actual ADU/DN
-              and a GAIN keyword. This requires characterizing your
-              camera. It requires other aspects to consider like the
-              CMOS HCD-GAIN and the offset. You may add small values
-              of random noise to those least-significant-bits that
-              are bull-dozed under by the camera firmware. This will
-              actually improve fittings by blurring out systematic
-              noise (similar to padding FFTS with zeros)
+fixgain     - EXPERIMENTAL -- Fix ADU/DN add GAIN for a camera specified
+              by command line or the CAMERA keyword, change the
+              data. This removes the silly shift by 4 and replaces
+              with an actual ADU/DN and a GAIN keyword. This requires
+              characterizing your camera. It requires other aspects to
+              consider like the CMOS HCD-GAIN and the offset. You may
+              add small values of random noise to those
+              least-significant-bits that are bull-dozed under by the
+              camera firmware. This will actually improve fittings by
+              blurring out systematic noise (similar to padding FFTS
+              with zeros)
 
-fixheader   - DEVELOPING: This takes one or more .csv files with
-              KEYWORD,VALUE,COMMENT [,whatev] and add/replaces
-              values in file list supplied. The columns may be
+fixheader   - DEVELOPING: Use ".csv" files to fix headers.
+              The columns KEYWORD,VALUE,COMMENT [,whatev] add/copy/delete/replaces
+              keywords values in file list supplied. The columns may be
               in any order; but are case sensitive and must be
               spelled as above. A value line:
-              MYLAT,!BSS-LAT,Copy BSS-LAT value for me.
-              and
-              BSS-LAT,#BSS-LAT,Remove this keyword
-              are additional capability.
-              This program is python3 only.
 
-trim        - Given a region described in FITS/NOAO/pro tradition
+              MYLAT,!BSS-LAT,Copy BSS-LAT value for me.
+
+              and:
+
+              BSS-LAT,#BSS-LAT,Remove this keyword
+
+              are additional capability. This program is python3
+              only.
+
+trim        - USe a DATASEC switch to create smaller images
+              Given a region described in FITS/NOAO/pro tradition
               of, say the DATASEC keyword; trim the images.
               A prefix is prepended to files, so originals and other
               are kept. Prefix defaults to "t_". 
