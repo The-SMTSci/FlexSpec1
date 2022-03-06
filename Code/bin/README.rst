@@ -40,7 +40,7 @@ fixheader   - DEVELOPING: Use ".csv" files to fix headers.
               are additional capability. This program is python3
               only.
 
-trim        - USe a DATASEC switch to create smaller images
+trim        - Use a DATASEC switch to create smaller images
               Given a region described in FITS/NOAO/pro tradition
               of, say the DATASEC keyword; trim the images.
               A prefix is prepended to files, so originals and other
