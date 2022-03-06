@@ -57,8 +57,7 @@ TODO
 
 * Make sure TRIMSEC and DATASEC are done correctly.
 
-* There may be off-by-one issues with 'inclusive' and FITS->numpy
-array translations.
+* There may be off-by-one issues with 'inclusive' and FITS->numpy array translations.
 
 
 
