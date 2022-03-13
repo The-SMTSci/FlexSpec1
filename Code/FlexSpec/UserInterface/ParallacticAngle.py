@@ -10,6 +10,7 @@ import optparse
 import sys
 import re
 from Display import fakedisplay
+import json
 
 
 from bokeh                import events
@@ -51,6 +52,26 @@ from bokeh.models.widgets import Tabs, Panel
 #
 # (wg-python-toc)
 #
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['FlexOrientationException','FlexOrientation']   # list of quoted items to export
+# class FlexOrientationException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FlexOrientation(object):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self, name : str = "Default",
+#     def update_homebutton(self):                                # Collimator::update_homebutton()
+#     def update_readbutton(self):                                # Collimator::update_readbutton()
+#     def debug(self,msg="",skip=[],os=sys.stderr):               # FlexOrientation::debug()
+#     def update_parallacticangle(self, attr,old,new):            # FlexOrientation::update_parallacticangle()
+#     def ExtProcess(self, newvalue):                             # FlexOrientation::ExtProcess()
+#     def layout(self):                                           # FlexOrientation::layout()
+#
+#
+#
 #############################################################################
 __doc__ = """
 
@@ -60,7 +81,6 @@ __doc__ = """
 
 
 """
-
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
@@ -82,7 +102,6 @@ w differentiated capture of exceptions"""
         return f" FlexOrientation: {e.__str__()}\n"
 # FlexOrientationException
 
-
 ##############################################################################
 # FlexOrientation
 #
@@ -92,27 +111,51 @@ class FlexOrientation(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, name : str = "Default",
+    def __init__(self, flexname : str = "Default",
+                 name  = "IMU",
                  display = fakedisplay,
                  pangle : str = "0.0", width=200):  # FlexOrientation::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
+        self.flexname      = flexname
         self.name      = name
         self.display   = display
         self.wwidth    = width
         self.pangle    = float(pangle)
+        self.home      = 0
+        self.read      = 0
         self.spacer    = Spacer(width=self.wwidth, height=5, background='black')
 
 
         self.parallacticangle = Slider    (title=f"Parallactic Angle", bar_color='firebrick',
                                            value = self.pangle, start = 0,  end = 180,
                                            step = 0.1, width=self.wwidth)
-        self.homebutton       = Button    ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
+        self.readbutton       = Button    ( label="Read",     disabled=False, button_type="warning", width=self.wwidth//2)
+        self.homebutton       = Button    ( label="Home",     disabled=False, button_type="danger",  width=self.wwidth//2)
 
         self.parallacticangle .on_change('value', lambda attr, old, new: self.update_parallacticangle      (attr, old, new))
 
+        self.readbutton       .on_click(lambda : self.update_readbutton ())
+        self.homebutton       .on_click(lambda : self.update_homebutton ())
+
     ### FlexOrientation.__init__()
+
+    def update_homebutton(self):                                # Collimator::update_homebutton()
+        """Update the home command. """
+        self.home = 1 
+        self.send_state()
+        self.home = 0
+
+    ### FlexOrientation.update_homebutton()
+
+    def update_readbutton(self):                                # Collimator::update_readbutton()
+        """Update the read command. """
+        self.read = 1 
+        self.send_state()
+        self.read = 0
+
+    ### FlexOrientation.update_readbutton()
 
     def debug(self,msg="",skip=[],os=sys.stderr):               # FlexOrientation::debug()
         """Help with momentary debugging, file to fit.
@@ -144,10 +187,26 @@ class FlexOrientation(object):
 
     ### FlexOrientation.ExtProcess()
 
+    def send_state(self):                                       # ParallacticAngle::send_state()
+        """Several ways to send things
+        
+        """
+        devstate = dict( [ ( "read"    , self.read),
+                           ( "home"    , self.home)
+                        ])
+        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict = json.dumps(d3)
+        self.display.display(f'{jdict}')
+
+    ### ParallacticAngle.send_state()
+
     def layout(self):                                           # FlexOrientation::layout()
         """Create the layout"""
         return(row ( column ( self.parallacticangle,
-                              self.homebutton
+                              row(self.homebutton, self.readbutton)
                             )  ))
 
     ### FlexOrientation.layout()
