@@ -141,7 +141,7 @@ class FlexOrientation(object):
 
     ### FlexOrientation.__init__()
 
-    def update_homebutton(self):                                # Collimator::update_homebutton()
+    def update_homebutton(self):                                # FlexOrientation::update_homebutton()
         """Update the home command. """
         self.home = 1 
         self.send_state()
@@ -149,7 +149,7 @@ class FlexOrientation(object):
 
     ### FlexOrientation.update_homebutton()
 
-    def update_readbutton(self):                                # Collimator::update_readbutton()
+    def update_readbutton(self):                                # FlexOrientation::update_readbutton()
         """Update the read command. """
         self.read = 1 
         self.send_state()
@@ -176,7 +176,7 @@ class FlexOrientation(object):
 
     def update_parallacticangle(self, attr,old,new):            # FlexOrientation::update_parallacticangle()
         """Update the parallactic angle. Disabled in interface"""
-        pass # self.parallacticangle.value = float(new)
+        self.pangle = new
 
     ### FlexOrientation.update_parallacticangle()
 
@@ -191,14 +191,15 @@ class FlexOrientation(object):
         """Several ways to send things
         
         """
-        devstate = dict( [ ( "read"    , self.read),
-                           ( "home"    , self.home)
-                        ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
+        devstate           = dict( [ ( "read"    , self.read),
+                                     ( "home"    , self.home),
+                                     ( "pangle"  , self.pangle)
+                                   ])
+        slitcmd            = dict([("Process", devstate), ("Receipt" , 0)])
         slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
+        d2                 = dict([(f"{self.name}", slitcmd)])
+        d3                 = dict([(f"{self.flexname}", d2)])
+        jdict              = json.dumps(d3)
         self.display.display(f'{jdict}')
 
     ### ParallacticAngle.send_state()

@@ -27,6 +27,8 @@ from bokeh.models         import RadioGroup
 from bokeh.models         import Select
 from bokeh.models.widgets import Tabs, Panel
 
+from Shutter              import FlexShutter
+
 
 #############################################################################
 #
@@ -165,6 +167,7 @@ class BokehKzinRing(object):
         self.flatcheck_value     = 0
         self.augflatcheck_value  = 0
         self.nearcheck_value     = 0
+        self.shutter             = FlexShutter (flexname,display=display,width=width)
 
         self.slider_values = BokehKzinRing.SliderValues()
 
@@ -275,7 +278,8 @@ class BokehKzinRing(object):
                               self.hβslider,                    # Marker for BLUE  LED  - broad band led
                               self.oiiislider,                  # Marker for GREEN LED
                               self.hαslider,                    # Marker for REF   LED
-                              row(self.process,self.offbutton)
+                              row(self.process,self.offbutton),
+                              row(self.shutter.layout())
                             )  ))
         return self
 

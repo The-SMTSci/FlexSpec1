@@ -28,6 +28,7 @@ from GratingBokeh         import BokehGrating
 from Guider               import Guider
 from Collimator           import Collimator
 from Display              import FlexDisplay
+from ParallacticAngle     import FlexOrientation
 
 #############################################################################
 #

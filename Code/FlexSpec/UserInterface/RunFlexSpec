@@ -54,7 +54,7 @@ while getopts ":hsvt:" opt ; do     # request to use master bib
    esac
 done
 
-../../SBC/server.py "$verboseflag" &
+../../SBC/FlexSpecServer.py "$verboseflag" &
 
 # Finally! The command we want to run.
 currpid=$(echo $$; exec bokeh serve $show ./FlexSpec.py $mswitch --unused-session-lifetime $intervaltime)
