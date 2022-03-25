@@ -1,26 +1,16 @@
 ABSTRACT
 ========
 
-**Title**: Ramifications of 3D printing Spectrographs: Introducing the Flexible
-Spectrograph I (FS1) Small Telescope Spectrograph.
+**Title**:  Lessons Learned from the FlexSpec1 Spectrograph
 
-(Accepted May, Proceedings of the Small Telescope Symposium 2021, Society
+(Accepted TBD, Proceedings of the Small Telescope Symposium 2022, Society
 for Astronomical Sciences).
 
 Authors : Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony
           Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager
 
-**Contributors**: Paul Gerlach
-
-**Abstract**: Here we present the engineering and science case for the
-Flexible Spectrograph Small Telescope Spectrograph I (FS1).  In Paper
-I, we explored 3D Printing the LOWSPEC 1 for general science use. In
-Paper II, we presented technical issues and solutions related to the
-LOWSPEC 2.  Here, in Paper III, we address the underlying optics and
-astrophysics by adding flexibility in choices of materials,
-resolutions and optics needed to match observing needs and
-capabilities of the community.  The full design is available via
-GitHub, the documentation is at 'readthedocs.io flexspec1 <https://flexspec1.readthedocs.io/en/latest>_.
+**Abstract**: 
+This final paper of the FlexSpec1 series presents lessons learned and applied to 3D-Printed/Hybrid spectrographs for small telescope science. We present a detailed analysis of the photon-path from source to sensor and the steps within the spectrograph to mitigate instrumentation issues.  We present the caliberation unit, the "Kzin" ring, as a stand-alone aspect of the project suited to all spectrographs. A full implementation is in the puiblic domain via Github. Public documentation is available via ReadTheDocs.io. The full design is available via GitHub, the documentation is at 'readthedocs.io flexspec1 <https://flexspec1.readthedocs.io/en/latest>_.
 
 
 **Note to Editor**:

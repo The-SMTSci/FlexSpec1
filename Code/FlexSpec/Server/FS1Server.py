@@ -13,37 +13,19 @@ import re
 import socket
 import threading
 
+__mydebug = 1
+
 #############################################################################
 # git FlexSpec1/Code/FlexSpec/ClientServer/FS1Server.py 
-#  
-#
-#emacs helpers
-# (insert (format "\n# %s " (buffer-file-name)))
-#
 #
 # (set-input-method 'TeX' t)
-# (toggle-input-method)
-#
-# (wg-astroconda3-pdb)      # CONDA Python3
-#
-# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
-#
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
 #
 # (wg-python-toc)
 #
 #############################################################################
 __doc__ = """
 
-  clientserver/FS1Server.py
+  FlexSpec1/Server/FS1Server.py
 [options] files...
 
 The FS1Server is a class that listens on a port on 'this' machine
@@ -81,6 +63,7 @@ class FS1ServerException(Exception):
 ##############################################################################
 class FS1Server(object):
     """ Make a server side for FS1Server.
+    Inband string to make server disconnect: "!DISCONNECT!"
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
@@ -151,7 +134,7 @@ class FS1Server(object):
                 msg        = conn.recv(msg_length).decode(FORMAT)  # blocks
                 if msg == FS1Server.DISCONNECT_MESSAGE:
                     connected = False
-                if(1): print(f"[{addr}] {msg}")
+                if(__mydebug): print(f"[{addr}] {msg}")
                 conn.send("Msg received".encode(FORMAT))  # reply something to client.
 
         conn.close() # close the current connection, exit this thread,
@@ -162,13 +145,14 @@ class FS1Server(object):
         """Allow the socket to start listening for connections.
         This winds up being a thread."""
         self.server.listen()
-        if(1): print(f"[LISTENING] Server is listening on {self.SERVER}",file=sys.stderr)
+        if(__mydebug): print(f"[LISTENING] Server is listening on {self.SERVER}",file=sys.stderr)
         while True:
             conn, addr = self.server.accept()  # server.accept 'blocks' until the connection
-            print("conn ",conn)
+            if(__mydebug): print("conn ",conn)
             thread     = threading.Thread(target=handle_client, args=(conn, addr))
             thread.start()
-            if(1): print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}",file=sys.stderr)
+            if(__mydebug): print(f"[ACTIVE CONNECTIONS] {threading.activeCount() - 1}",
+                              file=sys.stderr)
     # start
 
     def write(self,msg):
