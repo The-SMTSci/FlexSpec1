@@ -39,7 +39,7 @@ Introducing the Flexible Spectrograph I
 Small Telescope Spectrograph.
 
 This is documentation, the project and our aspirations for developing
-a decent 3D spectrograph is 'Flexible'.
+a science data quality 3D spectrograph that is 'Flexible'.
 
 It is a continuous in progress. Bear with us. Better yet, collaborate with us.
 
