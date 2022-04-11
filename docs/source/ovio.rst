@@ -95,8 +95,6 @@ In addition, a baffle must be made for each desired
 telescope focal ratio.  The baffles are easy to modify
 and fit as a 3D printed part.
 
-INSERT 3D IMAGE.
-
 .. figure:: ./images/Fraunhofer baffle.png
 
 The position of the baffle is shown in the following 
