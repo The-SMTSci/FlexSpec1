@@ -28,6 +28,9 @@ is the necktie!
 
 .. figure:: ./images/BugFeature.png
 
-
+The use of a commercial camera lens also helps in achieving a 
+flatter field for the science camera (which then improves
+calibration) and assists greatly with maintaining overall
+collimation.
 
 
