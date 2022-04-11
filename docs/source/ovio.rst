@@ -99,7 +99,11 @@ INSERT 3D IMAGE.
 
 .. figure:: ./images/Fraunhofer baffle.png
 
+The position of the baffle is shown in the following 
+figure.  It can be seen as the red protrusion 
+attached to the rear of the OVIO wheel mount.
 
+.. figure:: ./images/_FS1_Assembly with Baffle.png
 
 
 
