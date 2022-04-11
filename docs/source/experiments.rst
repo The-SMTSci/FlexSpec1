@@ -42,17 +42,33 @@ order.
 Focus of the Camera/Collimator
 ------------------------------
 
-Position a camera (DSLR will work) with its lens focused for
+In order to achieve and maintain accurate collimation to and from
+the grating we find that focusing the science camera on infinity at the 
+outset and solely focusing the collimationg mirror during operation 
+results in the best possible set up.  This may seem obvious but most 
+commercial spectrographs allow the user to change the science camera 
+focus during an observing session (because the collimating mirror is 
+usually inaccessible).  This may be necessary because of thermal 
+changes or flexure in the spectrograph body.  The result is 
+a badly collimated system.
+
+We suggest the following method of set up.
+
+Position a camera (a DSLR will work) with its lens focused for
 infinity using a very distant point source. A far away
 street-light or a bright star works. Most commercial camera
-lenses will focus IR light, hence the fill stop is NOT
+lenses will focus IR light, hence the full stop is NOT
 focused for visible light.
 
 Place a front surface mirror at the grating position, and the camera
 at the exit 'camera' port of the spectrograph. Then focus the slit's
-image. This is a 'real' close approximation for the collimator lens
-focus.
+image using the collimating mirror. This is a 'real' close 
+approximation for the collimator lens focus.
 
+The FlexSpec has a remote collimating mirror adjuster driven by
+a stepper motor and eccentri cam arrangement for fine focus during
+an observing session.  This means the FlexSpec can be focused 
+without touching.
 
 Future FlexSpec will have a remote-selectable grating changer. Plans
 are to include a front-surface mirror.

@@ -60,7 +60,7 @@ The following images show a white light bench test of both
 orientations.
 
 .. figure:: ./images/GuideImageStandard.tiff
-
+  
 .. figure:: ./images/GuideImageReversed.tiff
 
 We also investigated the Fraunhofer diffraction pattern as it
@@ -73,9 +73,9 @@ INSERT IMAGE - Waynes diffraction pattern.
 This is shown in the attached image which is a highly
 magnified view of the slit taken from the science camera
 with the grating replaced by a mirror in the zeroeth order.
-
+ 
 .. figure:: ./images/FS1 FrFringe.png
-
+ 
 The fringe pattern can clearly be seen. Approximately 
 95% of the signal is contained within the first lobe.
 Additional lobes will cause noise in the signal through
@@ -83,8 +83,8 @@ loss of collimation and focus.
 
 We remedied this by inserting a baffle behind the OVIO
 mounting such that the width of the baffle exit pupil 
-removed the unwanted lobes.  This appreciably improved
- the sharpness of the spectral calibration lines.
+removed the unwanted lobes.  This appreciably improved 
+the sharpness of the spectral calibration lines.
 
 Since this effect is clearly dependent upon wavelength
 and the focal ratio of the incoming beam a compromise 
@@ -94,16 +94,16 @@ both the red and blue ends of the spectrum.
 In addition, a baffle must be made for each desired 
 telescope focal ratio.  The baffles are easy to modify
 and fit as a 3D printed part.
-
-INSERT 3D IMAGE.
-
+ 
 .. figure:: ./images/Fraunhofer baffle.png
-
+ 
 The position of the baffle is shown in the following 
 figure.  It can be seen as the red protrusion 
 attached to the rear of the OVIO wheel mount.
-
+ 
 .. figure:: ./images/_FS1_Assembly with Baffle.png
+ 
 
-
+A development for the FS2 will be a motorised selectable
+slit wheel.
 
