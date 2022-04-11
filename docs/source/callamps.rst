@@ -83,11 +83,9 @@ It can be seen that early results show very good calibration performance
 of R = 1500+ and an RMS = 0.04.  These figures are better than similar
 commercially available designs.
 
-INSERT CALIBRATION FRAME HERE.
+
 .. figure:: images/FS1Calibration.png
 
-
-INSERT ISIS PINTOUT HERE.
 .. figure:: images/ISIS.png
 
 
