@@ -83,8 +83,8 @@ loss of collimation and focus.
 
 We remedied this by inserting a baffle behind the OVIO
 mounting such that the width of the baffle exit pupil 
-removed the unwanted lobes.  This appreciably improved
- the sharpness of the spectral calibration lines.
+removed the unwanted lobes.  This appreciably improved 
+the sharpness of the spectral calibration lines.
 
 Since this effect is clearly dependent upon wavelength
 and the focal ratio of the incoming beam a compromise 
