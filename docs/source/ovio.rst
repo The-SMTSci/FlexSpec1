@@ -59,9 +59,9 @@ wheel for the present until we can investigate further.
 The following images show a white light bench test of both
 orientations.
 
-<INSERT IMAGE Standard Guide - Tony>
+.. figure:: ./images/GuideImageStandard.tiff
 
-<INSERT IMAGE Reversed guide- Tony>
+.. figure:: ./images/GuideImageReversed.tiff
 
 We also investigated the Fraunhofer diffraction pattern as it
 emerges from the spectrograph side of the slit because theory
@@ -74,7 +74,7 @@ This is shown in the attached image which is a highly
 magnified view of the slit taken from the science camera
 with the grating replaced by a mirror in the zeroeth order.
 
-INSERT IMAGE - Tony
+.. figure:: ./images/FS1 FrFringe.png
 
 The fringe pattern can clearly be seen. Approximately 
 95% of the signal is contained within the first lobe.
@@ -96,6 +96,8 @@ telescope focal ratio.  The baffles are easy to modify
 and fit as a 3D printed part.
 
 INSERT 3D IMAGE.
+
+.. figure:: ./images/Fraunhofer baffle.png
 
 
 
