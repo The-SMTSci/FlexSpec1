@@ -39,7 +39,7 @@ The 500 micron (next to largest size) is blocked to be used as a
 simple shutter to allow taking zero and dark imagess during the
 daytime.
 
-The slit thickness is 1.5 mm.
+The slit disc thickness is 1.5 mm.
 
 The slit length is 6mm which is larger than most commercial
 spectrographs. Benefits are easier placement of targets in the
