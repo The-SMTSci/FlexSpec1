@@ -11,6 +11,7 @@ __version="0.0.1"
 function usage {
    echo "Version $__version"
    echo "RunFlexSpec ... switches"
+   echo "  -p show currently running ports listening to 5006"
    echo "  -t <intervaltime> in microseconds 3600000 is one hour."
    echo "  -s - use show flag with bokeh."
    echo "  -v - pass verbose flag to FlexSpec."
@@ -26,6 +27,9 @@ verboseflag=""
 showflag=""
 currpid=""
 
+lsof -i :5006 | awk -e '/bokeh/ {print "killing bokeh ",$2, system("kill -9 " $2); exit}'
+
+
 sigint_handler()
 {
    if [ "$currpid" != ""];  then kill -i "$pid"; fi
@@ -36,12 +40,16 @@ trap sigint_handler SIGINT
 
 
 # leading colon is silent. ":hb:" h has no option, b has an option.
-while getopts ":hsvt:" opt ; do     # request to use master bib
+while getopts ":hpsvt:" opt ; do     # request to use master bib
    case $opt in
    h)
       usage
       exit 1
       ;; # process a two part parm
+   p)
+       lsof -i :5006
+       exit
+       ;;
    s)
        showeflag="show"
       ;;
