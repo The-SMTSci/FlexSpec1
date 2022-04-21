@@ -61,7 +61,7 @@ orientations.
 
 .. figure:: images/GuideImageStandard.jpeg
   
-.. figure:: images/GuideImageReversed.tiff
+.. figure:: images/GuideImageReversed.jpeg
 
 We also investigated the Fraunhofer diffraction pattern as it
 emerges from the spectrograph side of the slit because theory
