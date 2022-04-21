@@ -74,7 +74,8 @@ This is shown in the attached image which is a highly
 magnified view of the slit taken from the science camera
 with the grating replaced by a mirror in the zeroeth order.
  
-.. figure:: ./images/FS1 FrFringe.png
+.. figure:: ./images/FS1FrFringe.png
+
  
 The fringe pattern can clearly be seen. Approximately 
 95% of the signal is contained within the first lobe.
@@ -96,6 +97,7 @@ telescope focal ratio.  The baffles are easy to modify
 and fit as a 3D printed part.
  
 .. figure:: ./images/Fraunhofer_baffle.png
+
  
 The position of the baffle is shown in the following 
 figure.  It can be seen as the red protrusion 
