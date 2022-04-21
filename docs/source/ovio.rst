@@ -103,7 +103,7 @@ The position of the baffle is shown in the following
 figure.  It can be seen as the red protrusion 
 attached to the rear of the OVIO wheel mount.
  
-.. figure:: ./images/FS1_Assembly_with_Baffle.png
+.. figure:: ./images/FS1_Assembly_with_Baffle.jpeg
  
 
 A development for the FS2 will be a motorised selectable
