@@ -1,4 +1,4 @@
-# FlesSpec1
+# FlexSpec1
 
 Small telescope Flexible Spectrograph One.
 
