@@ -33,7 +33,7 @@ system. Here are a few guide pointers:
 
 #. Use the same units, here centimeters;
     - :math:`5 \times 10^{-5}` cm for green light. :math:`5 \times 10^{-5}` cm for blue and :math:`6 \times 10^{-5}` cm for red. We use 300 and 600 l/mm gratings and the math cancels!
-    - Translate grating :math:`l/mm to` :math:`l/cm`
+    - Translate grating :math:`l/mm\; to\l` :math:`l/cm`
 
 #. Remember sign conventions, and get the right equation.
 #. Follow the general spectrograph equation chain. Slit/grating/sensor.
