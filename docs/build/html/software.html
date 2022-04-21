@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>15. User Software &#8212; FlexSpec1 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="16. CAD Computer Aided Design" href="cad.html" />
+    <link rel="prev" title="14. Serial Communication" href="serial.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="user-software">
+<h1><span class="section-number">15. </span>User Software<a class="headerlink" href="#user-software" title="Permalink to this headline">¶</a></h1>
+<p>The overall goal of the project is to utilize free (as in money) software
+that is platform agnostic (Capable of running or being made to run) on
+all operating systems. One main sub-goal is to create an simple architecture
+using basic web enabled applications, inexpensive Single Board Computers (SBCs)
+(Raspberry Pi running the Astroberry suite), inexpensive Single Board
+Microprocessors (SBMs). Another sub-goal is to leverage the best tools
+for collaboration including Github, and Sphinx – the package that
+creates this documentation tied to Readthedocs.io.</p>
+<p>The basic philosophy is to used ‘mirrored’ object-oriented classes written
+in Python/Bokeh for managing the instructins from its users, relaying
+those instructions via JSON to C/C++ classes running on the SBM. We use
+the Raspberry Pi mounted to the telescope’s OTA to offer the web interface
+and to direct messages to other Pi’s and arduinos within the full instrumentation
+for the Pier and its OTAs.</p>
+<div class="section" id="remote-desktop">
+<h2><span class="section-number">15.1. </span>Remote Desktop<a class="headerlink" href="#remote-desktop" title="Permalink to this headline">¶</a></h2>
+<p>Many use the VNC Desktop ®, TeamViewer ®, Microsoft Remote
+Desktop ® and Chromeremote ® are packages we have encountered
+in the wild.</p>
+<p>KStars/INDI/Ekos:</p>
+<ul class="simple">
+<li><p>Windows</p></li>
+<li><p>Linux:</p>
+<ul>
+<li><p>Desktop</p></li>
+<li><p>Raspberry/PI</p></li>
+<li><p>ODroid</p></li>
+</ul>
+</li>
+<li><p>Apple</p></li>
+<li><p>SAOImage/ds9 (Platform Agnostic)</p></li>
+<li><p>Astrometry.net (program and )</p></li>
+<li><p>Sextractor (image to data conversion)</p></li>
+</ul>
+</div>
+<div class="section" id="networking">
+<h2><span class="section-number">15.2. </span>Networking<a class="headerlink" href="#networking" title="Permalink to this headline">¶</a></h2>
+<p>X11/R6 The X Consortium dissolved at the end of 1996, producing a
+final revision, X11R6.3. Pre-1983, known as “W” – move to X in
+1984, settled down to the X11 release in 1986.</p>
+<p>Wayland, X Org people (2010-Current), with XWayland to tie back
+to legacy systems.</p>
+</div>
+<div class="section" id="serial-port-management">
+<h2><span class="section-number">15.3. </span>Serial Port Management<a class="headerlink" href="#serial-port-management" title="Permalink to this headline">¶</a></h2>
+<p>The chapter on Serial Communications covers details, Putty is the
+package of choice as it is platform independent.</p>
+</div>
+<div class="section" id="end-user-software">
+<h2><span class="section-number">15.4. </span>End-user Software<a class="headerlink" href="#end-user-software" title="Permalink to this headline">¶</a></h2>
+<p>TODO Add hyperlinks</p>
+<p>The 3D design work was done with SolidWorks ®, Autodesk Fusion/360 ®,
+TinkerCad ® and special modifications made with Cura ®.</p>
+</div>
+<div class="section" id="computer-languages">
+<h2><span class="section-number">15.5. </span>Computer Languages<a class="headerlink" href="#computer-languages" title="Permalink to this headline">¶</a></h2>
+<p>The two languages of this project are Python and C++. The C++ is the
+GNU toolchain – very consistent across platforms. The GNU compiler
+suite has excellent language libraries. Some external libraries
+for the Arduino are not the best in the world – be careful there.</p>
+<p>The Pythonic environment of choice include Anaconda and VSCode. The
+Anaconda environment is widely used in Astronomy and the VSCode widely
+used on Win10 environments. Both have advantages and disadvantages.
+The main thing with Python is to match the very extensive libraries
+more that sweat the language details. The libraries include numpy, astropy,
+scipy etc.</p>
+<p>Other languages include “bash”, the Linux/Unix shell. Beware, bash on
+Win10 IS NOT CONSISTENT. A handful of useful Linux utilities were used
+to develop code – not needed for run-time support.</p>
+</div>
+<div class="section" id="science">
+<h2><span class="section-number">15.6. </span>Science<a class="headerlink" href="#science" title="Permalink to this headline">¶</a></h2>
+<p>Telescope and camera management:</p>
+<ul class="simple">
+<li><p>KStars/INDI/Ekos</p></li>
+<li><p>Astroberry (augmented)</p></li>
+</ul>
+<p>Reductions were performed with</p>
+<ul class="simple">
+<li><p>BASS</p></li>
+<li><p>Demetra</p></li>
+<li><p>ISIS</p></li>
+<li><p>VSpec</p></li>
+<li><p>IRAF</p></li>
+<li><p>PlotSpectra</p></li>
+</ul>
+<p>Tools include
+- SAOImage ds9
+- fitsverify</p>
+<p>General tools:</p>
+<ul class="simple">
+<li><p>Anaconda Python env, including Jupyter, Spyder etc.</p></li>
+</ul>
+</div>
+<div class="section" id="bokeh-holoviz-panel">
+<h2><span class="section-number">15.7. </span>Bokeh/Holoviz/Panel<a class="headerlink" href="#bokeh-holoviz-panel" title="Permalink to this headline">¶</a></h2>
+<p>Bokeh <a class="reference external" href="https://www.psych.mcgill.ca/labs/mogillab/anaconda2/lib/python2.7/site-packages/bokeh/command/subcommands/serve.py">parameters</a> at McGill University.</p>
+<p>TODO: Token</p>
+<p>TODO: Authentication</p>
+<p>Bokeh <a class="reference external" href="https://docs.bokeh.org/en/latest/docs/user_guide/server.html">server</a>
+instructions.</p>
+<p>Some additional software packages need to be installed:</p>
+<div class="highlight-bash notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>apt-get update
+apt-get -y install gcc
+pip3 install numpy
+pip3 install astropy<span class="o">[</span>all<span class="o">]</span>
+pip3 install pandas
+pip3 install bokeh
+</pre></div>
+</td></tr></table></div>
+<p>TODO: Cite the trademarks etc.</p>
+</div>
+<div class="section" id="other-packages">
+<h2><span class="section-number">15.8. </span>Other Packages<a class="headerlink" href="#other-packages" title="Permalink to this headline">¶</a></h2>
+<p>Here is a collectin or very random links to other coding projects.</p>
+<p>Mostly in PERL
+<a class="reference external" href="https://github.com/robertoabraham/ProjectDragonfly/tree/master/scripts">DragonFly</a></p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FlexSpec1</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="abstract.html">1. ABSTRACT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flexspec1.html">2. Download FlexSpec1 Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openquestions.html">3. Open Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovio.html">4. OVIO Slit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optics.html">5. Care of Optics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">6. Optical Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">7. OVERVIEW</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics.html">8. Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathematics.html">9. Mathematics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guiding.html">10. FlexSpec 1 Guiding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">11. Remote Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controls.html">12. FlexSpec 1 Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">13. Communications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serial.html">14. Serial Communication</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">15. User Software</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#remote-desktop">15.1. Remote Desktop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#networking">15.2. Networking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#serial-port-management">15.3. Serial Port Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#end-user-software">15.4. End-user Software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computer-languages">15.5. Computer Languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#science">15.6. Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bokeh-holoviz-panel">15.7. Bokeh/Holoviz/Panel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-packages">15.8. Other Packages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cad.html">16. CAD Computer Aided Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronics.html">17. Electronics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arduino.html">18. Arduino Chips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">19. Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">20. Using Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bom.html">21. Bill of Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="callamps.html">22. Calibration Lamps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outstanding.html">23. Outstanding Documentation Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">24. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="youtube.html">25. YouTube Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="printer.html">26. Printer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="merlin.html">27. MERLIN GCODE Tricks</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="serial.html" title="previous chapter"><span class="section-number">14. </span>Serial Communication</a></li>
+      <li>Next: <a href="cad.html" title="next chapter"><span class="section-number">16. </span>CAD Computer Aided Design</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/software.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

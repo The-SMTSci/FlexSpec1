@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>13. Communications &#8212; FlexSpec1 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="14. Serial Communication" href="serial.html" />
+    <link rel="prev" title="12. FlexSpec 1 Ecosystem" href="controls.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="communications">
+<h1><span class="section-number">13. </span>Communications<a class="headerlink" href="#communications" title="Permalink to this headline">¶</a></h1>
+<p>The main scenario <span class="target" id="index-0"></span>scenario;communications is one of:</p>
+<ul class="simple">
+<li><p>An observing network of sites (observatories)</p></li>
+<li><p>Each observatory has one or more buildings</p></li>
+<li><p>Each building has one or more piers</p></li>
+<li><p>Each pier has its elements, and one or more OTAs</p></li>
+<li><p>Each OTA has lots of things. One or more of them may be Flex Spec 1 spectrographs.</p></li>
+</ul>
+<p>This project implements its OTAs with piggy-back Raspberry Pi processors
+on the OTA with one power cable and one Ethernet cable. This makes wire
+maintenance very easy. Since the Raspberry Pi is already deployed, with
+Astroberry KStars/INDI/Ekos – there is spare room for our instrument’s
+control Single Board Microcontrollers (SBMs).</p>
+<p>In spectroscopy it is desirable to have a piggy-back system for simultaneous
+photometry of the target.</p>
+<p>Each OTA may have one or more Raspberry computers. Each computer may have one or
+more serial connections (multi-drop destinations using a serial interface)
+to one or more Arduino-class SBMs.</p>
+<p>Remembering the mantra, “Flexible is Flexible” – how this gets built and
+orchestrated makes for a very interesting problem.</p>
+<p>The message origination may be a GUI like interface or an intelligent
+scheduler. Ideally the scheduler is inter-operable with other schedulers
+to maximize the observing output of its network. This is the “lofty” future goal.
+Now is present-time for architecture.</p>
+<p>There are two paradigms to help with understanding the FlexSpec
+communication:</p>
+<ul class="simple">
+<li><p>The Captain of a Ship concept: Here directions are supplied to the crew in the form of orders in common terms (rotate n degrees) and the crew translates that into a compass heading.</p></li>
+<li><p>The matryoshkas <span class="target" id="index-1"></span>matryoshkas (nested-doll) model: messages within messages.</p></li>
+<li><p>Postal Delivery System, with a set of inter-related postmasters. The postmaster accepts packages or envelopes, with a return address.</p></li>
+</ul>
+<p>The implementation is a nested set of restricted JSON dictionaries.</p>
+<p>A dictionary is a “key” : “value” pair. The key is restricted to always be a quoted-string
+without spaces.  The “value” may be a quoted string, an integer (no quotes), a float
+(no quotes and not using exponential notation) or – yup a dictionary.</p>
+<p>The idea is to have a set of “matched classes” for each widget utilized. They
+are matched as:</p>
+<div class="section" id="character-set">
+<h2><span class="section-number">13.1. </span>Character Set<a class="headerlink" href="#character-set" title="Permalink to this headline">¶</a></h2>
+<p>The JSON communications strings are taken from a restricted ASCII
+character set ANSI X3.4-1986 <span class="target" id="index-2"></span>communication;ASCII ANSI
+X3.4-1986 with an 8-bit data frame, MSB defined to be zero. This
+permits traditional 8-bit serial terminal code (PuTTY) <span class="target" id="index-3"></span>PuTTY
+to monitor lines, permits using out of band characters as an alarm
+for corrupted serial communications, allows special characters
+(ASCII control characters) to serve allow in-band synchronization
+and special “in-band” control.</p>
+<p>Here the characters <code class="docutils literal notranslate"><span class="pre">{}&quot;&quot;:,</span></code> are strictly reserved for JSON use
+to promote very restricted hand-coded JSON capability for lesser
+machines.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FlexSpec1</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="abstract.html">1. ABSTRACT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flexspec1.html">2. Download FlexSpec1 Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openquestions.html">3. Open Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovio.html">4. OVIO Slit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optics.html">5. Care of Optics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">6. Optical Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">7. OVERVIEW</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics.html">8. Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathematics.html">9. Mathematics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guiding.html">10. FlexSpec 1 Guiding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">11. Remote Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controls.html">12. FlexSpec 1 Ecosystem</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">13. Communications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#character-set">13.1. Character Set</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="serial.html">14. Serial Communication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software.html">15. User Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cad.html">16. CAD Computer Aided Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronics.html">17. Electronics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="arduino.html">18. Arduino Chips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">19. Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">20. Using Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bom.html">21. Bill of Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="callamps.html">22. Calibration Lamps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outstanding.html">23. Outstanding Documentation Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">24. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="youtube.html">25. YouTube Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="printer.html">26. Printer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="merlin.html">27. MERLIN GCODE Tricks</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="controls.html" title="previous chapter"><span class="section-number">12. </span>FlexSpec 1 Ecosystem</a></li>
+      <li>Next: <a href="serial.html" title="next chapter"><span class="section-number">14. </span>Serial Communication</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/communication.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

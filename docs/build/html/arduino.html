@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>18. Arduino Chips &#8212; FlexSpec1 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="19. Documentation" href="documentation.html" />
+    <link rel="prev" title="17. Electronics" href="electronics.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="arduino-chips">
+<h1><span class="section-number">18. </span>Arduino Chips<a class="headerlink" href="#arduino-chips" title="Permalink to this headline">¶</a></h1>
+<p>Follow the instructions:</p>
+<p><a class="reference external" href="https://wiki.seeedstudio.com/Seeeduino-XIAO/">Seeeduino XIAO</a></p>
+<p>Arduino chips come in several flavors. Here we are using Arm -Core <span class="target" id="index-0"></span>Arm processors.</p>
+<p>Download the Arduino IDE (here 1.8.15)</p>
+<p>Under <strong>File -&gt; Preferences</strong></p>
+<p>Into the <strong>Additional Boards Manager URLs</strong> enter:</p>
+<p>“<a class="reference external" href="https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json">https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json</a>”</p>
+<p><strong>Tools -&gt; Board -&gt; Boards Manager</strong></p>
+<p>Search/select <strong>Seeed SAMD Boards</strong> (see that it includes
+Seeeduino XAIO M0, and install it. (here 1.21.1) Takes a beat.</p>
+<p>The real trick is to start with the raw IDE and add the <strong>Blink</strong>
+program. This shows the ‘loop’ is closed with respect to development.</p>
+<div class="section" id="pin-outs">
+<h2><span class="section-number">18.1. </span>Pin Outs<a class="headerlink" href="#pin-outs" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>Pin Funcion Type Description
+1  D13          Digital GPIO
+2  +3V3 Power Out Internally generated power output to external devices
+3  AREF         Analog           Analog Reference; can be used as GPIO
+4  A0/DAC0      Analog ADC in/DAC out; can be used as GPIO
+5  A1           Analog ADC in; can be used as GPIO
+6  A2           Analog ADC in; can be used as GPIO
+7  A3           Analog ADC in; can be used as GPIO
+8  A4/SDA       Analog ADC in; I2C SDA; Can be used as GPIO (*)
+9  A5/SCL       Analog ADC in; I2C SCL; Can be used as GPIO(*)
+10 A6           Analog ADC in; can be used as GPIO
+11 A7           Analog ADC in; can be used as GPIO
+12 VUSB Normally NC;
+13 RST          Digital In Active low reset input (duplicate of pin 18)
+14 GND Power Power Ground
+15 VIN Power In Vin Power input
+16 TX           Digital USART TX; can be used as GPIO
+17 RX           Digital USART RX; can be used as GPIO
+18 RST          Digital Active low reset input (duplicate of pin 13)
+19 GND Power Power Ground
+20 D2           Digital GPIO
+21 D3/PWM       Digital GPIO; can be used as PWM
+22 D4           Digital GPIO
+23 D5/PWM       Digital GPIO; can be used as PWM
+24 D6/PWM       Digital GPIO; can be used as PWM
+25 D7           Digital GPIO
+26 D8           Digital GPIO
+27 D9/PWM       Digital GPIO; can be used as PWM
+28 D10/PWM      Digital GPIO; can be used as PWM
+29 D11/MOSI     Digital SPI MOSI; can be used as GPIO
+30 D12/MISO     Digital SPI MISO; can be used as GPIO
+</pre></div>
+</td></tr></table></div>
+<dl class="simple">
+<dt>Note: (12)can be connected to VUSB pin of the USB connector by shorting</dt><dd><p>a jumper Power In/Out</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="logical">
+<h2><span class="section-number">18.2. </span>Logical<a class="headerlink" href="#logical" title="Permalink to this headline">¶</a></h2>
+<p>Pins are “overloaded” in their ability; Use of some pins
+precludes blocks of use.</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span>1  D13          Digital GPIO
+3  AREF         Analog  GPIO  Analog Reference
+4  A0/DAC0      Analog  GPIO  ADC in/DAC out
+5  A1           Analog  GPIO  ADC in
+6  A2           Analog  GPIO  ADC in
+7  A3           Analog  GPIO  ADC in
+8  A4/SDA       Analog  GPIO  ADC in; I2C SDA
+9  A5/SCL       Analog  GPIO  ADC in; I2C SCL
+10 A6           Analog  GPIO  ADC in
+11 A7           Analog  GPIO  ADC in
+20 D2           Digital GPIO
+21 D3/PWM       Digital GPIO  ; can be used as PWM
+22 D4           Digital GPIO
+23 D5/PWM       Digital GPIO  ; can be used as PWM
+24 D6/PWM       Digital GPIO  ; can be used as PWM
+25 D7           Digital GPIO
+26 D8           Digital GPIO
+27 D9/PWM       Digital GPIO  ; can be used as PWM
+28 D10/PWM      Digital GPIO  ; can be used as PWM
+29 D11/MOSI     Digital GPIO  SPI MOSI
+30 D12/MISO     Digital GPIO  SPI MISO
+
+
+16 TX           Digital USART TX; can be used as GPIO
+17 RX           Digital USART RX; can be used as GPIO
+
+
+2  +3V3 Power Out Internally generated power output to external devices
+12 VUSB Normally NC;
+15 VIN Power In Vin Power input
+
+14 GND Power Power Ground
+19 GND Power Power Ground
+
+13 RST          Digital In Active low reset input (duplicate of pin 18)
+18 RST          Digital Active low reset input (duplicate of pin 13)
+</pre></div>
+</td></tr></table></div>
+<blockquote>
+<div><p><a class="reference external" href="https://cdn.sparkfun.com/assets/0/d/8/4/9/DS-15580-Arduino_Nano_33_BLE_Sense.pdf">https://cdn.sparkfun.com/assets/0/d/8/4/9/DS-15580-Arduino_Nano_33_BLE_Sense.pdf</a></p>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FlexSpec1</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="abstract.html">1. ABSTRACT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flexspec1.html">2. Download FlexSpec1 Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openquestions.html">3. Open Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ovio.html">4. OVIO Slit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optics.html">5. Care of Optics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">6. Optical Experiments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">7. OVERVIEW</a></li>
+<li class="toctree-l1"><a class="reference internal" href="physics.html">8. Physics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mathematics.html">9. Mathematics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guiding.html">10. FlexSpec 1 Guiding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">11. Remote Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controls.html">12. FlexSpec 1 Ecosystem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">13. Communications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serial.html">14. Serial Communication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="software.html">15. User Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cad.html">16. CAD Computer Aided Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="electronics.html">17. Electronics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">18. Arduino Chips</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pin-outs">18.1. Pin Outs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logical">18.2. Logical</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="documentation.html">19. Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">20. Using Docker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bom.html">21. Bill of Materials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="callamps.html">22. Calibration Lamps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outstanding.html">23. Outstanding Documentation Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">24. References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="youtube.html">25. YouTube Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="printer.html">26. Printer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="merlin.html">27. MERLIN GCODE Tricks</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="electronics.html" title="previous chapter"><span class="section-number">17. </span>Electronics</a></li>
+      <li>Next: <a href="documentation.html" title="next chapter"><span class="section-number">19. </span>Documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jerrold L. Foote, Wayne Green, Greg Jones, Frank Parks, Anthony Rodda, Forrest Sims, Thomas C. Smith, Clarke Yeager.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/arduino.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
