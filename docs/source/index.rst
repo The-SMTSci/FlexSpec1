@@ -30,7 +30,7 @@
 INTRODUCTION
 ============
 
-.. figure:: images/FS1LayoutHack.png
+.. figure:: images/FS1_Assembly_with_Baffle.jpeg
 
    CAD Layout for optical components of the FlexSpec 1.
 
