@@ -50,7 +50,7 @@ the electrodes. They are the bulbs best suited for the work.
 
 
 .. _fluorescent:
-.. figure:: images/Fluorescent_Light.png *
+.. figure:: images/Fluorescent_Light.png
 
    A preheat fluorescent lamp circuit using an automatic starting switch. A: Fluorescent tube, B: Power (+220 volts), C: Starter, D: Switch (bi-metallic thermostat), E: Capacitor, F: Filaments, G: Ballast. `Wikipedia article <https://commons.wikimedia.org/wiki/File:Fluorescent_Light.svg>`_ .
 
