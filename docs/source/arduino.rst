@@ -1,5 +1,5 @@
 Arduino Chips
-*************
+=============
 
 Follow the instructions:
 
@@ -117,4 +117,7 @@ precludes blocks of use.
 
 ..
 
-   https://cdn.sparkfun.com/assets/0/d/8/4/9/DS-15580-Arduino_Nano_33_BLE_Sense.pdf
+Libraries
+---------
+
+   `ArduinoJson library <https://arduinojson.org/?utm_source=meta&utm_medium=library.properties>`_ 

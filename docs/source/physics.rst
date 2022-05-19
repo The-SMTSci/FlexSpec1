@@ -14,7 +14,7 @@ positive direction along the Z axis.)
 
 There are at least 6 dispersion techniques to consider:
 
-- (1) Fresnel (nearfield),
+- (1) Fresnel (nearfield)
 - (1) Fraunhofer (slit) diffraction,
 - (2) Reflection and transmission diffraction gratings,
 - (2) Prisms and a grism (combination prism/transmission grating).

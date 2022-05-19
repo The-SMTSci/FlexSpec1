@@ -160,8 +160,7 @@ supports FlexSpec interoperability.
 
 
 The Arduino Nano 33 BLE Sense and IoT have sufficient capability
-to support the ArduinoJson library. This is well crafted to be
-memory efficient.
+to support the `ArduinoJson library <https://arduinojson.org/?utm_source=meta&utm_medium=library.properties>`_ . This is well crafted to be memory efficient.
 
 
 

@@ -5,11 +5,14 @@ The control structure is being developed in a platform agnostic network
 neutral fashion leveraging web applications (web apps) via bokeh and
 other tools.
 
-The bokeh server is a Raspberry Pi and is be considered to be the
-'main' computer, a peer in an asynchronous distributed network of
-peers. Any SBC/Desktop computer with a decent operating system may be
-used for the server. The ODroid, BeagleBone, Intel NUC etc. Some SBC
-:index:`SBC;Configuration` configuration will be required.
+The bokeh server is a Raspberry Pi, installed on one or more OTAs for
+the management and control of some of local (to the pier/mount/ota)
+devices.  The rest are left to management by LibIndi/EKOS in the usual
+fashion.  The local Bokeh/PostmasterServer are a peer in an
+asynchronous distributed network of peers. Any SBC/Desktop computer
+with a decent operating system may be used for the server. The ODroid,
+BeagleBone, Intel NUC etc. Some SBC :index:`SBC;Configuration`
+configuration will be required.
 
 Arduino class devices are designated as an SBM is a "Single Board
 Microcontroller".
@@ -108,10 +111,13 @@ logic and format checks to guarantee the messages sent to the SBM is
 correct.  (Remember remove checks from the Arduino to the degree
 possible).
 
-The Raspberry Pi owns the serial lines: RS-232 two-wire, I2C, BLE
-device.  This means Serial will be a server. It is provides one access
-point to all classes/programs the electrical system. It will accept
-and queue messages and route them by electrical protocol.
+The Raspberry Pi owns the 3.3V rx/tx serial lines, I2C, BLE and GPIO
+ports.  This means the PostmasterServer provides the single access
+point to all classes/programs the electrical system. It utilizes a
+Unix socket protocol, and permits connections from multiple GUI
+clients. Devices, like an Arduinoa accepts
+and queues messages and routes them to "devices" implemented
+as C++11 classes.
 
 In the code repository the Slit may look like:
 

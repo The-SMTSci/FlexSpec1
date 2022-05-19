@@ -43,6 +43,9 @@ a science data quality 3D spectrograph that is 'Flexible'.
 
 It is a continuous in progress. Bear with us. Better yet, collaborate with us.
 
+The STL and STEP files, EDA and CAD files and the software
+may be cloned from the `FlesSpec1 Github Repository <https://github.com/The-SMTSci/FlexSpec1>`_ here.
+
 
 
 .. toctree::
@@ -53,6 +56,7 @@ It is a continuous in progress. Bear with us. Better yet, collaborate with us.
    abstract
    flexspec1
    openquestions
+   kzin
    ovio
    optics
    experiments
@@ -65,6 +69,7 @@ It is a continuous in progress. Bear with us. Better yet, collaborate with us.
    communication
    serial
    software
+   postmaster
    cad
    electronics
    arduino
