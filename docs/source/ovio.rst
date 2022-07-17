@@ -46,6 +46,9 @@ spectrographs. Benefits are easier placement of targets in the
 guide camera field of view and greater coverage of extended
 objects.
 
+We are testing the orientation of the slit with respect to the sky.
+Shiny toward the grating produces a caustic
+
 We briefly investigated the idea of reversing the slit in its
 holder such that the mirrored side faces the incoming beam.
 We found that the guide image was noticeably improved in

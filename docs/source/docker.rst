@@ -1,5 +1,23 @@
 Using Docker
-************
+============
+
+..
+    # create a docker account (free) if you are comfortable.
+    # Download the latest docker desktop and run as administrator.
+    # install the latest sphinxdoc on your local machine
+    docker pull sphinxdoc/sphinx-latexpdf:latest
+
+    # update/create the documentation on your local machine
+
+    docker run -it --rm -v "c:/git/FlexSpec1/docs:/docs" \
+                        -v "$env:username/anaconda3/lib":/opt/lib \
+                           sphinxdoc/sphinx-latexpdf /bin/bash
+    > make html latexpdf
+
+    open "file:///c:/git/FlexSpec1/docs:/docs/build/html/index.html"
+    open c:/git/FlexSpec1/docs:/docs/build/latex/
+    
+
 
 A docker container is a software module, loaded into memory and
 executed within its own environment. It contains both the OS image [#f1]_,

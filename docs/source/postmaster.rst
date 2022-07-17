@@ -4,7 +4,7 @@ Postmaster
 There are a few paradigms of FlexSpec1.
 
 #. A "Postmaster"/"Patron"/"Parcel" paradigm. The Bokeh server sends
-   its information to the RPi PostmasterServer, a
+   its information to the RPi PostmasterServer that acts as a
    'dispatch-server'. It adds keys to 'wrapper' a few things in a
    "Parcel" that is sent to the 'Serial' device requested by
    Bokeh. This parcel is unwrapped and routines are dispatched to C++

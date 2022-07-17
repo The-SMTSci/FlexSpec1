@@ -7,6 +7,21 @@ Bias and Dark calibration frames have come under scrutiny but for the
 moment we focus here on wavelength calibration and "flat" lamps.
 
 Wavelength Calibration
+----------------------
+
+The FlexSpec1 played with a number of approaches to 'injecting'
+calibration ligth into the spectrograph. We found that most
+approaches resulted in discernable differences at the sensor.
+
+We determined the beam needed to be mimic the incoming light
+beam from the sky. The f/ratio of the beam needed to match
+the instrtument and be symmetrical about the OTA's optical
+axis. 
+
+We compromised with using lambertian reflectiance and rely
+on pure geometric means to better match the calibration and
+flat lamp's light to the OTA.
+
 The former has usually been addressed by "the dangly bulb" method
 of suspending a small Ar/Ne Relco bulb, or a much larger "Filly" bulb 
 over the end of the telescope object lens or aperture.  This, as we
@@ -24,6 +39,20 @@ a much better job notwithstanding the limitations of the Relco bulb
 but the bulbs are generally inaccessible.
 
 Flats
+-----
+
+The real purpose of a spectrographic flat is to guarantee the flux
+from the sky bands on either side of the trace to be calibrated to
+the target flux + sky in the image. It is easy to see a gradient
+across the slit that, for example,  renders the sky-band above
+the trace to be higher than that below the trace.
+
+The Flexspec1 ignores the intensity curve of the whole dispersion
+axis -- it does not need to be flat one wavelength to the next.
+We presume the mapping of the sensor's :math:`(x,y) \rightarrow (x,y,\lambda)`
+to define a spectral flat. The main issues are *tilt* and  *smile*.
+With care, tilt can be minimized.
+
 Spectroscopic "flats" have also been the source of problems.  The lack
 of flux provided by Tungsten and Halogen bulbs in the blue regime
 to enable pixel-to-pixel variations places a severe limitation on 

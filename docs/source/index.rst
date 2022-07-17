@@ -22,6 +22,10 @@
                         -e PYTHONPATH=/home/wayne/anaconda \
                            sphinxdoc/sphinx-latexpdf make html latexpdf
 
+    docker run -it --rm -v /home/git/external/FlexSpec1/docs:/docs \
+                        -v /home/wayne/anaconda3/lib:/opt/lib \
+                           sphinxdoc/sphinx-latexpdf /bin/bash
+
     browser build/html/index.html
    
     /home/wayne/anaconda3/bin
@@ -33,6 +37,27 @@ INTRODUCTION
 .. figure:: images/FS1_Assembly_with_Baffle.jpeg
 
    CAD Layout for optical components of the FlexSpec 1.
+
+The spectroscopist wants what they want. The spectrograph gives what
+it will. One must strike the Faustian bargain that may only be paid
+with the coin of credibility. Choose wisely.
+
+
+
+The FlexSpec1 (FS1) spectrograph grew out of a segmented analysis of
+the entire impact on a spectrum starting with the Source signal; through a
+telescope's optical tube assembly (OTA); through the focal plane;
+through the spectrograph; and into the sensor. This article limits all
+variables from the Source to the OTA to one parameter: the `Parallactic
+Angle`_. 
+
+to those involving the impact of the atmosphere
+(parallactic angle), the effective focal length of the main OTA, and
+relationship of the OTA to the device injecting a calibration lamp
+signal (Herein the Kzin ring).
+
+Only the flux distortions taking place between the Source (a Star, Planet,
+Calibration Lamp) are considered up to the
 
 Ramifications of 3D printing leading to FlexSpec 1 (FS1): 
 Introducing the Flexible Spectrograph I
@@ -58,6 +83,7 @@ may be cloned from the `FlesSpec1 Github Repository <https://github.com/The-SMTS
    openquestions
    kzin
    ovio
+   parallacticangle
    optics
    experiments
    overview
@@ -78,6 +104,7 @@ may be cloned from the `FlesSpec1 Github Repository <https://github.com/The-SMTS
    bom
    callamps
    outstanding
+   history
    references
    youtube
    printer

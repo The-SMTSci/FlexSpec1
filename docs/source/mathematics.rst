@@ -6,16 +6,15 @@ aspects of mathematics tailored to optics. This section is a collection
 of notes that guided our intuition to close the gaps between the theory
 and the images we obtained with practice.
 
-- **"Conventions"** get in the way of the pure math.
+- social **"Conventions"** get in the way of the pure math.
 - **Beware**! Trig **folds** quadrants! 
 - Angles are measured as positive in a counter-clockwise direction, and negative in a clockwise direction using the ":index:`right-hand-rule`".
 
 Most calculators and the human brain operate within the social
-convention of "degrees". Computer languages, for the most part, work
-with radians. High school trigonometry has left most people with a
+convention of **"degrees"**. Computer languages, for the most part, work
+with **"radians"**. High school trigonometry has left most people with a
 morbid fear of radians. When radians are used in their simplest terms
-they offer a powerful shortcut to intuition for
-back-of-the-envelope (:index:`BOTE`) work.
+they offer a powerful shortcut to intuition for **back-of-the-envelope** (:index:`BOTE`) work.
 
 The slope-intercept equation from high school algebra
 :index:`equation;slope-intercept` uses a "rise-over-run"
@@ -27,8 +26,27 @@ outside the unit circle and goes to infinity as :math:`cos(\theta)
 represents an exact value. The tangent starts at 0 degrees (and
 radians) and follows a line tangent to the outside of the unit circle.
 
-Radians
--------
+Radians and Steradians
+----------------------
+
+The radian and steradian are dimensionless quantites. They are scalars
+that when applied to a measure (distance etc) will result in an
+proper answer without picking up some sort of extra units designation.
+Using a 'unit' vector, 1, for the radius and not affixing a measure
+like mm, cm, pc allows the result to be applied later.
+
+This plays out in spectroscopy as a means of determining angstroms per
+mm dispersion or flux from a source at a distance of parsecs from
+the source (area of part of a sphere steradians).
+
+A circle has :math:`2\pi radians` in its circumference. Think of using
+a ruler that is the radius of the circle and wrapping it around the
+circumference of the circle. The term :math:`360 [degrees] / 2\pi [radians]`
+gives an answer in degrees per radian. There are 206264.8... arcseconds
+in one radian. 
+
+There are :math:`4\pi r^2`, setting :math:`r = 1`, the anwser is :math:`4\pi` steradians of area for a sphere.
+
 
 With a spectrograph, the separation between two wavelengths, :math:`\lambda` 
 and :math:`\lambda+\Delta{\lambda}` may be calculated by simply (ha!)
