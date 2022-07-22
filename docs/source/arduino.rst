@@ -1,6 +1,39 @@
 Arduino Chips
 =============
 
+The Arduino project introduces people to both hardware and software design.
+This package hides a massive amount of detail, and bends some of the basic
+C/C++ approaches to program execution. Here are a few details you need to
+know.
+
+#. The main program (project) is called a 'sketch' and has a **.ino** extension.
+
+#. A program called **foo** with its **foo.ino** file must reside in a directory called **foo** (with out the .ino extension). 
+
+#. Any other **.h** or **.cpp** file that is in the foo directory will be automatically scanned, compiled and linked to form the main program. This is what FS1 does.
+
+#. External packages are processor-dependent. They are managed by the "Preferences" and the "Tools/Manage Library" sub-menus. 
+
+#. Some packages have the same name and may the IDE may confuse itself.
+
+#. GCC error messages are pretty cryptic -- but with practice you sorta get used to them. 
+
+Arduino does not use a 'sketch' language -- it uses **C++11** without
+exception handling. The C++ features **try/throw/catch** are disabled and 
+cause issues. 
+
+Arduino uses a lot of hidden build tricks that are unfamiliar to experienced
+C/C++ programers using blaze, make, cmake. 
+
+See the FS1 makefiles  for decent (hopefully) particulars.
+
+Some other things to note:
+
+#. The definitions vary between the Nano 33 BLE/IoT and the XIAO processors. **Beware**.
+
+CLI
+---
+
 Follow the instructions:
 
 `Seeeduino XIAO <https://wiki.seeedstudio.com/Seeeduino-XIAO/>`_

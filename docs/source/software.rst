@@ -1,14 +1,15 @@
-User Software
-=============
+Automation
+==========
 
-The overall goal of the project is to utilize free (as in money) software
-that is platform agnostic (Capable of running or being made to run) on
-all operating systems. One main sub-goal is to create an simple architecture
-using basic web enabled applications, inexpensive Single Board Computers (SBCs)
-(Raspberry Pi running the Astroberry suite), inexpensive Single Board
-Microprocessors (SBMs). Another sub-goal is to leverage the best tools
-for collaboration including Github, and Sphinx -- the package that
-creates this documentation tied to Readthedocs.io.
+The overall goal of the project is to utilize free (as in money)
+software that is platform agnostic (capable of running or being made
+to run on all operating systems). One main sub-goal is to create an
+simple architecture using basic web enabled applications, inexpensive
+Single Board Computers (SBCs) (Raspberry Pi running the Astroberry
+suite), inexpensive Single Board Microprocessors (SBMs) like the
+Arduino family of processors. Another sub-goal is to leverage the best
+tools for collaboration including Github, and Sphinx -- the package
+that creates this documentation tied to Readthedocs.io.
 
 The basic philosophy is to used 'mirrored' object-oriented classes written
 in Python/Bokeh for managing the instructins from its users, relaying

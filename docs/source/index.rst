@@ -81,6 +81,7 @@ may be cloned from the `FlesSpec1 Github Repository <https://github.com/The-SMTS
    abstract
    flexspec1
    openquestions
+   eeprom
    kzin
    ovio
    parallacticangle
