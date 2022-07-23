@@ -2,9 +2,9 @@ Download FlexSpec1 Files
 ========================
 
 FlexSpec1 is managed and distributed using the super zip-like
-\*cough\* environment managed by the free **git** source code management (SCM)
+\*cough\* environment managed by the free **git** source management
 system. Git will manage anything, not just computer code. So, we use
-it! We distribute the STL files, and their original package's
+it! We distribute the STL files, and their original packages
 sources. SLDPRT for Solidworks for example. We also distribute code
 for the Raspberry Pi, Arduinos, documentation, python utilities.  We
 greatly appreciate SolidWorks support of community education projects.

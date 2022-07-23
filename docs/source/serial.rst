@@ -97,7 +97,7 @@ The maximum voltage range is from -25 to 25 volts.
 .. figure:: images/Bokeh1Hack.png
    :scale: 75%
 
-   The Bokeh widget uses a "has-a" relationship to one or more
+The Bokeh widget uses a "has-a" relationship to one or more
 PostmasterServers. The PostmasterServer may be local to same
 machine or remote.  The message is passed to any subclass -- here a
 FlexSerial class which owns the interface to it's local machines

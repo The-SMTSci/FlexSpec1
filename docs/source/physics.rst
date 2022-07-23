@@ -1,11 +1,11 @@
-Physics
-=======
+vPhysics
+========
 
 This section contains the basic mathematical underpinnings used in our
 analysis of the basic DIY spectroscope.
 
 The optical :index:`sign conventions` used here follow Schroeder's (1987)
-"Cartesian" approach. The plane for the optics ("lens/mirror surfaces")
+"Cartesian" approach. The plane for the optics ("wen/mirror surfaces")
 are in the XY plane, the optical axis follows the Z axis.  Along the Z
 axis, rays pass from the negative (lesser) to right
 (greater). Reflections reverse the sign. (I.e.: photons move in the
@@ -14,7 +14,7 @@ positive direction along the Z axis.)
 
 There are at least 6 dispersion techniques to consider:
 
-- (1) Fresnel (nearfield)
+- (1) Fresnel (nearfield),
 - (1) Fraunhofer (slit) diffraction,
 - (2) Reflection and transmission diffraction gratings,
 - (2) Prisms and a grism (combination prism/transmission grating).
@@ -27,13 +27,13 @@ BOTE Computation
 ----------------
 
 To assist with basic design and to develop intuition, "Back of The
-Envelope" :index:`BOTE` computation is in
+Envelope" :index:`BOTE;Back of The Envelope` computation is in
 order. Astronomers utilize the "Centimeter Gram Seconds" (CGS)
 system. Here are a few guide pointers:
 
 #. Use the same units, here centimeters;
-    - :math:`5 \times 10^{-5}` cm for green light. :math:`5 \times 10^{-5}` cm for blue and :math:`3 \times 10^{-5}` cm for red. We use 300 and 600 l/mm gratings and the math cancels for lines per cm!
-    - Translate grating :math:`l/mm\; to\l` :math:`l/cm`
+    - :math:`5 \times 10^{-5}` cm for green light. :math:`5 \times 10^{-5}` cm for blue and :math:`6 \times 10^{-5}` cm for red. We use 300 and 600 l/mm gratings and the math cancels!
+    - Translate grating :math:`l/mm to` :math:`l/cm`
 
 #. Remember sign conventions, and get the right equation.
 #. Follow the general spectrograph equation chain. Slit/grating/sensor.
@@ -201,12 +201,12 @@ system.
 Spot Size and Slit Selection
 ----------------------------
 
-In practice, the focal length drives the platescale eq: :eq:`pixelscale`
+In practice, the focal length drives the platescale :eq:`pixelscale`
 and aperture drives resolution :eq:`RayleighEquation`.
 
 In general, the :index:`spot-size` is independent of the aperture, and
 wholly dependent on the focal length. Since f/ratio is a derived value
--- equation eq: :eq:`pixelscale` bypasses the aperture and gives a result
+-- equation :eq:`pixelscale` bypasses the aperture and gives a result
 as a fraction of an arcsecond per micron at the focal plane:
 
 .. math:: \frac{206204.8}{fl\times 1000} = \frac{x^"}{1 \mu{m}}
@@ -219,7 +219,7 @@ in mm (traditionally stated) and multiplied by 1000 to turn into
 microns; :math:`x^"` is "x" in arc-seconds; the goal of :math:`1 \mu{m}`
 relates to both pixel size and slit width.
 
-In spectroscopy, the Rayleigh equation eq: :eq:`RayleighEquation` provides
+In spectroscopy, the Rayleigh equation :eq:`RayleighEquation` provides
 a critical estimate of the ability to separate the light from two
 close objects.
 

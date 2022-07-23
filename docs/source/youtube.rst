@@ -1,7 +1,7 @@
 YouTube Resources
 =================
 
-A word about YouTube: many tutorials are made my 
+A work about YouTube: Many tutorials are made my 
 non-American producers are are excellent in content.
 Lately, many are just music with no words. Be patient
 and shop around. 
@@ -57,8 +57,8 @@ Computer Hardware
     - Digi-Key
 
 
-Computer Languages
-------------------
+Computer Languages YouTube
+--------------------------
 
     - Tech with Tim
     - Traversy Media
@@ -88,8 +88,8 @@ DIY
     - The Thought Emporium
 
 
-Electronics 
------------
+Electronics YouTube
+-------------------
 
     - Dronebot Workshop
     - Kevin Darrah
@@ -118,8 +118,8 @@ Math
     - patrickJMT
 
 
-Networking 
-----------
+Networking YouTube
+------------------
 
     - CWNE88
     - Crosstalk Solutions
@@ -131,8 +131,8 @@ Physics
     - patrickJMT
 
 
-Raspberry Pi 
-------------
+Raspberry Pi YouTube
+--------------------
 
     - Ralph S Bacon
     - Explaining Computers

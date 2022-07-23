@@ -48,8 +48,7 @@ The FlexSpec1 (FS1) spectrograph grew out of a segmented analysis of
 the entire impact on a spectrum starting with the Source signal; through a
 telescope's optical tube assembly (OTA); through the focal plane;
 through the spectrograph; and into the sensor. This article limits all
-variables from the Source to the OTA to one parameter: the `Parallactic
-Angle`_. 
+variables from the Source to the OTA to one parameter: the Parallactic Angle. 
 
 to those involving the impact of the atmosphere
 (parallactic angle), the effective focal length of the main OTA, and
