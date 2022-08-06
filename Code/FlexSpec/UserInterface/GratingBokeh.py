@@ -112,7 +112,7 @@ class BokehGrating(object):
 
     # FAKE up some enums.
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
-    GratingInserts = ["150 l/mm","300 l/mm","600 l/mm","1200 l/mm","1800 l/mm"]
+    GratingInserts = ["150 l/mm","300 l/mm","600 l/mm","1200 l/mm","1800 l/mm","Unknown"]
 
     GratingsTable = OrderedDict( [ ("150 l/mm"  , [3000.0, 9500.0]),  # Synchronize with BokehGrating.GratingInserts
                                    ("300 l/mm"  , [3000.0, 7500.0]),
@@ -123,26 +123,29 @@ class BokehGrating(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, flexname : str = "Default",
-                 name : str = "Grating",
-                 display = fakedisplay,
-                 grating : str = "300 l/mm",
-                 width=200): # BokehGrating::__init__()
+    def __init__(self, flexname : str = "Default",              # BokehGrating::__init__()
+                       name : str     = "Grating",
+                       display        = fakedisplay,
+                       grating : str  = "300 l/mm",
+                       width          = 200):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
+        if(grating in self.GratingInserts):    # guarantee the user's request in our vocab
+            self.grating = grating             # this is a programming error, so default
+        else:
+            self.grating = GratingInserts[-1]  # to last one on the list.
         self.display       = display
         self.flexname      = flexname    # Name of associated instrument
         self.name          = name        # Name of this instance
         self.wwidth        = width
         self.grating       = grating     # Start with a default 300 l/mm
-        self.startwave     = 100         # start range current grating
-        self.endwave       = 200         # end   range current grating
-        self.cwave         = 50          # current selected range.
-        self.slit          = "20"
+        self.startwave     = 3200         # start range current grating
+        self.endwave       = 10000         # end   range current grating
+        self.cwave         = 5000        # current selected range.
         self.state         = "undefined"
-        self.home     = 0
-        self.homed         = False       # don't know.
+        self.home          = 0
+        self.homestate     = False       # don't know.
         self.validp        = False       # wake up in false position
 
 
@@ -150,17 +153,17 @@ class BokehGrating(object):
         entry              =  BokehGrating.GratingsTable.get(grating,None)
         if(entry is not None):
             grating = entry
-            self.cwave    = self.startwave   = entry[0]
+            self.startwave   = entry[0]
             self.endwave  = entry[1]
 
-        self.gratingchoices   = Select  (title=f"Gratings",value='20',options=self.GratingInserts, width=self.wwidth)
-        self.cwavechoice   = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
+            self.gratingchoices   = Select  (title=f"Gratings",value=self.grating,options=self.GratingInserts, width=self.wwidth)
+        self.cwavechoice      = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
                                      value = self.cwave, start = self.startwave,  
-                                     end = self.endwave+1, step = 10, width=self.wwidth)
-        self.processbutton = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
+                                     end = self.endwave+1, step = 1, width=self.wwidth)
+        self.processbutton    = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
 
-        self.homebutton    = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
-        self.gratingchoices     .on_change('value', lambda attr, old, new: self.update_slitchoice   (attr, old, new))
+        self.homebutton       = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
+        self.gratingchoices     .on_change('value', lambda attr, old, new: self.update_gratingchoice   (attr, old, new))
         self.cwavechoice     .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
         self.processbutton   .on_click (lambda : self.update_processbutton())
         self.homebutton      .on_click (lambda : self.update_homebutton())
@@ -168,7 +171,7 @@ class BokehGrating(object):
 
     ### BokehGrating.__init__()
 
-    def update_slitchoice(self,attr,old,new):                    # BokehGrating::update_slitchoice()
+    def update_gratingchoice(self,attr,old,new):                   # BokehGrating::update_gratingchoice()
         """update_debugbtn Button via an event lambda"""
         grating = new # self.gratingchoices.value
         entry   = BokehGrating.GratingsTable.get(grating)
@@ -183,7 +186,7 @@ class BokehGrating(object):
             #self.gratingchoices.end   = f"{self.cwave}"
         #self.send_state()
 
-    ### BokehGrating.slitchoice()
+    ### BokehGrating.update_gratingchoice()
 
     def update_cwave(self,attr,old,new):                        # BokehGrating::cwave()
         """Get the new slider value and send it."""
@@ -193,11 +196,12 @@ class BokehGrating(object):
 
     def update_homebutton(self):                                # BokehGrating::update_homebutton()
         """Send a home command"""
-        self.homestate = 1
+        self.home      = 1
         self.send_state()
-        self.homestate = 0
+        self.home      = 0   # clear the command
 
-    def update_processbutton(self):                                # BokehGrating::update_homebutton()
+
+    def update_processbutton(self):                             # BokehGrating::update_homebutton()
         """Send a home command"""
         self.send_state()
 
@@ -206,12 +210,12 @@ class BokehGrating(object):
     def send_state(self):                                       # BokehGrating::send_state()
         """Several ways to send things"""
         devstate = dict( [ ( "grating"   , self.grating),
-                           ( "cwave"     , self.cwave),
-                           ( "homestate" , self.home)
+                           ( "cwave"     , f"{self.cwave:d}"),
+                           ( "home"      , f"{self.home:d}")
                          ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
+        gratingcmd = dict([("Process", devstate), ("Receipt" , "0")])
+        gratingcmd['Receipt'] = "1"                      # set the receipt as desired
+        d2 = dict([(f"{self.name}", gratingcmd)])
         d3 = dict([(f"{self.flexname}", d2)])
         jdict = json.dumps(d3)
         self.display.display(f'{jdict}')

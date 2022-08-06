@@ -1,0 +1,40 @@
+#!/bin/bash
+#############################################################################
+# Observe -- do the things we need to do to observe.
+#############################################################################
+function usage {
+   echo "observe"
+   echo "Create a $HOME/Desktop/Today and usw,Focus,Flats,Darks directories"
+   exit 1
+}
+
+# leading colon is silent. ":h" h has no option
+while getopts ":h" opt ; do     # request to use master bib
+   case $opt in
+   h)
+      usage
+      exit 1
+      ;; # process a two part parm
+done
+
+# no real parameters permited.
+if [ $# -eq 0 ]; then 
+   usage
+   exit 1
+fi
+
+#if the Desktop exists and $HOME/Desktop/Today does not, then make one.
+#if a series of dates exist, then push
+# TODO: move it.
+shopt noglob
+if test -e "$HOME/Desktop" ; 
+  if test  -e $HOME/Desktop/Today ; then
+    have=($HOME/Desktop/Today.*.`jpldate`)  # echo ${have[@]} ; echo ${#have[*]} ; 
+    len=${#have[*]}
+    nxt=$((++len))
+    $HOME/Desktop/Today "$HOME/Desktop/Today.$nxt.`jpldate`"
+fi
+
+# make the new one.
+mkdir -p $HOME/Desktop/Today/{usw,Focus,Flats,Darks}
+echo "Observation starting $(date)" >> "$HOME/Desktop/Today/Readme.txt"

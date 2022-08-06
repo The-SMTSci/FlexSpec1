@@ -167,10 +167,10 @@ class FlexDisplay(object):
            s.close()
 
     def display(self,msg : str = "\n",color='Bisque'):                 # FlexDisplay.display
-        """append to conent display to the div """
+        """append to content display to the div """
         self.panel.background = color
         ts                    = fulltimestamp()
-        self.message          = self.message  + f'\n--- {ts}\n' + msg + "\n"
+        self.message          = self.message  + f'\n# {ts}\n' + msg + "\n"
         self.panel.text       = FlexDisplay.brre.sub("<br/>",f'{self.message}')
         self.send(msg)
         return self

@@ -188,10 +188,10 @@ class BokehOVIOSlit(object):
     def send_state(self):                                       # BokehOVIOSlit::send_state()
         """Several ways to send things"""
         devstate = dict( [ ( "slit"         , self.slit),  # ascii text of the slit width.
-                          (  "illuminator"  , self.lamp)
+                          (  "illuminator"  , f"{self.lamp:d}")
                          ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
+        slitcmd = dict([("Process", devstate), ("Receipt" , "0")])
+        slitcmd['Receipt'] = "1"                             # set the receipt as desired
         d2 = dict([(f"{self.name}", slitcmd)])
         d3 = dict([(f"{self.flexname}", d2)])
         jdict = json.dumps(d3)
