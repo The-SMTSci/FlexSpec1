@@ -9,7 +9,7 @@ import os
 import optparse
 import sys
 import re
-from Display import fakedisplay
+from FlexPublish          import fakedisplay
 import json
 
 
@@ -208,7 +208,7 @@ if (0):  # set to 1 for hokeh regression test
 
     (options, args) = opts.parse_args()
 
-    display        = FlexDisplay("FlexShutter Test")
+    display        = FlexPublish("FlexShutter Test")
     pangle         = FlexShutter("FlexSpec_Rodda",display=display)
     curdoc().theme = 'dark_minimal'
     curdoc().title = "Pangle Test"

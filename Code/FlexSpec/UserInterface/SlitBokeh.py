@@ -11,7 +11,7 @@ import sys
 import io
 import re
 import json
-from Display import fakedisplay
+from FlexPublish    import fakedisplay
 
 from bokeh.events   import ButtonClick
 from bokeh.io       import curdoc

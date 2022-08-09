@@ -10,8 +10,8 @@ import optparse
 import sys
 import io
 import re
-from collections import OrderedDict
-from Display import fakedisplay        # Display upgrade
+from collections    import OrderedDict
+from FlexPublish    import fakedisplay        # Display upgrade
 
 import json
 
@@ -28,57 +28,48 @@ from bokeh.models   import Select
 #
 #  /home/git/external/xxx.SAS_NA1_3D_Spectrograph/Code/NA1Focus/GratingBokeh.py
 #
-#emacs helpers
-# (insert (format "\n# %s " (buffer-file-name)))
-#
-# (set-input-method 'TeX' t)
-# (toggle-input-method)
-#
-# (wg-astroconda3-pdb)      # CONDA Python3
-#
-# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
-#
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
-#
-# https://docs.bokeh.org/en/latest/docs/user_guide/interaction/widgets.html#paragraph
-#
 #
 # (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['BokehGrating','BokehGratingException']   # list of quoted items to export
+# class BokehGratingException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class BokehGrating(object):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self, flexname : str = "Default",              # BokehGrating::__init__()
+#     def update_gratingchoice(self,attr,old,new):                # BokehGrating::update_gratingchoice()
+#     def update_cwave(self,attr,old,new):                        # BokehGrating::cwave()
+#     def update_homebutton(self):                                # BokehGrating::update_homebutton()
+#     def update_processbutton(self):                             # BokehGrating::update_homebutton()
+#     def send_state(self):                                       # BokehGrating::send_state()
+#     def layout(self):                                           # BokehGrating::layout()
+#     def debug(self,msg="",skip=[],os=sys.stderr):               # BokehGrating::debug()
 #
 #############################################################################
 __doc__ = """
 
-/home/git/external/xxx.SAS_NA1_3D_Spectrograph/Code/NA1Focus/GratingBokeh.py
-[options] files...
+FlexSpec1/Code/NA1Focus/GratingBokeh.py
 
-This class displays a rate field, a state field (on/off) and
-a small error text field.
+Designed to be included by a senior class to implement a control
+panel for the FlexSpec1 spectrograph.
+
+This class implements a Bokeh super-widget for the FlexSpec1 spectrograph
+to allow choice of gratings. The gratings are contained, by name in
+GratingDefinitions.py
 
 A little documentation help.
-(wg-browser "https://docs.bokeh.org/en/latest/docs/reference.html#refguide")
+   "https://docs.bokeh.org/en/latest/docs/reference.html#refguide"
 
-Grating is a tiny class, that should be part of every Arduino, giving the
-user the ability to start a LED blinking.
+Each grating carries a bit of information that should appear in headers
+and to allow useful calculations about offsets etc.
 
-The blink pattern is on for a duration, off for a duration, and
-a pause between the on/off states. I can make a short pulse
-every 10 seconds or every 1 second. (The off specification).
-
-Grating Description:
-
-The Flex Spec Ovio holder has one position Dark.
-The home position is set to that
-
-
-Kzin Ring Assy.
+The regression test for this module is guarded by if(0), but may
+(probably not now!) contain some hints about the operation of this class.
 
 """
 
@@ -124,39 +115,41 @@ class BokehGrating(object):
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
     def __init__(self, flexname : str = "Default",              # BokehGrating::__init__()
-                       name : str     = "Grating",
+                       name     : str = "Grating",
                        display        = fakedisplay,
                        grating : str  = "300 l/mm",
-                       width          = 200):
-        """Initialize this class."""
-        #super().__init__()
-        # (wg-python-property-variables)
-        if(grating in self.GratingInserts):    # guarantee the user's request in our vocab
-            self.grating = grating             # this is a programming error, so default
-        else:
-            self.grating = GratingInserts[-1]  # to last one on the list.
-        self.display       = display
-        self.flexname      = flexname    # Name of associated instrument
-        self.name          = name        # Name of this instance
-        self.wwidth        = width
-        self.grating       = grating     # Start with a default 300 l/mm
-        self.startwave     = 3200         # start range current grating
-        self.endwave       = 10000         # end   range current grating
-        self.cwave         = 5000        # current selected range.
-        self.state         = "undefined"
-        self.home          = 0
-        self.homestate     = False       # don't know.
-        self.validp        = False       # wake up in false position
+                       width   : int  = 200):
+        """Initialize this class. If requested grating in choices, then use it
+           otherwise add it.
+        """
+
+        # snipped of dead code to presume a grating...
+        if(grating not in self.GratingInserts):        # guarantee the user's request in our vocab
+            self.GratingInserts.append(grating)        # this is a programming error, so default...
+            self.GratingsTable[grating] = [3500.0, 7500.0] # ...establish a default for values too
+
+        self.grating       = self.GratingInserts.index(grating)
+        self.display       = display                   # the name of the display for status trace
+        self.flexname      = flexname                  # Name of associated instrument
+        self.name          = name                      # Name of this instance
+        self.wwidth        = width                     # govern the width of the Bokeh widgets
+        self.grating       = grating                   # Start with a default 300 l/mm
+        self.startwave     = 3200                      # start range current grating assume the whole spectrum
+        self.endwave       = 10000                     # end   range current grating if grating in new to us.
+        self.cwave         = 5000                      # current selected range.
+        self.state         = "undefined"               # Just waking up
+        self.home          = 0                         # we assume we're not homed
+        self.validp        = False                     # wake up in false state
 
 
         # Handle startup the easy way. Proper will be to query before instantiation.
         entry              =  BokehGrating.GratingsTable.get(grating,None)
         if(entry is not None):
-            grating = entry
+            grating          = entry
             self.startwave   = entry[0]
-            self.endwave  = entry[1]
+            self.endwave     = entry[1]
 
-            self.gratingchoices   = Select  (title=f"Gratings",value=self.grating,options=self.GratingInserts, width=self.wwidth)
+        self.gratingchoices   = Select  (title=f"Gratings",value=self.grating,options=self.GratingInserts, width=self.wwidth)
         self.cwavechoice      = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
                                      value = self.cwave, start = self.startwave,  
                                      end = self.endwave+1, step = 1, width=self.wwidth)
@@ -171,7 +164,7 @@ class BokehGrating(object):
 
     ### BokehGrating.__init__()
 
-    def update_gratingchoice(self,attr,old,new):                   # BokehGrating::update_gratingchoice()
+    def update_gratingchoice(self,attr,old,new):                # BokehGrating::update_gratingchoice()
         """update_debugbtn Button via an event lambda"""
         grating = new # self.gratingchoices.value
         entry   = BokehGrating.GratingsTable.get(grating)
@@ -213,11 +206,11 @@ class BokehGrating(object):
                            ( "cwave"     , f"{self.cwave:d}"),
                            ( "home"      , f"{self.home:d}")
                          ])
-        gratingcmd = dict([("Process", devstate), ("Receipt" , "0")])
+        gratingcmd            = dict([("Process", devstate), ("Receipt" , "0")])
         gratingcmd['Receipt'] = "1"                      # set the receipt as desired
-        d2 = dict([(f"{self.name}", gratingcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
+        d2                    = dict([(f"{self.name}", gratingcmd)])
+        d3                    = dict([(f"{self.flexname}", d2)])
+        jdict                 = json.dumps(d3)
         self.display.display(f'{jdict}')
 
     ### BokehGrating.send_state()

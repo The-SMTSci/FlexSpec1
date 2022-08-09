@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #############################################################################
-# RunFlexSpec
+# RunFlexSpec   dispatch server launcher
 # /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/RunFlexSpec
 # bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000
-# uses: /home/git/external/FlexSpec1/Code/SBC/server.py
+# uses: /home/git/external/FlexSpec1/Code/SBC/FlexSpecServer.py
 #############################################################################
 
 __version="0.0.1"
@@ -65,4 +65,23 @@ done
 ../../SBC/FlexSpecServer.py "$verboseflag" &
 
 # Finally! The command we want to run.
-currpid=$(echo $$; exec bokeh serve $show ./FlexSpec.py $mswitch --unused-session-lifetime $intervaltime)
+
+export port=eno1
+#export bkhost="--address $(ifconfig $port | awk -e '/inet / { print $2;}') --port 5006"
+#export bkhost="allow-web-origin '*'"
+export bkcmd=" exec bokeh serve $show $bkhost ./FlexSpec.py $mswitch --unused-session-lifetime $intervaltime"
+
+if test "$verboseflag" == "" ; then
+echo "port $port"
+echo "bkhost $bkhost"
+echo "bkcmd  $bkcmd"
+fi
+
+# echo pidl; then the command.
+currpid=$(echo $$; bokeh serve ./FlexSpec.py $mswitch $bkhost --unused-session-lifetime $intervaltime)
+
+# bokeh serve $show ./FlexSpec.py $mswitch $bkhost --unused-session-lifetime $intervaltime > ~/RunFlexSpecLog 2>&1
+
+
+# bokeh serve ./FlexSpec.py --allow-websocket-origin '*' --unused-session-lifetime 3600000
+

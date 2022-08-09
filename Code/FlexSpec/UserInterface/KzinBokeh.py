@@ -12,7 +12,7 @@ import sys
 import io
 import re
 import json
-from Display              import fakedisplay
+from FlexPublish          import fakedisplay
 
 
 from bokeh                import events
@@ -249,14 +249,14 @@ class BokehKzinRing(object):
                         #   ( "flat"    , self.slider_values.values["flat_value"    ]), 
                         #   ( "near"    , self.slider_values.values["near_value"    ]), # Relco
         #                    JSON TXT      Bokeh                    PY Variable
-        devstate = dict( [ ( "wheat"   , self.slider_values.values["wheat_value"   ]), # Tungstun
-                           ( "callamp" , self.slider_values.values["near_value"    ]), # CAL Relco
-                           ( "hbeta"   , self.slider_values.values["hbeta_value"   ]), # M3 BLUE LED
-                           ( "oiii"    , self.slider_values.values["oiii_value"    ]), # M2 GREEN LED
-                           ( "halpha"  , self.slider_values.values["halpha_value"  ]), # M1 RED LED
-                           ( "uvboost" , self.slider_values.values["augflat_value" ]), # Blue boost
-                           ( "flat"    , self.slider_values.values["flat_value"    ]), # MID WHITE LED
-                           ( "state"   , self.onoff)                                   # State  ON/OFF
+        devstate = dict( [ ( "wheat"   , f'"{self.slider_values.values["wheat_value"   ]}"'), # Tungstun
+                           ( "callamp" , f'"{self.slider_values.values["near_value"    ]}"'), # CAL Relco
+                           ( "hbeta"   , f'"{self.slider_values.values["hbeta_value"   ]}"'), # M3 BLUE LED
+                           ( "oiii"    , f'"{self.slider_values.values["oiii_value"    ]}"'), # M2 GREEN LED
+                           ( "halpha"  , f'"{self.slider_values.values["halpha_value"  ]}"'), # M1 RED LED
+                           ( "uvboost" , f'"{self.slider_values.values["augflat_value" ]}"'), # Blue boost
+                           ( "flat"    , f'"{self.slider_values.values["flat_value"    ]}"'), # MID WHITE LED
+                           ( "state"   , f'"{self.onoff}"')                                   # State  ON/OFF
                          ])
 
         slitcmd  = dict([("Process", devstate), ("Receipt" , 0)])
@@ -322,14 +322,14 @@ if(0):
     (options, args) = opts.parse_args()
 
     kzin1  = BokehKzinRing("Tony")
-    kzin2  = BokehKzinRing("Woody")
+    kzin2  = BokehKzinRing("John")
     if(0):
         with open('/tmp/debug1.txt','w') as os:
             blink1.debug(msg="Starting with...", os=os)
     l1     = kzin1.layout()
     l2     = kzin2.layout()
     tab1   = Panel(child=l1,title='Tony')
-    tab2   = Panel(child=l2,title='Woody')
+    tab2   = Panel(child=l2,title='John')
     tabs   = Tabs(tabs=[tab1,tab2])
     curdoc().add_root(tabs)
 

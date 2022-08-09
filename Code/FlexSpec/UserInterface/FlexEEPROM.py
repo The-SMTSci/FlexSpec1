@@ -41,6 +41,25 @@ import json
 #
 # (wg-python-toc)
 #
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['FlexEEPROMException','FlexEEPROM']   # list of quoted items to export
+# class FlexEEPROMException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FlexEEPROM(object):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self, pjson: str = "{}"):                  # FlexEEPROM::__init__()
+#     def setdefault(self):                                   # FlexEEPROM::setdefault()
+#     def parserawjson(self):                                 # FlexEEPROM::parserawjson()
+#     def debug(self,msg="",skip=[],os=sys.stderr):           # FlexEEPROM::debug()
+# if __name__ == "__main__":
+#
+#
+#
+#
 #############################################################################
 __doc__ = """
 
@@ -163,12 +182,12 @@ class FlexEEPROM(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, pjson: str = "{}"):                   # FlexEEPROM::__init__()
+    def __init__(self, pjson: str = "{}"):                  # FlexEEPROM::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
         self.rawjson       = pjson
-        self.layout        = None
+        self.image         = None
         self.instrument    = {}
         self.eepromtoc     = {}
         self.devices       = {}   # 
@@ -181,12 +200,11 @@ class FlexEEPROM(object):
         return self
     ### FlexEEPROM.setdefault()
 
-    def parserawjson(self,pjson):                            # FlexEEPROM::parserawjson()
+    def parserawjson(self):                                 # FlexEEPROM::parserawjson()
         """The raw json -- see eepromdef above"""
-        print(type(f"self.rawjson {self.rawjson}"))  # PDB-DEBUG
         try:
-            msg = "layout";     self.layout     = json.loads(self.rawjson)
-            msg = "devices";    self.devices    = self.layout['eeprom']['process'] # dict of all devices
+            msg = "image";      self.image      = json.loads(self.rawjson)
+            msg = "devices";    self.devices    = self.image['eeprom']['process'] # dict of all devices
             msg = "instrument"; self.instrument = self.devices['flexspec'] # is a self-device
             msg = "eepromtoc";  self.eepromtoc  = self.instrument['toc']   # all other devices
         except Exception as e:
@@ -234,4 +252,4 @@ if __name__ == "__main__":
 
     # (wg-python-atfiles)
     fstest = FlexEEPROM(eepromdef)
-    fstest.parserawjson(json.dumps(eepromdef)).debug()
+    fstest.setdefault().parserawjson().debug()

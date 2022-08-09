@@ -9,7 +9,7 @@ import os
 import optparse
 import sys
 import re
-from Display import fakedisplay
+from FlexPublish          import fakedisplay
 import json
 
 
@@ -118,7 +118,7 @@ class FlexOrientation(object):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname      = flexname
+        self.flexname  = flexname
         self.name      = name
         self.display   = display
         self.wwidth    = width
@@ -228,7 +228,7 @@ if (0):  # set to 1 for hokeh regression test
 
     (options, args) = opts.parse_args()
 
-    display        = FlexDisplay("FlexOrientation Test")
+    display        = FlexPublish("FlexOrientation Test")
     pangle         = FlexOrientation("FlexSpec_Rodda",display=display)
     curdoc().theme = 'dark_minimal'
     curdoc().title = "Pangle Test"

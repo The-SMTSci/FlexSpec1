@@ -11,7 +11,7 @@ import sys
 import io
 import re
 import json
-from Display          import fakedisplay
+from FlexPublish          import fakedisplay
 
 
 from bokeh                import events
@@ -103,6 +103,7 @@ class FlexLampException(Exception):
     @staticmethod
     def __format__(e):
         return f" FlexLamp: {e.__str__()}\n"
+
 # FlexLampException
 
 ##############################################################################
@@ -110,7 +111,10 @@ class FlexLampException(Exception):
 #
 ##############################################################################
 class BokehFlexLamp(object):
-    """ A small class to blink the led, with varying rate
+    """ Manage the KZin functionality.
+    Ideally this consists of a series of lamps that may be controlled
+    using PWM to vary the brightness. If not zero, turn on -- if more
+    than zero, have the Arduino make a decision about using a PWM pin.
     """
 
     # FAKE up some enums.
@@ -120,12 +124,12 @@ class BokehFlexLamp(object):
     SateText    = ["Off","On","Illegal"]
     brre        = re.compile(r'\n')                         # used to convert newline to <br/>
     postmessage = { "name"    : "Unassigned",
-                    "near"    : None ,
-                    "osram"   : None ,
-                    "halpha"  : None ,
-                    "oiii"    : None ,
-                    "flat"    : None ,
-                    "augflat" : None
+                    "near"    : 0 ,
+                    "osram"   : 0 ,
+                    "halpha"  : 0 ,
+                    "oiii"    : 0 ,
+                    "flat"    : 0 ,
+                    "augflat" : 0
                     }
 
 
@@ -207,17 +211,17 @@ class BokehFlexLamp(object):
     ### BokehFlexLamp.update_edebugbtn()
 
     def send_state(self):                                       # BokehFlexLamp::send_state()
-        """Several ways to send things"""
-        cmddict = dict( [ ( "wheat"   , self.wheat_value),
-                          ( "osram"   , self.osram_value),
-                          ( "halpha"  , self.halpha_value),
-                          ( "oiii"    , self.oiii_value),
-                          ( "flat"    , self.flat_value),
-                          ( "augflat" , self.augflat_value),
-                          ( "near"    , self.near_value)
+        """Brew up the string to send to the Arduino."""
+        cmddict = dict( [ ( "wheat"   , f'"{self.wheat_value}"'   ),
+                          ( "osram"   , f'"{self.osram_value}"'   ),
+                          ( "halpha"  , f'"{self.halpha_value}"'  ),
+                          ( "oiii"    , f'"{self.oiii_value}"'    ),
+                          ( "flat"    , f'"{self.flat_value}"'    ),
+                          ( "augflat" , f'"{self.augflat_value}"' ),
+                          ( "near"    , sf'"{elf.near_value}"'    )
                          ])
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
-        jdict = json.dumps(d2)
+        d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
+        jdict   = json.dumps(d2)
         self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
 
     ### BokehFlexLamp.send_state()
@@ -287,14 +291,14 @@ if(0):
     (options, args) = opts.parse_args()
 
     kzin1 = BokehFlexLamp("Tony")
-    kzin2  = BokehFlexLamp("Woody")
+    kzin2  = BokehFlexLamp("John")
     if(0):
         with open('/tmp/debug1.txt','w') as os:
             blink1.debug(msg="Starting with...", os=os)
     l1 = kzin1.layout()
     l2 = kzin2.layout()
     tab1 = Panel(child=l1,title='Tony')
-    tab2 = Panel(child=l2,title='Woody')
+    tab2 = Panel(child=l2,title='John')
     tabs = Tabs(tabs=[tab1,tab2])
     curdoc().add_root(tabs)
 

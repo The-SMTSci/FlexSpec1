@@ -12,7 +12,7 @@ import re
 import numpy as np
 import pandas as pd
 import json
-from Display import fakedisplay
+from FlexPublish          import fakedisplay
 
 
 from bokeh                import events

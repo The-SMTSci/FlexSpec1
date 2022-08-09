@@ -12,7 +12,7 @@ import sys
 import io
 import re
 import json
-from Display import fakedisplay        # Display upgrade
+from FlexPublish import fakedisplay        # Display upgrade
 
 from bokeh.events   import ButtonClick
 from bokeh.io       import curdoc
@@ -276,7 +276,7 @@ if(0):   # set to 1 for bokeh regression test.
     (options, args) = opts.parse_args()
 
     blink1         = BokehFlexBlinky("PiggyBack")
-    display        = FlexDisplay("Blinky Test")
+    display        = FlexPublish("Blinky Test")
     curdoc().theme = 'dark_minimal'
     curdoc().title = "Blinky1 Test"
     curdoc().add_root(row(blink1.layout(), display.layout()))

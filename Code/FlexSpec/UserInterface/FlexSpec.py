@@ -27,8 +27,10 @@ from ParallacticAngle     import FlexOrientation
 from GratingBokeh         import BokehGrating
 from Guider               import Guider
 from Collimator           import Collimator
-from Display              import FlexDisplay
+from FlexPublish          import FlexPublish
 from ParallacticAngle     import FlexOrientation
+from Network              import FlexNetwork
+from CameraFocusBokeh     import CameraFocus
 
 #############################################################################
 #
@@ -64,6 +66,22 @@ __doc__ = """
 
 Main "Program" (bokeh remote client) on a SBC (Raspberry pi etc.)
 
+The kitchen sink of devices is in this mix to assist with writing
+proper FITS headers when the time comes.
+
+This module relies on the RunFlexSpec script and a dispatch
+server running as a seperate process. 
+
+The REST interface sets the internal state of this collection
+of classes. When a "Process" "Home" or other "command" button
+is pressed -- the internal state of these classes are sent
+to a remote device. It is then up to the remote device to
+"match" states. Thus, there are no real commands. 
+
+The remote device 'reacts' to the new knowledge of the
+state of these classes by setting it's internal state
+(by moving things or turing things on/off). 
+
 
 """
 
@@ -93,38 +111,57 @@ if (1):  # This is main! leave set to 1
 
     (options, args) = opts.parse_args()
 
-    width          = 350
+    # set a few main constants
+    width          = 350  # width of the main things
     flexname       = "FlexSpec_Rodda"
-    fstitle        = TextInput(value=f"{flexname}", background='Black',disabled=True, width=width)
-    display        = FlexDisplay("f{flexname}",width=600)
-
-    curdoc().theme = 'dark_minimal'
-    curdoc().title = "FlexSpec1 Spectrograph"
-    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=350)
-    l1             = kzin1.layout()
-    tab1           = Panel(child=l1,title='Kzin Calibration')
+    fstitle        = TextInput(value=f"{flexname}", background='Black',
+                               disabled=False, width=width)
+    display        = FlexPublish("f{flexname}",width=600)
 
     slits          = BokehOVIOSlit   (flexname,display=display,width=width)
     grating        = BokehGrating    (flexname,display=display,width=width)
     pangle         = FlexOrientation (flexname,display=display,width=width)
     guider         = Guider          (flexname,display=display,width=width)
     collimator     = Collimator      (flexname,display=display,width=width)
+    camerafocus    = CameraFocus     (flexname,display=display,width=width)
+    network        = FlexNetwork     (flexname,display=display,width=width)
 
-    l2             = column(fstitle,                Spacer(width=width, height=5, background='black'),          
-                            slits.layout(),         Spacer(width=width, height=5, background='black'),
-                            grating.layout(),       Spacer(width=width, height=5, background='black'),
-                            guider.layout(),        Spacer(width=width, height=5, background='black'),
-                            collimator.layout(),    Spacer(width=width, height=5, background='black'),
-                            pangle.layout())
+    #-------------------------------- Tab 1 -------------------------------------
+    # The control tab (left most)
+    l1             = column(fstitle,                Spacer(width=width, height=5, background='black'),          
+                            slits.       layout(),  Spacer(width=width, height=5, background='black'),
+                            grating.     layout(),  Spacer(width=width, height=5, background='black'),
+                            guider.      layout(),  Spacer(width=width, height=5, background='black'),
+                            collimator.  layout(),  Spacer(width=width, height=5, background='black'),
+                            camerafocus. layout(),  Spacer(width=width, height=5, background='black'),
+                            pangle.      layout())
+
+    tab1           = Panel(child=l1,title='FlexSpec')
+
+    #-------------------------------- Tab 2 -------------------------------------
+    # The kzin control 
+    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=350)
+    l2             = kzin1.layout()
+    tab2           = Panel(child=l2,title='Kzin Calibration')
+
+
+    #-------------------------------- Tab 3 -------------------------------------
+    # Provision for additional network information (On for now)
+    l3             = column(network.layout())
+    tab3           = Panel(child=l3,title='Network')
 
     ln             = column(display.layout())
-    tab2           = Panel(child=l2,title='FlexSpec')
+
+    ############################## Create the main tab ##########################
+    # Tab n is the last tab (here devoted to a report column)
 
     tabn           = Panel(child = ln, title="Display")
 
-    tabs           = Tabs(tabs=[tab2,tab1,   tabn])
+    tabs           = Tabs(tabs=[tab1,tab2,tab3,   tabn])
 
     try:
+        curdoc().theme = 'dark_minimal'
+        curdoc().title = "FlexSpec1 Spectrograph"
         curdoc().add_root(row(tabs))
     except Exception as e:
         print("FlexSpec: Main. Terminating.")
