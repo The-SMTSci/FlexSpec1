@@ -2,8 +2,10 @@
 #############################################################################
 # RunFlexSpec   dispatch server launcher
 # /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/RunFlexSpec
-# bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000 --address 0.0.0.0
+# bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000 --address 127.0.0.1
 # uses: /home/git/external/FlexSpec1/Code/SBC/FlexSpecServer.py
+#
+# run from remote browser to: http://pier15.local/flexspec/ 
 #############################################################################
 
 __version="0.0.1"
@@ -58,7 +60,6 @@ while getopts ":hpsvt:" opt ; do     # request to use master bib
       ;;
    t)
        intervaltime=${OPTARG}
-export bkhost="--allow-websocket-origin=pier15:5006"
       ;;
    esac
 done
@@ -67,27 +68,17 @@ done
 
 # Finally! The command we want to run.
 
-export port=eno1
-#export bkhost="--address $(ifconfig $port | gawk -e '/inet / { print $2;}') --port 5006"
-export bkhost="--allow-websocket-origin=pier15:5006"
+export flexprefix="-- prefix /flexspec"
+export port=eth0
+export bkhost="--allow-websocket-origin=pier15.local"
 export bkcmd=" exec bokeh serve $show ./FlexSpec.py $bkhost --unused-session-lifetime $intervaltime"
 
-
-#export bkhost="--allow-websocket-origin '*'"
-#export bkhost="--address 0.0.0.0"
-
-
 if test "$verboseflag" == "" ; then
-echo "port $port"
-echo "bkhost $bkhost"
-echo "bkcmd  $bkcmd"
+   echo "   port   $port"
+   echo "   bkhost $bkhost"
+   echo "   bkcmd  $bkcmd"
 fi
 
-# echo pidl; then the command.
+# echo pid; then the command.
 currpid=$(echo $$; bokeh serve ./FlexSpec.py $bkhost --unused-session-lifetime $intervaltime)
-
-# bokeh serve $show ./FlexSpec.py $mswitch $bkhost --unused-session-lifetime $intervaltime > ~/RunFlexSpecLog 2>&1
-
-
-# bokeh serve ./FlexSpec.py --allow-websocket-origin '*' --unused-session-lifetime 3600000
 
