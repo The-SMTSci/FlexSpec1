@@ -1,0 +1,24 @@
+\subsection{Flex Nginx Configuration}
+
+This is a rambling collection of notes about the Nginx
+install. This is initial setup:
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+FILE 50-mod-http-geoip2.conf
+load_module modules/ngx_http_geoip2_module.so;
+FILE 50-mod-http-image-filter.conf
+load_module modules/ngx_http_image_filter_module.so;
+FILE 50-mod-http-xslt-filter.conf
+load_module modules/ngx_http_xslt_filter_module.so;
+FILE 50-mod-mail.conf
+load_module modules/ngx_mail_module.so;
+FILE 50-mod-stream.conf
+load_module modules/ngx_stream_module.so;
+FILE 70-mod-stream-geoip2.conf
+load_module modules/ngx_stream_geoip2_module.so;
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}

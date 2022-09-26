@@ -1,0 +1,7 @@
+sudo useradd -m -d /home/flex -G dialout -p "$(openssl passwd -1 'happy startrails')" flex
+cd /home/flex
+mkdir -p git
+cd /home/flex/git
+git clone https://github.com/The-SMTSci/FlexSpec1.git
+cd /home/flexgit/FlexSpec1/FlexBerry
+sudo bash FollowMe.sh  # this will take a while.

@@ -1,0 +1,85 @@
+\section{Filesharing}
+
+The FlexSpec, running on a Raspberry Pi, takes science images and may
+store them locally in the Pi filesystem. It may also copy these files
+to remote machine elsewhere. To work with file processing/viewing utilities
+one has two choices:
+\vspace{-.15cm}
+\begin{enumerate}\addtolength{\itemsep}{-0.5\baselineskip}
+%\setcounter{enumi}{N}
+   \item   Move the file to the Remote machine, and use sofware there.
+   \item   Install the package on the RPi
+\end{enumerate}
+
+Of the two, doint all processing/viewing on the remote machine makes the most
+sense. This shifts the CPU load away from the instrumentation, and allows
+programs native to a mix of operating systems to be used.
+
+\subsection{NFS}
+
+
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+sudo apt install nfs-common
+/mnt/share 10.0.0.0/24(rw,sync,no_subtree_check)
+/export/flex 192.168.0.0/24(rw,async,no_subtree_check,anonuid=1000,anongid=1000)
+sudo exportfs -a
+sudo systemctl restart nfs-kernel-server
+sudo ufw allow from 10.0.2.15/24 to any port nfs
+sudo ufw enable
+# sudo ufw status # look for 2049
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+
+/subsection{SMB Windows Filesharing}
+
+A SMB server is added to promote pushing image files to remote
+servers during observing.
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+sudo apt install -y samba samba-tools smbclient cifs-utils
+sudo systemctl enable --now smbd              # retister for all reboots
+sudo ufw allow samba
+sudo usermod -aG sambashare flex
+sudo smbpasswd -a "flex%time has come"
+sudo mkdir -p /samba/{$USER,flex}             # make shares for the two main users
+sudo chgrp -R sambashare /samba
+sudo usermod -aG sambashare $USER             # add these users to group
+sudo usermod -aG sambashare flex
+#smb://winhost/shared-folder-name
+# TODO mod /etc/samba/smb.conf
+sudo systemctl restart smbd
+sudo systemctl restart nmbd
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+Gnome's file manager has built in SMB support.
+
+\url{https://wiki.samba.org/index.php/User_and_Group_management} has decent
+examples.
+
+/etc/samba/smb.conf:
+
+   server role = standalone server
+interfaces = 127.0.0.0/8 eth0
+bind interfaces only = yes
+
+
+[flex]
+    path = /samba/flex
+    browseable = no
+    read only = no
+    force create mode = 0660
+    force directory mode = 2770
+    valid users = flex @sadmin

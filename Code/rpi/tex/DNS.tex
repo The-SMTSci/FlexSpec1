@@ -1,0 +1,200 @@
+\section{Domain Name Server}
+
+In the FlexSpec1 scenario, there are one or many  pi's per OTA/Mount; one or many 
+mounts per observatory; one or many observatories per site and one or more sites
+per collaboration; and one or more collaborations per federation. Or just a observer
+in his warm room.
+
+To facilitate all of this we assume the Site is called
+example.com\footnote{Remember, this one does not route and we use it,
+  well, as an example.}. The observatory, obs1 is a \dhl{subnet} of
+example.com and may be reached at the \dhl{obs1.example.com} domain
+name. In this the person far away just enters that name, example.com
+is undergoes a DNS lookup within the real DNS system, and a query is
+made of example.com to see if it can resolve a name, and if it can
+reslove the \dhl{obs1.example.com} name.  If, so packets are sent
+to the main machine, which in turn passes the packets on to the
+obs1 router.
+
+Lets have pier15 with two OTAs, one with a flexspec and the other
+performing \dhl{piggyback} duty. let ther be two Pi's:  myflex and mypiggy
+machines there. Now the domain name will be
+mypiggy.pier15.example.com.
+
+Each dot (.) is a router! Each one needs to know the 'names' of the
+individual machines under the router's control.
+
+This is were \dhl{bind9} comes into play.
+
+The FlexSpec1/Code/ directory has a script for each Pi to manage itself,
+and help with each router as we can.
+
+
+
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+lsb_release -a  # get a short list of the machine
+ip r
+
+
+
+
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+export mylocalnet=$(ip r | gawk -- '/kernel/ {printf("%s", $1);}')
+
+forward/reverse lookup zones
+SOA and A record forward
+SOA and A reverse 
+
+Edit /etc/named.conf
+forwarders {
+  192.168.1.254;   # private (us)
+  8.8.8.8;         # public here google
+};
+
+sudo systemctl restart bind9
+sudo systemctl status bind9
+
+
+edit named.conf:
+
+zone "class.local" {
+  type master;
+  file "/etc/bind/db.class.local";
+};
+
+sudo cp db.local db.class.local  # our domain local
+
+edit db.class.local
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+$TTL   604800
+@          IN       SOA     class.local. root.class.local. (
+                    2          ; serial  
+                     604800    ; refresh
+                     86400     ; Retry
+                     2419200   ; Expire
+                     604800 )  ; Netative Cache TTL
+;
+@    IN           NS     flex.class.local.
+@    IN           A      10.1.10.70
+@    IN           AAAA   ::1
+flex              10.1.10.70
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+sudo systemctl restart bind9
+sudo systemctl status bind9    # check for typos/syntax errors
+
+edit named.conf.local insert lookup zone
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+//  add to end
+// reverse lookup zone
+zone "1.254.10.in-addr.arpa"  {
+    type       master;
+    file       "/etc/bind.db.10";
+};
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+sudo systemctl restart bind9
+sudo systemctl status bind9    # check for typos/syntax errors
+
+edit db.10 file
+
+
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+; BIND reverse data file for local 10.01.10.xx network
+
+$TTL   604800
+@          IN       SOA     flex.class.local. root.class.local. (
+                    2          ; serial  
+                     604800    ; refresh
+                     86400     ; Retry
+                     2419200   ; Expire
+                     604800 )  ; Netative Cache TTL
+;
+@    IN           NS     flex.
+10   IN           PTR    flex.class.local
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+sudo systemctl restart bind9
+sudo systemctl status bind9    # check for typos/syntax errors
+
+edit resolv.conf and add log
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+nameserver 10.01.10.70   
+options eth0 trust-ad
+search  class.local
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+sudo systemctl restart bind9
+sudo systemctl status bind9    # check for typos/syntax errors
+
+
+ping 10.01.10.70
+dig -x                 # look at us
+dig du.edu             # lool at something far away
+ping pier15.class.local
+
+
+
+\subsection{Notes}
+
+
+ip r | gawk --  '/proto/ {print $1;}'
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 22.04.1 LTS
+Release:	22.04
+Codename:	jammy
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+ip r
+default via 10.1.10.1 dev eth0 proto dhcp metric 100 
+10.1.10.0/24 dev eth0 proto kernel scope link src 10.1.10.70 metric 100 
+169.254.0.0/16 dev eth0 scope link metric 1000 
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+
+\url{https://www.youtube.com/watch?v=MPDXVkwUehs}

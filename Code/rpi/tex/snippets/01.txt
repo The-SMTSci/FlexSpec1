@@ -1,0 +1,7 @@
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get dist-upgrade
+sudo apt install -y openssh-server   # add openssh capability
+sudo systemctl status ssh            # open the interface
+sudo ufw allow ssh                   # open the firewall
+sudo apt install -y git              # get our image!

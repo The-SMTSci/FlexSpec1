@@ -1,0 +1,43 @@
+\section{CertMe.sh}   \label{sec:CertMe}
+
+This section covers issuing a 'self-signed-certificate' for nginx.
+It is designed for local network use. We will enable ssh certificate
+login AND keep PasswordAuthentication. PasswordAuthentication leaves
+the machine open to brute force attacks -- we'll live with that for
+now.
+
+In order to ssh into the FlexBerry, adding a certificate mechanism
+to the user's directory is not a bad or difficult thing to do.
+Here are the steps. \index{Certificates of Authority!ssh}.
+
+The files:
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+cd ~/.ssh
+ssh-keygen
+ssh-copy-id  wayne@pier15
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+\snippet{Nginx Files}{certme1.txt}
+
+%%% \begingroup \fontsize{10pt}{10pt}
+%%% \selectfont
+%%% %%\begin{Verbatim} [commandchars=\\\{\}]
+%%% \begin{verbatim} 
+%%% certs/
+%%%    # nginx-selfsigned.crt dhparam.pem"
+%%% openssl.cnf
+%%% private/
+%%%    # nginx-selfsigned.key  
+%%% \end{verbatim}
+%%% \endgroup
+%%% %% \end{Verbatim}
+
+
+\snippet{nginx sample file}{certme2.txt}
