@@ -1,7 +1,59 @@
 README
 ======
 
+Testing can be done with Chrome in incognito mode (does't clutter
+up cookies).
+
 This approach uses a "matched class" and a "data driven" approach.
+The 'def send_state(self) is the gateway to Flex dispatch server for
+    each class.
+
+FlexSpec.py - instantiate/layout the gadgets we're currently supporting:
+   KzinBokeh.py
+   Collimator.py
+   GratingBokey.py GrratingDefinition.py
+   ParallacticAngle.py
+   Shutter.py  (Needs to be developed fully)
+
+Other Gadgets:
+      EEPROMBokeh.py
+      BlinkyBokeh.h
+
+Good to have:
+     Site.py
+     TargetsBokeh.py
+     FITS/FITS.py       -- brew up header for the instrument
+
+
+The objects to use/develop:
+
+    BlinkyBokeh.py       - Test more than anything
+    CameraFocusBokeh.py  - NOT the 'camera' lens
+    Collimator.py        - drive the collimator motors
+    EEPROMBokeh.py       - manage an eeprom filesystem     FlexEEPROM.py        -
+    FITS.py              - FlexSpec FITS header details, fits format
+    FlexSpec.py          - A class for the device itself
+    GratingBokeh.py      - Motors and configuration of  a grating
+    GratingDefinition.py - Definition of lots of gratings to choose
+    Guider.py            - NOT focus/rotate the guider
+    KzinBokeh.py         - Manage the cal lamps and the shutter
+    LampBokeh.py         - ?
+    Network.py           - GUI/Dispatch server management
+    ParallacticAngle.py  - pangle - get/report the parallactic angle
+    Shutter.py           - Deal with the shutter itself
+    Site.py              - Site details
+    SlitBokeh.py         - Select and manage slit details
+    TargetsBokeh.py      - NOT state the curent target details
+
+TBD: FITS.py, Site,Targets. Network
+
+Not clearly defined.... FlexPublish.py       -
+
+
+
+
+RunFlexSpec
+
 
 Two classes -- A python class at the Bokeh level and a C++ class in the
 Arduino have their data synchronized. The user's request is tested and all

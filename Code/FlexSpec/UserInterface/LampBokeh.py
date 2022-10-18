@@ -67,14 +67,14 @@ Treat this as Kzin Ring Assy.
 
 The buttons are:
 
-   near     --  Calibration Lamp
+   callamp  --  Calibration Lamp
    osram    --  OSRAM Lamp HV bulb
    halpha   --  Reference Red LED
    oiii     --  Reference ND OIII region
    flat     --  Flat Assy
    augflat  --  Flat Assy with Blue Boost
 
-_near
+_callamp
 _osram
 _halpha
 _oiii
@@ -124,7 +124,7 @@ class BokehFlexLamp(object):
     SateText    = ["Off","On","Illegal"]
     brre        = re.compile(r'\n')                         # used to convert newline to <br/>
     postmessage = { "name"    : "Unassigned",
-                    "near"    : 0 ,
+                    "callamp" : 0 ,
                     "osram"   : 0 ,
                     "halpha"  : 0 ,
                     "oiii"    : 0 ,
@@ -151,10 +151,10 @@ class BokehFlexLamp(object):
         self.oiii_value     = 0
         self.flat_value     = 0
         self.augflat_value  = 0
-        self.near_value     = 0
+        self.callamp_value  = 0
 
         # // coordinate with lampcheckboxes_handler
-        self.CBLabels=["Wheat", "Osram", "H-alpha", "O[iii]", "Flat", "Blue Flat", "NeAr" ]
+        self.CBLabels=["Wheat", "Osram", "H-alpha", "O[iii]", "Flat", "Blue Flat", "Cal Lamp" ]
 
         self.LampCheckBoxes = CheckboxButtonGroup(labels=self.CBLabels,
                                                   active=[0]*len(self.CBLabels)
@@ -196,7 +196,7 @@ class BokehFlexLamp(object):
         self.oiii_value    = 1 if 3 in new else 0
         self.flat_value    = 1 if 4 in new else 0
         self.augflat_value = 1 if 5 in new else 0
-        self.near_value    = 1 if 6 in new else 0
+        self.callamp_value = 1 if 6 in new else 0
         #self.display(msg)
 
     ### BokehFlexLamp.lampcheckboxes_handler()
@@ -218,7 +218,7 @@ class BokehFlexLamp(object):
                           ( "oiii"    , f'"{self.oiii_value}"'    ),
                           ( "flat"    , f'"{self.flat_value}"'    ),
                           ( "augflat" , f'"{self.augflat_value}"' ),
-                          ( "near"    , sf'"{elf.near_value}"'    )
+                          ( "callamp" , f'"{self.callamp_value}"' )
                          ])
         d2      = dict([(f"{self.name}", dict([("Process", cmddict)]))])
         jdict   = json.dumps(d2)
@@ -235,7 +235,7 @@ class BokehFlexLamp(object):
                           ( "oiii"    , 0),
                           ( "flat"    , 0),
                           ( "augflat" , 0),
-                          ( "near"    , 0)
+                          ( "callamp" , 0)
                          ])
         d2      = dict([("Kzin", dict([("Process", cmddict)]))])
         jdict   = json.dumps(d2)

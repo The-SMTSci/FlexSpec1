@@ -12,7 +12,6 @@ import re
 import json
 from FlexPublish          import fakedisplay        # Display upgrade
 
-
 from bokeh                import events
 from bokeh.events         import ButtonClick
 from bokeh.io             import curdoc
@@ -63,7 +62,7 @@ __doc__ = """
 /home/git/external/SAS_NA1_3D_Spectrograph/Code/Collimator.py
 [options] files...
 
-Handle the details of focusing the Collimating Lens. 
+Handle the details of focusing the Collimating Lens.
 
 Note: There are details in here planned for future updates,
   like a home sensor.
@@ -122,6 +121,7 @@ class Collimator(object):
         self.maxrange        = float(maxrange)  # c++ instance Max range
         self.direction       = 1                # c++ instance current direction of rotation
         self.homestate       = 0                # c++ instance is it homed (no home sensor now)
+        self.receipt         = 1                # always ask for an update on positions
 
         # Bokeh bits
         self.spacer          = Spacer(width=self.wwidth, height=5, background='black') #None #
@@ -212,14 +212,14 @@ class Collimator(object):
 
     def send_state(self):                                       # Collimator::send_state()
         """Several ways to send things"""
-        devstate = dict( [ ( "position" , f"{self.position:7.4f}"),
-                           ( "direction", f'"{int(self.direction)}"'),
-                           ( "speed"    , f'"{self.speed}"'),
-                           ( "home"     , f'"{self.homestate}"')
+        devstate = dict( [ ( "position" , f'"{self.position:7.4f}"'   ),
+                           ( "direction", f'"{int(self.direction):d}"'),
+                           ( "speed"    , f'"{self.speed:d}"'         ),
+                           ( "home"     , f'"{self.homestate:d}"'     ),
+                           ( "receipt"  , f'"{self.receipt:d}"'       )
                         ])
-        slitcmd            = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # force the receipt as desired
-        d2                 = dict([(f"{self.name}", slitcmd)])
+        gadgetcmd            = dict([("Process", devstate)])
+        d2                 = dict([(f"{self.name}", gadgetcmd)])
         d3                 = dict([(f"{self.flexname}", d2)])
         jdict              = json.dumps(d3)
         self.display.display(f'{jdict}')
@@ -232,7 +232,8 @@ class Collimator(object):
                               self.collimatorspeed,
                               row(self.stepin,self.stepout),
                               self.homebutton
-                            )  ))
+                            )
+               ))
 
     ### Collimator.layout()
 

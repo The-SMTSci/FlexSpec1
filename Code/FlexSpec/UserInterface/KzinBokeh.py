@@ -20,7 +20,6 @@ from bokeh.events         import ButtonClick
 from bokeh.io             import curdoc
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import CheckboxButtonGroup,ColumnDataSource, Slider, TextInput, Button
-from bokeh.models         import Spacer
 from bokeh.models         import CustomJS, Div
 from bokeh.plotting       import figure
 from bokeh.models         import RadioGroup
@@ -167,6 +166,7 @@ class BokehKzinRing(object):
         self.flatcheck_value     = 0
         self.augflatcheck_value  = 0
         self.nearcheck_value     = 0
+        self.receipt             = 1                 # always ask for an update
         #self.shutter             = FlexShutter (flexname,display=display,width=width)
 
         self.slider_values = BokehKzinRing.SliderValues()
@@ -246,7 +246,7 @@ class BokehKzinRing(object):
            schematic  2021-08-27T11:32:01-0600
         """
         # dropped
-                        #   ( "flat"    , self.slider_values.values["flat_value"    ]), 
+                        #   ( "flat"    , self.slider_values.values["flat_value"    ]),
                         #   ( "near"    , self.slider_values.values["near_value"    ]), # Relco
         #                    JSON TXT      Bokeh                    PY Variable
         devstate = dict( [ ( "wheat"   , f'"{self.slider_values.values["wheat_value"   ]}"'), # Tungstun
@@ -256,25 +256,26 @@ class BokehKzinRing(object):
                            ( "halpha"  , f'"{self.slider_values.values["halpha_value"  ]}"'), # M1 RED LED
                            ( "uvboost" , f'"{self.slider_values.values["augflat_value" ]}"'), # Blue boost
                            ( "flat"    , f'"{self.slider_values.values["flat_value"    ]}"'), # MID WHITE LED
-                           ( "state"   , f'"{self.onoff}"')                                   # State  ON/OFF
+                           ( "state"   , f'"{self.onoff}"'),                                  # State  ON/OFF
+                           ( "receipt" , f'"{self.receipt}"')                                 # get update
                          ])
 
-        slitcmd  = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                                  # set the receipt as desired
-        d2       = dict([(f"{self.name}", slitcmd)])            # Add in my decice (instance with in one instrument) name
-        d3       = dict([(f"{self.flexname}", d2)])             # Add in my 'Instrument' name (vis-a-vis other instruments)
-        jdict    = json.dumps(d3)                               # make string image
-        self.display.display(f'{jdict}')                        # send it to browser DIV, and off to communications port.
+        gadgetcmd  = dict([("process", devstate)])
+        d2        = dict([(f"{self.name}", gadgetcmd)])     # Add in my decice (instance with in one instrument) name
+        d3        = dict([(f"{self.flexname}", d2)])        # Add in my 'Instrument' name (vis-a-vis other instruments)
+        jdict     = json.dumps(d3)                          # make string image
+        self.display.display(f'{jdict}')                    # send it to browser DIV, and off to communications port.
 
     ### BokehKzinRing.send_state()
 
     def layout(self):                                           # BokehKzinRing::layout()
         """Get the layout in gear"""
         return(row ( column ( #self.LampCheckBoxes,             # Physical layout the user.
-                              self.nearslider,                  # Relco - 
+                              self.nearslider,                  # Relco -
                               self.wheatslider,                 # Tungstun flat
                               self.augflatslider,               # ... add in some BLUE LED boost
                               self.flatslider,                  # ... and/or toss in WHITE LIGHT LED
+                              Spacer(width=self.wwidth, height=3, background='black'),
                               self.hβslider,                    # Marker for BLUE  LED  - broad band led
                               self.oiiislider,                  # Marker for GREEN LED
                               self.hαslider,                    # Marker for REF   LED

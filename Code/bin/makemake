@@ -1,0 +1,310 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# pdb is messed up by subprocess call
+
+
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+### HEREHEREHERE
+
+import os
+import optparse
+import sys
+import re
+import subprocess
+import glob
+import datetime
+
+#############################################################################
+#
+#  /home/wayne/bin/makemake
+#
+#emacs helpers
+# (insert (format "\n# %s " (buffer-file-name)))
+#
+# (set-input-method 'TeX' t)
+# (toggle-input-method)
+#
+# (wg-astroconda3-pdb)      # CONDA Python3
+#
+# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
+#
+# (ediff-current-file)
+# (find-file-other-frame "./.pdbrc")
+
+# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
+# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
+#
+# (wg-astroconda-pdb)       # IRAF27
+#
+# (set-background-color "light blue")
+#
+# (wg-python-toc)
+#
+#############################################################################
+__doc__ = """
+
+/home/wayne/bin/makemake
+[options] files...
+
+if MAKEIGNORE is a colon separated list of pythonic RE patterns, make
+a regular expression to ignore the files -- case insensitive.
+
+-d  -- dependencies
+-i  -- ignore         [] list of file patterns to ignore.
+-k  -- keys           [] add string to pattern for regexps
+-v  -- be verbose (not really)
+
+This program runs grep -Hns to get #include's from cpp and h files.
+
+-i allows you to append to a list the patterns you want to ignore
+in the dependencies. For Arduino:
+
+-k "Arduino" -k "ArduinoJson" -k "Wire"
+
+Ignore any include names that are in system brackets <>.
+
+An additional list may be expanded with the -k switch, currently
+wired for Arduino development.
+
+Within an existing Makefile, insert the output (like emacs
+"shell-command (read-from-minibuffer "Shell Command:")
+Escape, run, and a tmp results file. The -d switch
+provides a new SRCS and INCS for your use.
+
+This code is not sacrosanct, riff away on the source!
+
+This program ignores platform issues, #ifdefs etc. Just the
+long list of anyfile it can find. For the most part it
+is designed to start the process of things.
+
+Current: This utility was made to wrangle Arduion ARM development
+and has some built in lists of extensive g++ switches that may
+optionally be included with the --arduino long-switch.
+
+Future: Be granular -- add --cflags --includes etc for
+the usual C/C++ flags. Now, you are on your own to
+augment this outout.
+
+"""
+
+deps = ["Arduino","Wire","[<]"]
+
+__author__  = 'Wayne Green'
+__version__ = '0.1'
+__all__     = ['','']   # list of quoted items to export
+
+##############################################################################
+# This is the fluff at the top, geared to Linux g++ --std=c++11
+#
+##############################################################################
+basicmakefile = """#############################################################################\n# Makefile -- FlexSpec Regression tests\n# github: https://github.com/The-SMTSci/FlexSpec1 \n#\n# $@ represents the name of the target and \n# $< represents the first prerequisite required to create the output file.\n#\n# 2022-09-14T00:09:08-0600 wlg\n#############################################################################\n# declare targets that are utilatrian, but meaningless: they depend on nothing.\n# they do something for us.\n.PHONY: clean objectlist\n\n# set forth the general rules\ng++ = g++\n\nCFLAGS = --std=c++11\nDEFINES   = -D__REGRESSION__\nDEBUG     = -g\n\n# remove existing pattern rules, don't extend them!\n%.o : %.cpp\n\n# pattern rule to make .o files\n%.o : %.cpp\n	$(g++) $(CFLAGS) $(DEFINES) $(DEBUG) -c $<\n\n# list the files we have, no need to link to system files.\n# this done by editing of grep and ls output \n"""
+
+bottompart1 = """REGRESSIONS   =
+
+all: $(OBJECTS)
+
+OBJECTS = $(SRCS:.cpp=.o)
+
+# start the complicated process with target rules and dependencies
+all: $(OBJECTS)
+
+# remove detritis
+clean:
+	@rm -f *.o *.h.gch *.out        # clean out all the resultant files
+	@rm -f $(REGRESSIONS)           # remove all the regression tests
+
+
+# simple list of the objects
+objectlist:
+	@echo $(OBJECTS)
+
+Targets:
+
+
+"""
+
+incs   = {}
+deps   = {}
+
+filterre = re.compile(r'(map|string|iostream|cstding|Arduino|vector|Wire|deque|functional|stdint|\<set\>|[<])')
+
+incsplit  = re.compile(r'[ ]*#include[ ]*')
+subs      = re.compile(r'["/]')
+colonre   = re.compile(r'[:]')
+commented = re.compile(r'://[ ]*#include')
+
+DUMPPREFS_FLAGS = """
+DUMPPREFS_FLAGS  = -dump-prefs -logger=machine -hardware $(TOOLCHAIN)/hardware -hardware $(HOME)/.arduino15/packages -tools $(TOOLCHAIN)/tools-builder -tools $(TOOLCHAIN)/hardware/tools/avr -tools $(HOME)/.arduino15/packages -built-in-libraries $(TOOLCHAIN)/libraries -libraries $(HOME)/Arduino/libraries -fqbn=arduino:avr:nano:cpu=atmega328 -ide-version=10813  -warnings=none -prefs=build.warn_data_percentage=75 -prefs=runtime.tools.avr-gcc.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino7.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avrdude.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avrdude-6.3.0-arduino17.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.arduinoOTA.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.arduinoOTA-1.3.0.path=$(TOOLCHAIN)/hardware/tools/avr -verbose"""
+
+COMPILE_FLAGS = """
+COMPILE_FLAGS    = -compile -logger=machine -hardware $(TOOLCHAIN)/hardware -hardware $(HOME)/.arduino15/packages -tools $(TOOLCHAIN)/tools-builder -tools $(TOOLCHAIN)/hardware/tools/avr -tools $(HOME)/.arduino15/packages -built-in-libraries $(TOOLCHAIN)/libraries -libraries $(HOME)/Arduino/libraries -fqbn=arduino:avr:nano:cpu=atmega328 -ide-version=10813  -warnings=none -build-cache /tmp/arduino_cache_697494 -prefs=build.warn_data_percentage=75 -prefs=runtime.tools.avr-gcc.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino7.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avrdude.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.avrdude-6.3.0-arduino17.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.arduinoOTA.path=$(TOOLCHAIN)/hardware/tools/avr -prefs=runtime.tools.arduinoOTA-1.3.0.path=$(TOOLCHAIN)/hardware/tools/avr -verbose"""
+
+ARDUINO_FLAGS = """
+ARDUINO_FLAGS    = -DF_CPU=16000000L \\
+                   -DARDUINO=10813 \\
+                   -DARDUINO_AVR_NANO \\
+                   -DARDUINO_ARCH_AVR"""
+
+ARDUINO_INCFILES = """
+ARDUINO_INCFILES = -I$(TOOLCHAIN)/hardware/arduino/avr/cores/arduino \\
+                   -I$(TOOLCHAIN)/hardware/arduino/avr/variants/eightanaloginputs \\
+                   -I$(USERROOT)/libraries/ArduinoSTL/src"""
+
+ROOTS = """
+SOURCE_ROOT      = $(shell pwd)
+TOOLCHAIN        = $(HOME)/Configuration/arduino-1.8.13
+USERROOT         = $(HOME)/Arduino
+USERARDUINO      = $(HOME)/.arduino15/packages
+"""
+
+##############################################################################
+# Header -- print a fancy header.
+#
+##############################################################################
+headerline = "#############################################################################"
+def header(filename : str ="Makefile"):
+    """Add a fanch header"""
+    print(f"{headerline}\n# ",end='')
+    print(f"Makefile: {filename}")
+    print(f"""#\n# {datetime.datetime.now()} {os.getenv("USER")}""")
+    print(f"{headerline}\n# ")
+### header
+
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+    opts.add_option("-i", "--ignore", action="append", dest="ignore",
+                   default=[],
+                   help="<array RE>     filename patterns to be ignored.")
+
+    opts.add_option("-k", "--keys", action="append", dest="keywords",
+                   default=[],
+                   help="<array str>     add a file template to be ignored.")
+
+    opts.add_option("-d", "--dependencies", action="store_true", dest="depend",
+                   default=False,
+                   help="<bool>     just deliver the SRCS/INCS/dependencies.")
+
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    # Long switches here...
+    opts.add_option("--arduino", action="store_true", dest="arduino",
+                   default=False,
+                   help="<bool>     include current thinking for Arduino.")
+
+    (options, args) = opts.parse_args()
+
+    justdependencies = options.depend
+    verboseflag      = options.verboseflag
+
+    # (wg-python-atfiles)
+    xrawresult = subprocess.run(["grep","#include", *glob.glob('*.cpp'), *glob.glob('*.h')],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE
+                           )
+    result     = xrawresult.stdout.decode('utf-8')
+
+    makeignore = os.getenv("MAKEIGNORE")
+    igsre      = re.compile(r'.*bak/*',re.IGNORECASE)  # simple case
+    igs        = []                                    # nail down empty array
+
+    if(makeignore is not None):
+        igs = [x for x in map(str.strip,makeignore.split(":")) if len(x) != 0]
+        igsre = re.compile("(.*" + '.*|.*'.join(igs) + ".*)",re.IGNORECASE)
+
+    msg = ""                                           # Assemble the depencencies
+    for l in result.split("\n"):
+        if(not filterre.search(l)):
+            if(commented.search(l)):                   # '// #include...' files commented out...
+               print(f"#Commented file {l}")           # ... make a note
+               continue
+            l = subs.sub('',l)                         # possibly usable file
+            if(len(l) == 0):
+                continue
+            try:
+                msg      = f"Ignoring {l}"
+                msg      = "parts"
+                parts    = incsplit.split(l)
+                parts[0] = subs.sub('',parts[0])
+                parts[0] = colonre.sub('',parts[0])
+                if(' ' in parts[1]):
+                    parts[1] = parts[1].split()[0]
+                if(".h" in parts[0]):
+                    d = incs.setdefault(parts[0],[])
+                else:
+                    d = deps.setdefault(parts[0],[])
+                d.append(parts[1])
+            except Exception as e:
+                print(f"Oops {msg} {parts} = {l}",file=sys.stderr)
+
+    ##################################################################
+    if(0):                                  # some testing of MAKEIGNORE
+        print("The incs...")
+        for k,v in incs.items():
+            print(f"incs {k} = {v}")
+
+        print("The deps...")
+        for k,v in deps.items():
+            print(f"incs {k} = {v}")
+
+        print(f"Re pattern {igsre.pattern}")
+    ##################################################################
+
+    if(not justdependencies):
+        header(__file__)
+        print(f"{ROOTS}\n{DUMPPREFS_FLAGS}\n\n{COMPILE_FLAGS}\n\n{ARDUINO_FLAGS}\n\n{ARDUINO_INCFILES}\n")
+        print(basicmakefile)
+
+    print("#Ignoring ",end='')              # The things MAKEIGNORE ignores
+    for k,v in incs.items():
+        if(igsre.search(k)):
+            print(f" {k} ",end='')
+    print()
+
+    print("#Ignoring ",end='')
+    for k,v in deps.items():
+        if(igsre.search(k)):
+            print(f" {k}",end='')
+    print("\n\n")
+
+    print(f"{'SRCS':15s}= ",end='')         # the CPP Sources...
+    cont = ""
+    for k,v in deps.items():
+        if(igsre.search(k) is None):
+            print(f"{cont}{k:30s}",end='')
+            cont = "\\\n                 "
+        else if(verboseflag): print(f"Ignoring {k}={v}")
+
+    print(f"\n\n{'INCS':15s}= ",end='')     # the H Sources...
+    cont = ""
+    for k,v in incs.items():
+        if(igsre.search(k) is None):
+            print(f"{cont}{k:30s}",end='')
+            cont = "\\\n                 "
+        else if(verboseflag): print(f"Ignoring {k}={v}")
+    print("\n\n")
+
+    if(not justdependencies):               # all the rule-like stuff
+        print(f"{bottompart1}")
+
+    for k,v in incs.items():
+        if(igsre.search(k) is None):
+           print(f"{k:30s} : {' '.join(v)}")
+        else if(verboseflag): print(f"Ignoring {k}={v}")
+    print("\n\n")
+`
+    for k,v in deps.items():
+        if(igsre.search(k) is None):  #  is not None
+           print(f"{k:30s} : {' '.join(v)}")
+        else if(verboseflag): print(f"Ignoring {k}={v}")
+
+    #print(xrawresult)

@@ -140,7 +140,7 @@ class BokehGrating(object):
         self.state         = "undefined"               # Just waking up
         self.home          = 0                         # we assume we're not homed
         self.validp        = False                     # wake up in false state
-
+        self.receipt       = 1                         # always ask for a update on status
 
         # Handle startup the easy way. Proper will be to query before instantiation.
         entry              =  BokehGrating.GratingsTable.get(grating,None)
@@ -204,11 +204,11 @@ class BokehGrating(object):
         """Several ways to send things"""
         devstate = dict( [ ( "grating"   , self.grating),
                            ( "cwave"     , f"{self.cwave:d}"),
-                           ( "home"      , f"{self.home:d}")
+                           ( "home"      , f"{self.home:d}"),
+                           ( "receipt"   , f"{self.receipt:d}")
                          ])
-        gratingcmd            = dict([("Process", devstate), ("Receipt" , "0")])
-        gratingcmd['Receipt'] = "1"                      # set the receipt as desired
-        d2                    = dict([(f"{self.name}", gratingcmd)])
+        gadgetcmd            = dict([("process", devstate)])
+        d2                    = dict([(f"{self.name.lower()}", gadgetcmd)])
         d3                    = dict([(f"{self.flexname}", d2)])
         jdict                 = json.dumps(d3)
         self.display.display(f'{jdict}')

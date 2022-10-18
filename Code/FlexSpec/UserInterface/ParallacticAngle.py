@@ -31,24 +31,6 @@ from bokeh.models.widgets import Tabs, Panel
 #  /home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexOrientation.py
 #
 #emacs helpers
-# (insert (format "\n# %s " (buffer-file-name)))
-#
-# (set-input-method 'TeX' t)
-# (toggle-input-method)
-#
-# (wg-astroconda3-pdb)      # CONDA Python3
-#
-# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
-#
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
 #
 # (wg-python-toc)
 #
@@ -62,12 +44,13 @@ from bokeh.models.widgets import Tabs, Panel
 #     def __format__(e):
 # class FlexOrientation(object):
 #     #__slots__ = [''] # add legal instance variables
-#     def __init__(self, name : str = "Default",
-#     def update_homebutton(self):                                # Collimator::update_homebutton()
-#     def update_readbutton(self):                                # Collimator::update_readbutton()
+#     def __init__(self,                                          # FlexOrientation::__init__()
+#     def update_homebutton(self):                                # FlexOrientation::update_homebutton()
+#     def update_readbutton(self):                                # FlexOrientation::update_readbutton()
 #     def debug(self,msg="",skip=[],os=sys.stderr):               # FlexOrientation::debug()
 #     def update_parallacticangle(self, attr,old,new):            # FlexOrientation::update_parallacticangle()
 #     def ExtProcess(self, newvalue):                             # FlexOrientation::ExtProcess()
+#     def send_state(self):                                       # ParallacticAngle::send_state()
 #     def layout(self):                                           # FlexOrientation::layout()
 #
 #
@@ -78,7 +61,7 @@ __doc__ = """
 /home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexOrientation.py
 [options] files...
 
-
+Manage Parallactic Angle for the FlexSpec1 bokeh GUI.
 
 """
 
@@ -111,10 +94,12 @@ class FlexOrientation(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, flexname : str = "Default",
-                 name  = "IMU",
-                 display = fakedisplay,
-                 pangle : str = "0.0", width=200):  # FlexOrientation::__init__()
+    def __init__(self,                                          # FlexOrientation::__init__()
+                 name     : str  = "IMU",              # The internal device name
+                 flexname : str  = "pangle",           # The program's name
+                 display         = fakedisplay,        # display for results
+                 pangle   : str  = "0.0",              # The parallactic angle in fraction degrees
+                 width    : int  = 200):               # the width for bokeh display
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
@@ -124,9 +109,9 @@ class FlexOrientation(object):
         self.wwidth    = width
         self.pangle    = float(pangle)
         self.home      = 0
+        self.receipt   = 1                              # always ask for an update
         self.read      = 0
         self.spacer    = Spacer(width=self.wwidth, height=5, background='black')
-
 
         self.parallacticangle = Slider    (title=f"Parallactic Angle", bar_color='firebrick',
                                            value = self.pangle, start = 0,  end = 180,
@@ -143,17 +128,17 @@ class FlexOrientation(object):
 
     def update_homebutton(self):                                # FlexOrientation::update_homebutton()
         """Update the home command. """
-        self.home = 1 
+        self.home = 1                                  # home for sure
         self.send_state()
-        self.home = 0
+        self.home = 0                                  # but reset no matter what
 
     ### FlexOrientation.update_homebutton()
 
     def update_readbutton(self):                                # FlexOrientation::update_readbutton()
         """Update the read command. """
-        self.read = 1 
+        self.read = 1                                  # read
         self.send_state()
-        self.read = 0
+        self.read = 0                                  # but reset no matter what
 
     ### FlexOrientation.update_readbutton()
 
@@ -176,7 +161,7 @@ class FlexOrientation(object):
 
     def update_parallacticangle(self, attr,old,new):            # FlexOrientation::update_parallacticangle()
         """Update the parallactic angle. Disabled in interface"""
-        self.pangle = new
+        self.pangle = new                              # grab new value from the widget
 
     ### FlexOrientation.update_parallacticangle()
 
@@ -189,15 +174,15 @@ class FlexOrientation(object):
 
     def send_state(self):                                       # ParallacticAngle::send_state()
         """Several ways to send things
-        
+
         """
-        devstate           = dict( [ ( "read"    , self.read),
-                                     ( "home"    , self.home),
-                                     ( "pangle"  , self.pangle)
+        devstate           = dict( [ ( "read"    , '"%d"'    % self.read),
+                                     ( "home"    , '"%d"'    % self.home),
+                                     ( "pangle"  , '"%f7.3"' % self.pangle),
+                                     ( "receipt" , '"%d"'    % self.receipt)
                                    ])
-        slitcmd            = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2                 = dict([(f"{self.name}", slitcmd)])
+        gadgetcmd          = dict([("process", devstate)])
+        d2                 = dict([(f"{self.name}", gadgetcmd)])
         d3                 = dict([(f"{self.flexname}", d2)])
         jdict              = json.dumps(d3)
         self.display.display(f'{jdict}')

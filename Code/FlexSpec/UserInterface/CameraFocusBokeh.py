@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # bokeh serve ./LampBokeh.py
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+#
 # (wg-python-fix-pdbrc)
 
 ### HEREHEREHERE
 
 import os
-import optparse
 import sys
 import io
 import re
 import json
-from FlexPublish          import fakedisplay
 
+from FlexPublish          import fakedisplay
 
 from bokeh                import events
 from bokeh.events         import ButtonClick
 from bokeh.io             import curdoc
 from bokeh.layouts        import column, row, Spacer
-from bokeh.models         import CheckboxButtonGroup,ColumnDataSource, Slider, TextInput, Button
+from bokeh.models         import Button
 from bokeh.models         import Spacer
 from bokeh.models         import CustomJS, Div
 from bokeh.plotting       import figure
-from bokeh.models         import RadioGroup
 from bokeh.models         import Select
 from bokeh.models.widgets import Tabs, Panel
 
@@ -107,23 +108,13 @@ class CameraFocusException(Exception):
 # CameraFocusException
 
 ##############################################################################
-# CameraFocus
+# CameraFocus - This is poorly defined and FlexSpec1 does not implement.
 #
 ##############################################################################
 class CameraFocus(object):
     """ A small class to blink the led, with varying rate
     """
-
-    # FAKE up some enums.
-    ON          = 0  # CameraFocus.ON
-    OFF         = 1  # CameraFocus.OFF
-    RUN         = 2  # CameraFocus.RUN
-    StateText   = ["Off","On","Illegal"]
     brre        = re.compile(r'\n')                         # used to convert newline to HTML <br/>
-    postmessage = { "name"        : "Unassigned",
-                    "camerafocus" : None
-                    }
-
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
@@ -137,50 +128,38 @@ class CameraFocus(object):
         self.wwidth         = width
         self.display        = display
         self.name           = name
-        self.camerafocus    = 0             # the lamp starts in off position.
+        self.stepin         = 0
+        self.stepout        = 0
+        self.camerafocus    = 0             # the device starts in off state.
 
         # // coordinate with lampcheckboxes_handler
         self.CBLabels=["CameraFocus"]
 
-        self.LampCheckBoxes = CheckboxButtonGroup(labels=self.CBLabels,
-                                                  active=[0]*len(self.CBLabels)
-                                                 ) # create/init them
-        self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
-                                                   button_type="success", width=self.wwidth//2)
-        self.offbutton      = Button    (align='end', label=f"{self.name} Off",  disabled=False,
-                                                   button_type="primary", width=self.wwidth//2)
+        self.step_inbutton  = Button  (align='end', label=f"{self.name} Step In",  disabled=False,
+                                           button_type="success", width=self.wwidth//2)
+        self.step_outbutton = Button  (align='end', label=f"{self.name} Step Off",  disabled=False,
+                                           button_type="primary", width=self.wwidth//2)
 
-        self.LampCheckBoxes .on_change('active', lambda attr, old, new: self.lampcheckboxes_handler   (attr, old, new))
-        self.process        .on_click (lambda : self.update_process())
-        self.offbutton      .on_click (lambda : self.update_offbutton())
-
+        self.step_inbutton  .on_click (lambda : self.update_step_inbutton())
+        self.step_outbutton .on_click (lambda : self.update_step_outbutton())
 
     ### CameraFocus.__init__()
 
-    def update_offbutton(self):                                 # CameraFocus::update_offbutton()
+    def update_step_outbutton(self):                                 # CameraFocus::update_step_outbutton()
         """Set internal variables to off."""
-        msg = self.send_off()
+        self.stepin  = 0;
+        self.stepout = 1;
+        self.send_state()                   # instant action
 
-    ### CameraFocus.update_offbutton()
+    ### CameraFocus.update_step_outbutton()
 
-    def update_process(self):                                   # CameraFocus::update_button_in()
-        """update_process Button via an event lambda"""
-        #os = io.StringIO()
-        #self.debug(f"{self.name} Debug",skip=['varmap'], os=os)
-        #os.seek(0)
-        msg = self.send_state()
+    def update_step_inbutton(self):                                   # CameraFocus::update_button_in()
+        """update_step_inbutton Button via an event lambda"""
+        self.stepin  = 1;
+        self.stepout = 0;
+        self.send_state()                   # instant action
 
-    ### CameraFocus.update_process()
-
-    def lampcheckboxes_handler(self,attr, old, new):            # CameraFocus::lampcheckboxes_handler()
-        """Handle the checkboxes, new is a list of indices into
-        self.CBLabels for their purpose"""
-        msg = f"attr {attr}, old {old}, new {new}"
-        self.camerafocus   = 1 if 0 in new else 0
-
-        #self.display(msg)
-
-    ### CameraFocus.lampcheckboxes_handler()
+    ### CameraFocus.update_step_inbutton()
 
     def update_debugbtn(self):                                  # CameraFocus::update_button_in()
         """update_debugbtn Button via an event lambda"""
@@ -192,31 +171,25 @@ class CameraFocus(object):
     ### CameraFocus.update_edebugbtn()
 
     def send_state(self):                                       # CameraFocus::send_state()
-        """Several ways to send things"""
-        cmddict = dict( [ ( "camerafocus"   , self.camerafocus)    # nest into message
-                        ] )
-        d2 = dict([(f"{self.name}", dict([("Process", cmddict)]))])
+        """Several ways to send things
+          {"camerafocus" : {"in" : "", "out" : "", "reciept" : "1"}
+        dict( [ ("in",  '"%d"' % self.stepin), ("out" , ), ("reciept", "1")] )
+        """
+        cmddict = dict( [ ("in",  '"%d"' % self.stepin),
+                          ("out" , '"%d"' % self.stepout),
+                          ("reciept", "1")
+                        ])
+
+        d2 = dict([(f"{self.name}", dict([("process", cmddict)]))])
         jdict = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
+        self.display.display(f'{jdict}')
 
     ### CameraFocus.send_state()
-
-    def send_off(self):                                         # CameraFocus::send_off()
-        """Don't change the internal variables, fake a message to make
-        the lamps off."""
-        cmddict = dict( [ ("camerafocus"   , 0)
-                         ])
-        d2      = dict([("camerafocus", dict([("Process", cmddict)]))])
-        jdict   = json.dumps(d2)
-        self.display.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
-        return jdict
-
-    ### CameraFocus.send_off(()
 
     def layout(self):                                           # CameraFocus::layout()
         """Get the layout in gear"""
         return(row ( column ( #self.LampCheckBoxes,
-                              row(self.process,self.offbutton)
+                              row(self.step_inbutton,self.step_outbutton)
                             )  ))
         return self
 
@@ -239,10 +212,6 @@ class CameraFocus(object):
 
     ### CameraFocus.debug()
 
-    __CameraFocus_debug = debug  # really preserve our debug name if we're inherited
-
-   # (wg-python-properties properties)
-
 # class CameraFocus
 
 ##############################################################################
@@ -251,23 +220,15 @@ class CameraFocus(object):
 ##############################################################################
 # HEREHEREHERE
 if(0):
-    opts = optparse.OptionParser(usage="%prog "+__doc__)
 
-    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
-                   default=False,
-                   help="<bool>     be verbose about work.")
+    camera = CameraFocus()
 
-    (options, args) = opts.parse_args()
-
-    kzin1  = CameraFocus("Tony")
-    kzin2  = CameraFocus("Jerry")
     if(0):
         with open('/tmp/debug1.txt','w') as os:
             blink1.debug(msg="Starting with...", os=os)
-    l1    = kzin1.layout()
-    l2    = kzin2.layout()
-    tab1  = Panel(child=l1,title='Tony')
-    tab2  = Panel(child=l2,title='Jerry')
+
+    tab1  = Panel(child=camera,title="Tony's Camera")
+    tab2  = Panel(child=fakedisplay,title='Display')
     tabs  = Tabs(tabs=[tab1,tab2])
     curdoc().add_root(tabs)
 

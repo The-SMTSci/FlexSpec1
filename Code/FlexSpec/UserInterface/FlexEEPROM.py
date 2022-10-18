@@ -90,13 +90,13 @@ eepromdef = """{
     "eeprom": {
         "process": {
             "flexspec": {
-                "name": "FlexSpec1",
-                "owner": "indef",
-                "contact": "indef",
-                "serialno": "indef",
+                "name"        : "FlexSpec1",
+                "owner"       : "indef",
+                "contact"     : "indef",
+                "serialno"    : "indef",
                 "coderevision": "indef",
-                "installdate": "indef",
-                "updatedate": "indef",
+                "installdate" : "indef",
+                "updatedate"  : "indef",
                 "toc": {
                     "flexspec"   : "(0    ,1024)",
                     "guidecamera": "(1024 ,1024)",
@@ -107,50 +107,50 @@ eepromdef = """{
                 }
             },
             "guidecamera": {
-                "vendor": "indef",
-                "serialumber": "indef",
-                "pixelsize": "indef",
-                "lens1": "indef",
-                "lens2": "indef",
-                "ccdsum": "(1,1)",
-                "slotoffset": "indef"
+                "vendor"      : "indef",
+                "serialumber" : "indef",
+                "pixelsize"   : "indef",
+                "lens1"       : "indef",
+                "lens2"       : "indef",
+                "ccdsum"      : "(1,1)",
+                "slotoffset"  : "indef"
             },
             "slit": {
-                "vendor": "ovio",
-                "serialno": "indef",
+                "vendor"      : "ovio",
+                "serialno"    : "indef",
                 "widthmicrons": "indef"
             },
             "fraunhofer": {
                 "baffleheight": "indef",
-                "bafflewidth": "indef",
+                "bafflewidth" : "indef",
                 "baffleoffset": "indef"
             },
             "grating": {
-                "name": "Thorlabs_500_600_25_0",
-                "vendor": "Thorlabs",
-                "catalogid": "GR25-0605",
-                "length": "25.0",
-                "height": "25.0",
-                "thickness": "6.0",
-                "lmm": "600",
-                "cwave": "500",
-                "blaze": "8.617",
-                "dispersion": "1.65",
-                "tcoeff": "8.0",
-                "home": "indef",
-                "offset": "indef",
-                "other": "indef"
+                "name"        : "Thorlabs_500_600_25_0",
+                "vendor"      : "Thorlabs",
+                "catalogid"   : "GR25-0605",
+                "length"      : "25.0",
+                "height"      : "25.0",
+                "thickness"   : "6.0",
+                "lmm"         : "600",
+                "cwave"       : "500",
+                "blaze"       : "8.617",
+                "dispersion"  : "1.65",
+                "tcoeff"      : "8.0",
+                "home"        : "indef",
+                "offset"      : "indef",
+                "other"       : "indef"
             },
             "camera": {
-                "vendor": "indef",
-                "serialno": "indef",
-                "pixelsize": "indef",
-                "backfocus": "indef",
-                "ccdsum": "(1,1)",
-                "lensdesc": "indef",
+                "vendor"      : "indef",
+                "serialno"    : "indef",
+                "pixelsize"   : "indef",
+                "backfocus"   : "indef",
+                "ccdsum"      : "(1,1)",
+                "lensdesc"    : "indef",
                 "lensaperture": "indef",
-                "lensfl": "indef",
-                "tempsetting": "indef"
+                "lensfl"      : "indef",
+                "tempsetting" : "indef"
             }
         }
     }
@@ -182,6 +182,28 @@ class FlexEEPROM(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
+    # Coordinate the keys we want to use.
+    eepromkeys = [ "s_camera"           ,  "s_camerasensor" , "s_collimator", 
+                   "s_collimatorsensor" , "s_flexspec"      , "s_grating", 
+                   "s_gratingsensor"    , "s_guider"        , "s_kzin" , "s_pangle", 
+                   "s_slit"             , "s_slitsensor"
+                 ]
+
+    # The record size to allocate for each widget
+    sizes =      { "s_camera"           : 1024,
+                   "s_camerasensor"     : 1024,
+                   "s_collimator"       : 1024,
+                   "s_collimatorsensor" : 1024,
+                   "s_flexspec"         : 2048,
+                   "s_grating"          : 1024,
+                   "s_gratingsensor"    : 1024,
+                   "s_guider"           : 1024,
+                   "s_kzin"             : 1024,
+                   "s_pangle"           :  512,
+                   "s_slit"             : 1024,
+                   "s_slitsensor"       : 1024
+                }
+
     def __init__(self, pjson: str = "{}"):                  # FlexEEPROM::__init__()
         """Initialize this class."""
         #super().__init__()
@@ -233,6 +255,19 @@ class FlexEEPROM(object):
     __FlexEEPROM_debug = debug  # really preserve our debug name if we're inherited
 
    # (wg-python-properties properties)
+
+   @staticmethod
+   def makecpptable(os=sys.stdout)                        # FlexEEPROM.makecpptable()
+      """Generate the table from these internal variables. The record block
+         consists of:
+         0(2)      -- the number of bytes in any record stored here. Excess is ignored.
+        _2(size-2) -- the actual space to hold the blocks.
+      """
+      offs = 2        # skip the magic cookie
+      for k,v in sizes.items():
+         print(f"    {{&FlexConstants::{k:18s}   , new FlexEEPROMRecord<16>(FlexConstants::{k:18} .c_str(), {offs+v:6d}, {v:5d})}},")
+         offs += v
+   ### FlexEEPROM.makecpptable()
 
 # class FlexEEPROM
 

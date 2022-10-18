@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+#
 # change the if stmt at bottom from if(0) to if(1) for regression.
 # bokeh serve ./BlinkyBokeh.py
 # (wg-python-fix-pdbrc)
@@ -26,28 +29,6 @@ from bokeh.plotting import figure
 #
 #  /home/git/external/xxx.SAS_NA1_3D_Spectrograph/Code/NA1Focus/BlinkyBokeh.py
 #
-#emacs helpers
-# (insert (format "\n# %s " (buffer-file-name)))
-#
-# (set-input-method 'TeX' t)
-# (toggle-input-method)
-#
-# (wg-astroconda3-pdb)      # CONDA Python3
-#
-# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
-#
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
-#
-# https://docs.bokeh.org/en/latest/docs/user_guide/interaction/widgets.html#paragraph
-#
 #
 # (wg-python-toc)
 #
@@ -55,10 +36,11 @@ from bokeh.plotting import figure
 __doc__ = """
 
 /home/git/external/xxx.SAS_NA1_3D_Spectrograph/Code/NA1Focus/BlinkyBokeh.py
-[options] files...
 
-This class displays a rate field, a state field (on/off) and
-a small error text field.
+The Arduino's have a built-in Color LED
+
+This class displays a rate field, a state field (on/off) and a small
+error text field.
 
 A little documentation help.
 (wg-browser "https://docs.bokeh.org/en/latest/docs/reference.html#refguide")
@@ -71,7 +53,10 @@ a pause between the on/off states. I can make a short pulse
 every 10 seconds or every 1 second. (The off specification).
 
 
-
+   int colormask     0RBG                   ; // 3 lsb for colors, or ignored mono
+   int         onduration                   ; // the duration
+   int         offduration                  ; // the off duration
+   int         state                        ; // toggle the on/off state
 
 
 
@@ -123,7 +108,9 @@ class BokehFlexBlinky(object):
     # (setq properties `("" ""))
     def __init__(self, name : str = "Default",
                  display = fakedisplay,
-                 rate : int = 1,wwidth=200,pin=4): # BokehFlexBlinky::__init__()
+                 rate : int = 1,
+                 wwidth=200,
+                 pin=4): # BokehFlexBlinky::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
@@ -143,18 +130,14 @@ class BokehFlexBlinky(object):
                                       value = 1.0, start = self.ontime,  end = 1000, step = 1, width=self.wwidth)
         self.bkofftime   = Slider    (title=f"{self.name} Off-time [ms]",  bar_color='firebrick',
                                       value = 1.0, start = self.offtime,  end = 1000, step = 1, width=self.wwidth)
-        self.bkpulserate = Slider    (title=f"{self.name} Pulse Interval (sec)",  bar_color='firebrick',
-                                      value = 1.0, start = self.rate,  end = 5, step = 1, width=self.wwidth)
         self.debugbtn    = Button    (align='end', label="DEBUG",     disabled=False, button_type="success", width=self.wwidth)
 
         self.paragraph   = Div       (text="Hello", width=200,height=200,background='Bisque')
 
         #self.ratefield   .on_change('value',  lambda attr, old, new: self.rate_handler    (attr, old, new))
         self.blink_group .on_change('active', lambda attr, old, new: self.radio_handler   (attr, old, new))
-
         self.bkontime    .on_change('value', lambda attr, old, new: self.update_bkontime    (attr, old, new))
         self.bkofftime   .on_change('value', lambda attr, old, new: self.update_bkofftime   (attr, old, new))
-        self.bkpulserate .on_change('value', lambda attr, old, new: self.update_bkpulserate (attr, old, new))
         self.debugbtn    .on_click (lambda : self.update_debugbtn())
 
 
@@ -169,24 +152,6 @@ class BokehFlexBlinky(object):
 
     ### BokehFlexBlinky.update_edebugbtn()
 
-    def send_state(self):
-        """Several ways to send things"""
-        devstate = dict( [ ( "pin"     , self.pin),
-                          ( "ontime"  , self.ontime),
-                          ( "offtime" , self.offtime),
-                          ( "rate"    , self.rate),
-                          ( "rate"    , self.rate),
-                          ( "state"   , self.state),
-                         ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
-        self.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
-
-    ### BokehFlexBlinky.send_state()
-
     def update_bkontime(self,attr, old, new):                   # BokehRoboFocuser.::pdate_microsteps()
         """update_microsteps Slider"""
         self.ontime=new
@@ -199,21 +164,12 @@ class BokehFlexBlinky(object):
 
     ### BokehFlexBlinky.update_bkofftime()
 
-    def update_bkpulserate(self,attr, old, new):                # BokehRoboFocuser.::pdate_microsteps()
-        """update_microsteps Slider via an event lambda"""
-        self.rate = new
-
-    ### BokehFlexBlinky.update_bkpulserate()
-
     def radio_handler(self,attr, old, new):                     # BokehFlexBlinky::radio_handler()
         """Do something about the blink via an event lambda"""
         self.state = new # self.blink_group.active
         if(self.state not in [0,1]):
             self.state = 3;
         self.send_state()
-    ### BokehFlexBlinky.
-
-
     ### BokehFlexBlinky.radio_handler()
 
     def rate_handler(self,attrname, old, new):                  # BokehRoboFocuser::pdate_commvals()
@@ -227,13 +183,31 @@ class BokehFlexBlinky(object):
 
     ### BokehFlexBlinky.rate_handler()
 
+    def send_state(self):
+        """Several ways to send things"""
+        devstate = dict( [
+                           ( "name"    , '"%d"' % self.pin     ),  # name of this button
+                           ( "pin"     , '"%d"' % self.pin     ),
+                           ( "ontime"  , '"%d"' % self.ontime  ),
+                           ( "offtime" , '"%d"' % self.offtime ),
+                           ( "state"   , '"%d"' % self.state   ),
+                         ])
+        slitcmd            = dict([("process", json.dumps(devstate)), ("receipt" , json.dumps({"recepit" : "0"}))])
+
+        slitcmd['receipt'] = 1                             # set the receipt as desired
+        d2 = dict([(f"{self.name}", slitcmd)])
+        d3 = dict([(f"{self.flexname}", d2)])
+        jdict              = json.dumps(d3)
+        self.display(f'{{ "{self.name}" : {jdict} , "returnreceipt" : 1 }}')
+
+    ### BokehFlexBlinky.send_state()
+
     def layout(self):                                           # BokehFlexBlinky::layout()
         """Get the layout in gear"""
         return(row ( column ( #self.ratefield ,
                               self.blink_group,
                               self.bkontime,
-                              self.bkofftime,
-                              self.bkpulserate
+                              self.bkofftime
                             )  ))
 
     ### BokehFlexBlinky.layout()

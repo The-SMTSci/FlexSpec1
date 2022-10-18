@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# FlexSpec1/Code/FlexSpec/UserInterface/Shutter.py 
+# FlexSpec1/Code/FlexSpec/UserInterface/Shutter.py
 # (wg-python-fix-pdbrc)
 
 ### HEREHEREHERE
@@ -31,26 +31,26 @@ from bokeh.models.widgets import Tabs, Panel
 #  /home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexOrientation.py
 #
 #emacs helpers
-# (insert (format "\n# %s " (buffer-file-name)))
-#
-# (set-input-method 'TeX' t)
-# (toggle-input-method)
-#
-# (wg-astroconda3-pdb)      # CONDA Python3
-#
-# (wg-python-fix-pdbrc)  # PDB DASH DEBUG end-comments
-#
-# (ediff-current-file)
-# (find-file-other-frame "./.pdbrc")
-
-# (setq mypdbcmd (concat (buffer-file-name) "<args...>"))
-# (progn (wg-python-fix-pdbrc) (pdb mypdbcmd))
-#
-# (wg-astroconda-pdb)       # IRAF27
-#
-# (set-background-color "light blue")
-#
 # (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['FlexShutterException','FlexShutter']   # list of quoted items to export
+# class FlexShutterException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FlexShutter(object):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self, flexname : str = "Default",
+#     def update_closebutton(self):                               # FlexShutter::update_closebutton()
+#     def update_openbutton(self):                                # FlexShutter::update_openbutton()
+#     def debug(self,msg="",skip=[],os=sys.stderr):               # FlexShutter::debug()
+#     def send_state(self):                                       # FlexSShutter::send_state()
+#     def layout(self):                                           # FlexShutter::layout()
+#
+#
 #
 #############################################################################
 __doc__ = """
@@ -58,6 +58,7 @@ __doc__ = """
 /home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexShutter.py
 [options] files...
 
+Manage a shutter control for the FlexSpec Bokeh GUI
 
 
 """
@@ -102,28 +103,22 @@ class FlexShutter(object):
         self.name         = name
         self.display      = display
         self.wwidth       = width
-        self.pangle       = float(pangle)
         self.openshutter  = 0
         self.closeshutter = 0
         self.spacer       = Spacer(width=self.wwidth, height=5, background='black')
 
 
-        self.parallacticangle = Slider    (title=f"Shutter", bar_color='firebrick',
-                                           value = self.pangle, start = 0,  end = 180,
-                                           step = 0.1, width=self.wwidth)
         self.openbutton       = Button    ( label="Open",      disabled=False, button_type="danger",  width=self.wwidth//2)
         self.closebutton      = Button    ( label="Close",     disabled=False, button_type="success", width=self.wwidth//2)
-
-        self.parallacticangle .on_change('value', lambda attr, old, new: self.update_parallacticangle      (attr, old, new))
 
         self.openbutton       .on_click(lambda : self.update_openbutton ())
         self.closebutton      .on_click(lambda : self.update_closebutton ())
 
     ### FlexShutter.__init__()
 
-    def update_closebutton(self):                                # FlexShutter::update_closebutton()
+    def update_closebutton(self):                               # FlexShutter::update_closebutton()
         """Update the home command. """
-        self.closeshutter = 1 
+        self.closeshutter = 1
         self.send_state()
         self.closeshutter = 0
 
@@ -131,7 +126,7 @@ class FlexShutter(object):
 
     def update_openbutton(self):                                # FlexShutter::update_openbutton()
         """Update the read command. """
-        self.openshutter = 1 
+        self.openshutter = 1
         self.send_state()
         self.openshutter = 0
 
@@ -154,35 +149,19 @@ class FlexShutter(object):
 
     ### FlexShutter.debug()
 
-    def update_parallacticangle(self, attr,old,new):            # FlexShutter::update_parallacticangle()
-        """Update the parallactic angle. Disabled in interface"""
-        self.pangle = new
-
-    ### FlexShutter.update_parallacticangle()
-
-    def ExtProcess(self, newvalue):                             # FlexShutter::ExtProcess()
-        """Process JSON string to update the display. Called from external process."""
-        self.parallacticangle.value = float(new)
-        self.display.display(newvalue)
-
-    ### FlexShutter.ExtProcess()
-
     def send_state(self):                                       # FlexSShutter::send_state()
         """Several ways to send things
-        
         """
-        devstate = dict( [ ( "open"    , self.openshutter),
-                           ( "close"   , self.closeshutter),
-                           ( "pangle"  , self.pangle)
+        devstate = dict( [ ( "open"    , '"d"' % self.openshutter),  # quoted ascii numbers
+                           ( "close"   , '"d"' % self.closeshutter)
                         ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
-        slitcmd['Receipt'] = 1                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
+        slitcmd = dict([("Process", devstate), ("Receipt" , "1")])
+        d2 = dict([(f"{self.name}",     slitcmd)])
         d3 = dict([(f"{self.flexname}", d2)])
         jdict = json.dumps(d3)
         self.display.display(f'{jdict}')
 
-    ### FlexSShutter.send_state()
+    ### FlexShutter.send_state()
 
     def layout(self):                                           # FlexShutter::layout()
         """Create the layout"""
