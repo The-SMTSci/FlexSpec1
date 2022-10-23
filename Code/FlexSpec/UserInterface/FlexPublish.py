@@ -182,7 +182,7 @@ class FlexPublish(object):
         """clear the interface.
         Allow a clear button in a column for the panel."""
         self.message           = ""
-        self.display("Cleared.")
+        self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)
 
     ### FlexPublish.update_clear()
 
