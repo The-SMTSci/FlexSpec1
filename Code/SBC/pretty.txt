@@ -1,0 +1,30 @@
+{"FlexSpec_Fred": 
+ { "ovioslit":    {"process": {"slit": "20", "illuminator": "0"}, 
+                   "receipt": "1"},
+   "grating":     {"process": {"grating": "300 l/mm", "cwave": "5000",
+                   "home": "0"}, 
+                   "receipt": "1"},
+   "ovioslit":    {"process": {"slit": "70", "illuminator": "1"}, 
+                   "receipt": "1"},
+   "grating":     {"process": {"grating": "600 l/mm", "cwave": "5544", 
+                   "home": "0"}, 
+                   "receipt": "1"},
+   "guider":      {"process": {"position": "0.4600", "direction": "1", 
+                   "speed": "0.32", "home": "0"}, 
+                   "receipt": "1"},
+   "collimator":  {"process": {"position": "0.3390", "direction": "1", 
+                   "speed": "0.1", "home": "0"}, 
+                   "receipt": "1"},
+   "camerafocus": {"process": {"camerafocus": "0"} , 
+                   "receipt" : "1" },
+   "camerafocus": {"process": {"camerafocus": "0"} , 
+                   "receipt" : "1" },
+   "imu":         {"process": {"read": "0", "home": "1", "pangle": "59.600"}, 
+                   "receipt": "1"},
+   "kzin":        {"process": {"hbeta": "0", "oiii0": "0", "uvboost": 
+                   "1", "wheat": "1", "halpha": "0", 
+                   "reclo": "0", "flat": "1", "slitled": "", "shutter": "0"},
+                   "receipt": "1"}
+}}
+
+
