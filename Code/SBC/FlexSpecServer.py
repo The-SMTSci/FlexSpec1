@@ -129,7 +129,10 @@ if __name__ == "__main__":
     (options, args) = opts.parse_args()
     HOST = options.hostname
     PORT = options.portnumber
-    if(options.verboseflag):
+
+    verboseflag = options.verboseflag
+
+    if(verboseflag):
         print(f"FlexSpec1 dispatch-server.py: {HOST}")
         print(f"FlexSpec1 dispatch-server.py: {PORT}")
 
@@ -137,21 +140,27 @@ if __name__ == "__main__":
     time.sleep(100)
     #systemd.daemon.notify('READY=1')
     flag = True
-    msg = "starting loop" ; print(f"msg flag = {flag}")
+    if(verboseflag):
+       msg = "starting loop" ; print(f"msg flag = {flag}")
     while(flag):
         try:
-            msg = "opening socket" ; print(f"msg")
+            if(verboseflag):
+                msg = "opening socket" ; print(f"msg")
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                msg = "bind" ; print(f"{msg}")
+                if(verboseflag):
+                    msg = "bind" ; print(f"{msg}")
                 s.bind((HOST, PORT))
-                msg = "listen" ; print(f"{msg}")
+                if(verboseflag):
+                    msg = "listen" ; print(f"{msg}")
                 s.listen()
-                msg = "accept" ; print(f"{msg}")
+                if(verboseflag):
+                    msg = "accept" ; print(f"{msg}")
                 conn, addr = s.accept()
                 with conn:
                     print('FlexSpecServer.py: Connection from:', addr)
                     while True:
-                        msg = "data" ; print(f"{msg} conn={conn} addr={addr}")
+                        if(verboseflag):
+                            msg = "data" ; print(f"{msg} conn={conn} addr={addr}")
                         data = conn.recv(1024)
                         if not data:
                             break
