@@ -27,83 +27,11 @@ localhost usually resolves to 127.0.0.1, use 127.0.0.1 for faster work
 
 """
 
-__author__  = 'Wayne Green'
-__version__ = '0.1'
 
-HOST = '0.0.0.0'  # Standard loopback interface address (localhost)
-PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
-SERIALPORT=None     # declare a serialport
+def flexserve():
+    """Tie bokeh to serial port"""
+    pass
 
-_flag = 1           # local flag to halt the processing loop
-                    # triggered if data == b'end'
-
-
-##############################################################################
-# InstrumentException
-#
-##############################################################################
-class InstrumentException(Exception):
-    """Special exception to allow differentiated capture of exceptions"""
-    def __init__(self,message,errors=None):
-        super(InstrumentException,self).__init__("Instrument "+ message)
-        self.errors = errors
-    @staticmethod
-    def __format__(e):
-        return f" Instrument: {e.__str__()}\n"
-# InstrumentException
-
-
-##############################################################################
-# Instrument
-#
-##############################################################################
-class Instrument(object):
-    """ Tie a logical name to physical port management details.
-       open   - Establish the status for the port
-       close  - Not recommended (pass)
-       read   - read a string from the interface
-       write  - write string to interface
-       Report - return a report for this device
-    """
-    #__slots__ = [''] # add legal instance variables
-    # (setq properties `("" ""))
-    def __init__(self,name :str = "FlexSpec"):              # Instrument::__init__()
-        """Initialize this class."""
-        #super().__init__()
-        # (wg-python-property-variables)
-        self.name = name
-
-    ### Instrument.__init__()
-
-    def open  (): pass
-    def close (): pass
-    def read  (): pass
-    def write (): pass
-    def Report(): pass
-
-
-    def debug(self,msg="",skip=[],os=sys.stderr):           # Instrument::debug()
-        """Help with momentary debugging, file to fit.
-           msg  -- special tag for this call
-           skip -- the member variables to ignore
-           os   -- output stream: may be IOStream etc.
-        """
-        import pprint
-        print("Instrument - %s " % msg, file=os)
-        for key,value in self.__dict__.items():
-            if(key in skip):
-               continue
-            print(f'{key:20s} =',file=os,end='')
-            pprint.pprint(value,stream=os,indent=4)
-        return self
-
-    ### Instrument.debug()
-
-    __Instrument_debug = debug  # really preserve our debug name if we're inherited
-
-   # (wg-python-properties properties)
-
-# class Instrument
 
 
 ##############################################################################
@@ -127,8 +55,8 @@ if __name__ == "__main__":
                    help="<bool>     be verbose about work.")
 
     (options, args) = opts.parse_args()
-    HOST = options.hostname
-    PORT = options.portnumber
+    HOST        = options.hostname
+    PORT        = options.portnumber
 
     verboseflag = options.verboseflag
 
@@ -137,7 +65,7 @@ if __name__ == "__main__":
         print(f"FlexSpec1 dispatch-server.py: {PORT}")
 
     print("FlexSpec1 dispatch-server.py: FlexSpec1 server started.")
-    time.sleep(100)
+    time.sleep(1)
     #systemd.daemon.notify('READY=1')
     flag = True
     if(verboseflag):
