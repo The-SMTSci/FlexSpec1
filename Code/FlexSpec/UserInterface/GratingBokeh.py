@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # bokeh serve ./GratingBokeh.py
 # (wg-python-fix-pdbrc)
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
 
 ### HEREHEREHERE
 
@@ -141,6 +143,7 @@ class BokehGrating(object):
         self.home          = 0                         # we assume we're not homed
         self.validp        = False                     # wake up in false state
         self.receipt       = 1                         # always ask for a update on status
+        self.rotdir        = 1                         # motor direction 1 = CW 2 = CCW
 
         # Handle startup the easy way. Proper will be to query before instantiation.
         entry              =  BokehGrating.GratingsTable.get(grating,None)
@@ -153,11 +156,15 @@ class BokehGrating(object):
         self.cwavechoice      = Slider  (title=f"Central Wavelength (A)", bar_color='firebrick',
                                      value = self.cwave, start = self.startwave,  
                                      end = self.endwave+1, step = 1, width=self.wwidth)
+
+        self.rot_group = RadioGroup(labels=["CW", "CCW" ], height=50, width=200,active=0, inline=True)
+
         self.processbutton    = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
 
         self.homebutton       = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
         self.gratingchoices     .on_change('value', lambda attr, old, new: self.update_gratingchoice   (attr, old, new))
         self.cwavechoice     .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
+        self.rot_group .on_change('active', lambda attr, old, new: self.radio_handler   (attr, old, new))
         self.processbutton   .on_click (lambda : self.update_processbutton())
         self.homebutton      .on_click (lambda : self.update_homebutton())
         self.send_state()
@@ -193,6 +200,15 @@ class BokehGrating(object):
         self.send_state()
         self.home      = 0   # clear the command
 
+    ### BokehGrating.update_homebutton()
+
+    def radio_handler(self,attr, old, new):                     # BokehFlexBlinky::radio_handler()
+        """Do something about the blink via an event lambda"""
+        self.state = new # self.blink_group.active
+        if(self.rotdir not in [0,1]):
+            self.rotdir = 3;
+        self.send_state()
+    ### BokehGrating..radio_handler()
 
     def update_processbutton(self):                             # BokehGrating::update_homebutton()
         """Send a home command"""
@@ -205,9 +221,10 @@ class BokehGrating(object):
         devstate = dict( [ ( "grating"   , self.grating),
                            ( "cwave"     , f"{self.cwave:d}"),
                            ( "home"      , f"{self.home:d}"),
+                           ( "rotdir"    , f"{self.rotdir}"),
                            ( "receipt"   , f"{self.receipt:d}")
                          ])
-        gadgetcmd            = dict([("process", devstate)])
+        gadgetcmd             = dict([("process", devstate)])
         d2                    = dict([(f"{self.name.lower()}", gadgetcmd)])
         d3                    = dict([(f"{self.flexname}", d2)])
         jdict                 = json.dumps(d3)
@@ -219,6 +236,7 @@ class BokehGrating(object):
         """Get the layout in gear"""
         return(row ( column ( self.gratingchoices,
                               self.cwavechoice,
+                              self.rot_group,
                               self.processbutton,
                               self.homebutton
                             )  ))

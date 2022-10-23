@@ -17,7 +17,7 @@ import socket
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import Button, Div
 
-HOST = '127.0.0.1'  # The server's hostname or IP address
+HOST = '127.0.0.1'  # The server's hostname or IP address 127.0.0.1 skips resolve
 PORT = 65432        # The port used by the server
 
 #############################################################################
@@ -197,21 +197,35 @@ class FlexPublish(object):
 
     ### FlexPublish.clear
 
-    def send(self,msg):                               # FlexPublish.send()
-       """Connect to socket and send the message., Return the data."""
-       data = ""
-       try:
-           with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-               s.connect((HOST, PORT))        # requires a tuple.
-               s.sendall(msg.encode())
-               data = s.recv(1024)                    # the returned data.
-       except Exception as e:
-           print(f"Publish Send Error: {HOST} {PORT}\n{msg}")
-           print(f"{e.__str__()}")
+    def send(self,payload):                               # FlexPublish.send()
+        """Connect to socket and send the message., Return the data.
+        Designd to be called by self.display
+        """
+        data = "CONNECTION FAILURE"          # assume the worst
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                msg = "settimeout"
+                #s.settimeout(1.5)              # seconds
+                msg = "connect"
+                s.connect((HOST, PORT))         # requires a tuple.
+                msg = "sendall"
+                s.sendall(payload.encode())     # sends bytes type
+                msg = "recv"
+                data = s.recv(1024)             # the returned data.
+        except socket.timeout as to:
+           data = f"FlexPublish: ERROR: Timeout Error to.__str__()"
+           print(data)
+           data = data.encode()                 # this needs to be bytes
            s.close()
-       self.data = data
+        except Exception as e:
+            data = f"FlexPublish: ERROR: Publish Send Error: {HOST} {PORT}\n{e.__str__()}\n{payload}\nerrmsg={msg}\n"
+            print(data)
+            print(f"{e.__str__()}")             # local console
+            data = data.encode()                # this needs to be bytes
+            s.close()
+        self.data = data
 
-       return self.data
+        return data                             # return data or errors as bytes
 
     ### FlexPublish.send()
 
@@ -219,10 +233,10 @@ class FlexPublish(object):
         """append to content display to the div """
         self.panel.background = color
         ts                    = _fulltimestamp()
-        self.message          = self.message  + f'\n# foo {ts}\n' + f'msg{self.messagecnt} = {msg}' + "\n"
+        retmsg = self.send(msg).decode()
+        self.message          = self.message  + f'\n# {ts}\n' + f'msg{self.messagecnt} = {retmsg}' + "\n"
         self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)
         self.messagecnt       += 1    # increment the variable.
-        self.send(msg)
 
         return self
 
@@ -232,7 +246,7 @@ class FlexPublish(object):
         """Return the original accumulated messages sans
         formatting."""
 
-        return self.self.data
+        return self.data
 
     ### FlexPublish.read()
 

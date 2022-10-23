@@ -214,7 +214,7 @@ class Collimator(object):
         """Several ways to send things"""
         devstate = dict( [ ( "position" , f'"{self.position:7.4f}"'   ),
                            ( "direction", f'"{int(self.direction):d}"'),
-                           ( "speed"    , f'"{self.speed:d}"'         ),
+                           ( "speed"    , f'"{self.speed:3f}"'        ),
                            ( "home"     , f'"{self.homestate:d}"'     ),
                            ( "receipt"  , f'"{self.receipt:d}"'       )
                         ])

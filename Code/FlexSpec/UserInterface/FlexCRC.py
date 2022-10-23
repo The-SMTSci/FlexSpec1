@@ -102,7 +102,9 @@ class FlexCRC(object):
 
     def crc(self):                                          # FlexCRC::crc()
         """Class member, return hex string with the payload"""
+
         return ("%08X" % zlib.crc32(self._payload.encode())).encode()
+
     ### FlexCRC::crc()
 
     @staticmethod

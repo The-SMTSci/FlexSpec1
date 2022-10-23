@@ -3,6 +3,9 @@
 # (compile "bokeh serve ./FlexSpec.py --unused-session-lifetime 3600000")
 # (wg-python-fix-pdbrc)
 # /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/FlexSpec.py
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+#
 ### HEREHEREHERE
 
 import os
@@ -31,6 +34,7 @@ from FlexPublish          import FlexPublish
 from ParallacticAngle     import FlexOrientation
 from Network              import FlexNetwork
 from CameraFocusBokeh     import CameraFocus
+from FlexTextInput        import FlexTextInput
 
 #############################################################################
 #
@@ -89,6 +93,10 @@ __author__  = 'Wayne Green'
 __version__ = '0.1'
 
 
+def settitle(attr,old,new):
+    print(f"FlexSpec settitle old={attr}, old={old}, new={new}")
+
+
 ##############################################################################
 #                                    Main
 #                               Regression Tests
@@ -116,6 +124,7 @@ if (1):  # This is main! leave set to 1
     flexname       = "FlexSpec_Rodda"
     fstitle        = TextInput(value=f"{flexname}", background='Black',
                                disabled=False, width=width)
+
     display        = FlexPublish("f{flexname}",width=width)
 
     slits          = BokehOVIOSlit   (flexname,display=display,width=width)
@@ -125,6 +134,8 @@ if (1):  # This is main! leave set to 1
     collimator     = Collimator      (flexname,display=display,width=width)
     camerafocus    = CameraFocus     (flexname,display=display,width=width)
     network        = FlexNetwork     (flexname,display=display,width=width)
+
+    fstitle.on_change('value_input', settitle) # call back for this
 
     #-------------------------------- Tab 1 -------------------------------------
     # The control tab (left most)
@@ -151,7 +162,7 @@ if (1):  # This is main! leave set to 1
     l4             = column( slits.       layout(),  Spacer(width=width, height=5, background='black'),
                              guider.      layout(),  Spacer(width=width, height=5, background='black'),
                              camerafocus. layout(),  Spacer(width=width, height=5, background='black'),
-                   )
+                           )
     tab4           = Panel(child=l4,title='Static Gadgets')
 
     ########################### Start the main layout ###########################
@@ -163,12 +174,12 @@ if (1):  # This is main! leave set to 1
 
     tabn           = Panel(child = ln, title="Display")
 
-    tabs           = Tabs(tabs=[tab1,tab2,tab3,tab4,   tabn])
+    tabs           = Tabs(tabs=[tab1,tab2,tab3,tab4,tabn])
 
     try:
         curdoc().theme = 'dark_minimal'
         curdoc().title = "FlexSpec1 Spectrograph"
-        curdoc().add_root(row(tabs))
+        curdoc().add_root(row(tabs,ln))
     except Exception as e:
         print("FlexSpec: Main. Terminating.")
         display.display(b'end')
