@@ -9,6 +9,8 @@ import time
 import sys
 import abc
 import serial
+import logging
+
 #import systemd.daemon
 
 import optparse             # flexibility for non-systemd starting.
@@ -27,43 +29,12 @@ localhost usually resolves to 127.0.0.1, use 127.0.0.1 for faster work
 
 """
 
-
+##############################################################################
+# flexserve - break out as a simple case.
+#
+##############################################################################
 def flexserve():
     """Tie bokeh to serial port"""
-    pass
-
-
-
-##############################################################################
-#                                    Main
-#                               Regression Tests
-##############################################################################
-# HEREHEREHERE
-if __name__ == "__main__":
-    opts = optparse.OptionParser(usage="%prog "+__doc__)
-
-    opts.add_option("-i", "--host", action="store", dest="hostname",
-                   default='127.0.0.1',
-                   help="<ip Address>     be verbose about work.")
-
-    opts.add_option("-p", "--port", action="store", dest="portnumber",
-                   default=65432,
-                   help="<int>     port number.")
-
-    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
-                   default=False,
-                   help="<bool>     be verbose about work.")
-
-    (options, args) = opts.parse_args()
-    HOST        = options.hostname
-    PORT        = options.portnumber
-
-    verboseflag = options.verboseflag
-
-    if(verboseflag):
-        print(f"FlexSpec1 dispatch-server.py: {HOST}")
-        print(f"FlexSpec1 dispatch-server.py: {PORT}")
-
     print("FlexSpec1 dispatch-server.py: FlexSpec1 server started.")
     time.sleep(1)
     #systemd.daemon.notify('READY=1')
@@ -101,3 +72,39 @@ if __name__ == "__main__":
             print(f"FlexSpecServer ERROR: {e.__str__()}")
     
     print("Socket complete, exiting")
+
+### def flexserve
+
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+    opts.add_option("-i", "--host", action="store", dest="hostname",
+                   default='127.0.0.1',
+                   help="<ip Address>     be verbose about work.")
+
+    opts.add_option("-p", "--port", action="store", dest="portnumber",
+                   default=65432,
+                   help="<int>     port number.")
+
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    (options, args) = opts.parse_args()
+    HOST        = options.hostname
+    PORT        = options.portnumber
+
+    verboseflag = options.verboseflag
+
+    if(verboseflag):
+        print(f"FlexSpec1 dispatch-server.py: {HOST}")
+        print(f"FlexSpec1 dispatch-server.py: {PORT}")
+
+    flexserve()
+
