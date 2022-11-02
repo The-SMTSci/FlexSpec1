@@ -1,9 +1,12 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# __doc__
 # (compile "pydoc2.7 ./newtrim")
 #
 # (wg-astroconda3-pdb)      # CONDA Python3
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
 #
 # (wg-python-fix-pdbrc)
 
@@ -56,17 +59,21 @@ bin/trim [options] files...
 "-s", "--section" <[X1:X2,Y1:Y2]>  section in IRAF/FITS coordinates.
 "-v", "--verbose" <bool>           be verbose about work.
 
+ALL COORDNIATES ARE IN FITS (FORTRAN) 1-BASED UNITS.
+
 The specified trim section may be in the file, specified by user
 via the -s switch or generically by an 'export TRIMSEC='[600:*,550:750]'
-or occur in the file.
+or occur in the file. 
 
-Under normal usage: No -s switch will fall back to the file, then
-fall back to the env. The '-s' always takes precedence.
+Under normal usage: If the -s switch is not supplied, the TRIMSEC in
+the file will be sought; then 'export TRIMSEC='[X1:X2,Y1:Y2]]. The
+'-s' always takes precedence.
 
-The -f switch force env over any file definition. In essence
-rewrites the TRIMSEC keyword. You can always leave the -s
-switch off -- but if there -f will take it as last resort.
-None of header, -s or env will skip the file.
+The -f switch will force env over any file definition. In essence
+rewrites the TRIMSEC keyword. You can always leave the -s switch off
+-- but if there -f will take the -s switch as last resort.  If no
+usable TRIMSEC may be determined by the machinations above or exists
+in the header the file will be skipped.
 
 The X and Y coordintes are 1s based. A splat ('*') may be used
 to stand in for the values, 
@@ -81,7 +88,9 @@ in the local envrionment.  Inside PyRAF the Python os.environ['TRIMSEC'] =
 the header.  Pay attention to numpy indexing!  All files are presumed
 to be bigger than the section.
 
-Note: Import this module for access to classes herein.
+Note: You may mport this module for access to classes herein.
+
+Note: The python conforms to python 2.7 for older PyRAF conventions.
 
 """
 
