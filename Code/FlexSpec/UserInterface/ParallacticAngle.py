@@ -116,7 +116,7 @@ class FlexOrientation(object):
         self.parallacticangle = Slider    (title=f"Parallactic Angle", bar_color='firebrick',
                                            value = self.pangle, start = 0,  end = 180,
                                            step = 0.1, width=self.wwidth)
-        self.readbutton       = Button    ( label="Read",     disabled=False, button_type="warning", width=self.wwidth//2)
+        self.readbutton       = Button    ( label="Read",     disabled=False, button_type="success", width=self.wwidth)
         self.homebutton       = Button    ( label="Home",     disabled=False, button_type="danger",  width=self.wwidth//2)
 
         self.parallacticangle .on_change('value', lambda attr, old, new: self.update_parallacticangle      (attr, old, new))
@@ -176,10 +176,10 @@ class FlexOrientation(object):
         """Several ways to send things
 
         """
-        devstate           = dict( [ ( "read"    , '"%d"'    % self.read),
-                                     ( "home"    , '"%d"'    % self.home),
-                                     ( "pangle"  , '"%f7.3"' % self.pangle),
-                                     ( "receipt" , '"%d"'    % self.receipt)
+        devstate           = dict( [ ( "read"    , f"{self.read:d}"),   # '"%d"'    % self.read),
+                                     ( "home"    , f"{self.home:d}"),   # '"%d"'    % self.home),
+                                     ( "pangle"  , f"{self.pangle}"),   # '"%f7.3"' % self.pangle),
+                                     ( "receipt" , f"{self.receipt:d}") # '"%d"'    % self.receipt)
                                    ])
         gadgetcmd          = dict([("process", devstate)])
         d2                 = dict([(f"{self.name}", gadgetcmd)])
@@ -192,7 +192,7 @@ class FlexOrientation(object):
     def layout(self):                                           # FlexOrientation::layout()
         """Create the layout"""
         return(row ( column ( self.parallacticangle,
-                              row(self.homebutton, self.readbutton)
+                              self.readbutton
                             )  ))
 
     ### FlexOrientation.layout()

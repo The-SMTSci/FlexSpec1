@@ -10,6 +10,8 @@ import optparse
 import sys
 import re
 import json
+from urllib.parse    import urlparse
+
 from FlexPublish          import fakedisplay
 
 from bokeh                import events
@@ -55,16 +57,15 @@ from bokeh.models.widgets import Tabs, Panel
 __doc__ = """
 
 /home/git/external/FlexSpec1/Code/FlexSpec/UserInterface/Network.py
-[options] files...
-
-
+manage the network credentials between the browser and the flexdispatch
+server.
 
 """
 
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
-__all__     = ['','']   # list of quoted items to export
+__all__     = ['FlexNetwork','FlexNetworkException']   # list of quoted items to export
 
 
 ##############################################################################
@@ -81,6 +82,36 @@ class FlexNetworkException(Exception):
         return f" FlexNetwork: {e.__str__()}\n"
 # FlexNetworkException
 
+##############################################################################
+# dumpurl - Start of a dumper for any encoded HTML traffic we send/receive
+#
+##############################################################################
+__dumper_code = """
+  elisp snippets for playing with the code.
+  (setq str "{\"grating\" : {\"kzin\" : {\"halpha\" : \"1\"}}}")
+  (setq str "{\"kzin\" : {\"halpha\" : \"1\"}}")
+  (progn
+      (setq str (replace-regexp-in-string "[\"]" "%22" str))
+      (setq str (replace-regexp-in-string "[{]"  "%7B" str))
+      (setq str (replace-regexp-in-string "[}]"  "%7D" str))
+      (setq str (replace-regexp-in-string "[:]"  "%3A" str))
+      (setq str (replace-regexp-in-string "[ ]"  "%20" str))
+      (insert str)
+  )
+"""
+def _dumpurl(x):                                            # def dumpurl()
+    print(f"scheme   = {x.scheme}"  )
+    print(f"hostname = {x.hostname}")
+    print(f"port     = {x.port}"    )
+    print(f"path     = {x.path}"    )
+    print(f"query    = {x.query}"   )
+    print(f"\nnetloc = {x.netloc}"  )
+    print(f"params   = {x.params}"  )
+    print(f"fragment = {x.fragment}")
+    print(f"username = {x.username}")
+    print(f"password = {x.password}")
+
+### def dumpurl()
 
 ##############################################################################
 # FlexNetwork
@@ -96,35 +127,48 @@ class FlexNetworkException(Exception):
 class FlexNetwork(object):
     """ Handle the  username, password, host ip, port
     """
-    #__slots__ = [''] # add legal instance variables
-    # (setq properties `("" ""))
-    def __init__(self, flexname,                        # FlexNetwork::__init__()
-                       name     = "Network",
-                       username = None,
-                       password = None,
-                       hostip   = None,
-                       port     = None,
-                       display  = fakedisplay,
-                       width    = 200):
+    urlre  = re.compile(r'')
+
+    def __init__(self, flexname : 'Insrument' ,                        # FlexNetwork::__init__()
+                       username = None,                     # the user's name
+                       password = None,                     # password
+                       hostip   = None,                     # the URL for the spectrpgraph
+                       display  = fakedisplay,              # the display for our logging
+                       width    = 200):                     # the default width
         """Get the details together and manage network"""
         #super().__init__()
         # (wg-python-property-variables)
         self.flexname        = flexname
-        self.name            = name
         self.width           = width
         self.connected       = False
         self.display         = display
         self.connection      = None
 
+        self.url_scheme      = None                         # the parts from url parse
+        self.url_hostname    = None
+        self.url_port        = None
+        self.url_path        = None
+        self.url_query       = None
+        self.url_netloc      = None
+        self.url_params      = None
+        self.url_username    = None
+        self.url_fragment    = None
+        self.url_password    = None
+
+
+
+        self.parsedurl       = None
+
         self.username        = username
         self.password        = password
         self.hostip          = hostip       # determined from the connect; passed to dispatch server
-        self.port            = port         # dispatch loops back with success of the login
 
-        self.connectionfield = TextInput    (title='Host Path',width=self.width)
+
+        self.connectionfield = TextInput    (title='Host URL',placeholder="flexspec://pier15.gao.flexspec.app:/help",
+                                             width=self.width)  # parse
         self.userfield       = TextInput    (title='Username',width=self.width)
         self.passwordfield   = PasswordInput(title='Password',width=self.width)
-        self.connectbutton   = Button       (label="Login"   ,width=self.width//2,  disabled=False, button_type="default")
+        self.connectbutton   = Button       (label="Login"   ,width=self.width,  disabled=False, button_type="danger")
 
         self.connectionfield  .on_change("value",lambda attr, old, new: self.update_connectionfield(attr, old, new))
         self.userfield        .on_change("value",lambda attr, old, new: self.update_userfield(attr, old, new))
@@ -134,7 +178,13 @@ class FlexNetwork(object):
     ### FlexNetwork.__init__()
 
     def update_connectionfield(self,attr,old,new):              # Network::update_connectbutton()
-        self.connectionfield = new
+        try:
+            v = urlparse(new)
+        except ValueError as ve:
+            #bad parse
+            self.connectionfield.value = f"{ve.__str__()}"
+
+        self.connection = new
 
     def update_userfield(self,attr,old,new):                    # Network::update_connectbutton()
         self.username = new
@@ -146,6 +196,24 @@ class FlexNetwork(object):
         """Update the home command. """
         self.send_state()
         self.connected = True
+
+    def parseurl(self):
+        """Parse the URL field
+        https://flexspec1.readthedocs.io/en/latest/
+        https://pier15.example.com:6563/roddaflex/?grating=%7B%22kzin%22%20%3A%20%7B%22halpha%22%20%3A%20%221%22%7D%7D
+
+        """
+        rawurl = self.connectionfield.value
+        self.url_scheme      = rawurl.scheme                # spell out the return stuff
+        self.url_hostname    = rawurl.hostname              # for clarity
+        self.url_port        = rawurl.port
+        self.url_path        = rawurl.path
+        self.url_query       = rawurl.query
+        self.url_netloc      = rawurl.netloc
+        self.url_params      = rawurl.params
+        self.url_username    = rawurl.username
+        self.url_fragment    = rawurl.fragment
+        self.url_password    = rawurl.password
 
     ### Network.update_connectbutton()
 
@@ -160,13 +228,14 @@ class FlexNetwork(object):
     ### Network.layout()
 
     def send_state(self):                                       # Network.send_state()
-        loginstate = dict ([ ("User Name",self.username),
-                             ("Password",self.password)
+        loginstate = dict ([ ("host"      , self.connectionfield.value ),
+                             ("uname"     , self.username              ),
+                             ("password"  , self.password              ),
+                             ("receipt"   , "1"                        )
                            ])
-        netcmd = dict([("Process", loginstate), ("RRR" , 0)])
-        d2 = dict([(f"{self.name}", netcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
+        netcmd = dict([("process", loginstate)])
+        d2     = dict([(f"{self.flexname.flexname}", netcmd)])
+        jdict  = json.dumps(d2)    # {"process" : {"network" : {...host, uname, passwd, receipt=1...}
         self.display.display(f'{jdict}')
 
     ### Network.send_state()

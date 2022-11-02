@@ -4,6 +4,7 @@
 # (wg-python-fix-pdbrc)
 #
 # (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
 
 ### HEREHEREHERE
 
@@ -12,8 +13,10 @@ import optparse
 import sys
 import io
 import re
-from collections    import OrderedDict
-from FlexPublish    import fakedisplay        # Display upgrade
+from Flex_Patron     import Flex_Patron
+from collections     import OrderedDict
+from FlexPublish     import fakedisplay        # Display upgrade 
+from Flex_Instrument import Flex_Instrument    # Flex_Instrument,Flex_InstrumentException
 
 import json
 
@@ -99,7 +102,7 @@ class BokehGratingException(Exception):
 # BokehGrating
 #
 ##############################################################################
-class BokehGrating(object):
+class BokehGrating(Flex_Patron):
     """ A small class to blink the led, with varying rate
     """
 
@@ -115,14 +118,17 @@ class BokehGrating(object):
                                  ])
 
     #__slots__ = [''] # add legal instance variables
-    # (setq properties `("" ""))
-    def __init__(self, flexname : str = "Default",              # BokehGrating::__init__()
-                       name     : str = "Grating",
-                       display        = fakedisplay,
-                       grating : str  = "300 l/mm",
-                       width   : int  = 200):
-        """Initialize this class. If requested grating in choices, then use it
-           otherwise add it.
+    # (setq properties '("" ""))
+    def __init__(self, flexname : 'Instrument', /,     # BokehGrating::__init__()
+                       name     : str           = "grating",   # internal Ardnino name
+                       grating  : str           = "300 l/mm",  # Our opinion Ardnino's l/mm
+                       display  : 'FlexPublish' = fakedisplay, # Browser thingy to publish things
+                       width    : int           = 200,         # Bokeh: width of our  <DIV>
+                       notify   : bool          = False):      # Bokeh/Dispatch send out initial notification
+        """
+        If requested grating in choices, then use it otherwise add it.
+        The grating is a mechanized component of the 'Instrument', with the
+        Ardino name of 'grating'
         """
 
         # snipped of dead code to presume a grating...
@@ -135,6 +141,9 @@ class BokehGrating(object):
         self.flexname      = flexname                  # Name of associated instrument
         self.name          = name                      # Name of this instance
         self.wwidth        = width                     # govern the width of the Bokeh widgets
+        self.notify        = notify                    # send(or not) out notification on startuy.
+
+        # fields matched (shared) with Ardhino C++ class.
         self.grating       = grating                   # Start with a default 300 l/mm
         self.startwave     = 3200                      # start range current grating assume the whole spectrum
         self.endwave       = 10000                     # end   range current grating if grating in new to us.
@@ -162,16 +171,18 @@ class BokehGrating(object):
         self.processbutton    = Button  ( label="Process",     disabled=False, button_type="warning", width=self.wwidth)
 
         self.homebutton       = Button  ( label="Home",     disabled=False, button_type="danger", width=self.wwidth)
-        self.gratingchoices     .on_change('value', lambda attr, old, new: self.update_gratingchoice   (attr, old, new))
+
+        self.gratingchoices  .on_change('value', lambda attr, old, new: self.update_gratingchoice   (attr, old, new))
         self.cwavechoice     .on_change('value', lambda attr, old, new: self.update_cwave      (attr, old, new))
-        self.rot_group .on_change('active', lambda attr, old, new: self.radio_handler   (attr, old, new))
+        self.rot_group       .on_change('active', lambda attr, old, new: self.radio_handler   (attr, old, new))
         self.processbutton   .on_click (lambda : self.update_processbutton())
         self.homebutton      .on_click (lambda : self.update_homebutton())
-        self.send_state()
+        if(self.notify):
+            self.send_state()    # when initialized send out info.
 
     ### BokehGrating.__init__()
 
-    def update_gratingchoice(self,attr,old,new):                # BokehGrating::update_gratingchoice()
+    def update_gratingchoice(self,attr,old,new):           # BokehGrating::update_gratingchoice()
         """update_debugbtn Button via an event lambda"""
         grating = new # self.gratingchoices.value
         entry   = BokehGrating.GratingsTable.get(grating)
@@ -188,13 +199,13 @@ class BokehGrating(object):
 
     ### BokehGrating.update_gratingchoice()
 
-    def update_cwave(self,attr,old,new):                        # BokehGrating::cwave()
+    def update_cwave(self,attr,old,new):                    # BokehGrating::cwave()
         """Get the new slider value and send it."""
         self.cwave = new
 
     ### BokehGrating.cwave()
 
-    def update_homebutton(self):                                # BokehGrating::update_homebutton()
+    def update_homebutton(self):                            # BokehGrating::update_homebutton()
         """Send a home command"""
         self.home      = 1
         self.send_state()
@@ -202,22 +213,24 @@ class BokehGrating(object):
 
     ### BokehGrating.update_homebutton()
 
-    def radio_handler(self,attr, old, new):                     # BokehFlexBlinky::radio_handler()
+    def radio_handler(self,attr, old, new):                 # BokehFlexBlinky::radio_handler()
         """Do something about the blink via an event lambda"""
         self.state = new # self.blink_group.active
         if(self.rotdir not in [0,1]):
             self.rotdir = 3;
         self.send_state()
+
     ### BokehGrating..radio_handler()
 
-    def update_processbutton(self):                             # BokehGrating::update_homebutton()
+    def update_processbutton(self):                         # BokehGrating::update_homebutton()
         """Send a home command"""
         self.send_state()
 
     ### BokehGrating.update_homebutton()
 
-    def send_state(self):                                       # BokehGrating::send_state()
+    def send_state(self):                                   # BokehGrating::send_state()
         """Several ways to send things"""
+        flexname = self.flexname                         # get the actual latest name.
         devstate = dict( [ ( "grating"   , self.grating),
                            ( "cwave"     , f"{self.cwave:d}"),
                            ( "home"      , f"{self.home:d}"),
@@ -232,7 +245,7 @@ class BokehGrating(object):
 
     ### BokehGrating.send_state()
 
-    def layout(self):                                           # BokehGrating::layout()
+    def layout(self):                                       # BokehGrating::layout()
         """Get the layout in gear"""
         return(row ( column ( self.gratingchoices,
                               self.cwavechoice,
@@ -258,11 +271,33 @@ class BokehGrating(object):
             pprint.pprint(value,stream=os,indent=4)
         return self
 
-    ### BokehGrating.debug()
+    ##################################################################
+    #  Abstract methods needed
+    #  
+    ##################################################################
+    def get_state(self) ->bool:
+        raise(FlexPatronException(f"{self.__class__name} get_state implemented"))
+        pass
 
-    __BokehGrating_debug = debug  # really preserve our debug name if we're inherited
+    def Process(self, jsonstr : (dict,'FlexStdString') = None, reply : str = "") -> int:
+        raise(FlexPatronException(f"{self.__class__name} Process implemented"))
+        pass
+    def ThinkFast(self, report : (str,'FlexStdString') = None)-> int:
+        raise(FlexPatronException(f"{self.__class__name} ThinkFast implemented"))
+        pass
+    def Report(self,report : (str,'FlexStdString') = None)-> str:
+        raise(FlexPatronException(f"{self.__class__name} Report implemented"))
+        pass
+    def Inventory(self,report : (str,'FlexStdString') = None)-> int:
+        raise(FlexPatronException(f"{self.__class__name} Inventory implemented"))
+        pass
+    def Reset(self) ->'self':
+        raise(FlexPatronException(f"{self.__class__name} Reset implemented"))
+        pass
+    def Validp(self) ->bool:
+        raise(FlexPatronException(f"{self.__class__name} Validp implemented"))
+        pass
 
-   # (wg-python-properties properties)
 
 # class BokehGrating
 

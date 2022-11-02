@@ -212,16 +212,15 @@ class Collimator(object):
 
     def send_state(self):                                       # Collimator::send_state()
         """Several ways to send things"""
-        devstate = dict( [ ( "position" , f'"{self.position:7.4f}"'   ),
-                           ( "direction", f'"{int(self.direction):d}"'),
-                           ( "speed"    , f'"{self.speed:3f}"'        ),
-                           ( "home"     , f'"{self.homestate:d}"'     ),
-                           ( "receipt"  , f'"{self.receipt:d}"'       )
+        devstate = dict( [ ( "position" , f"{self.position:7.4f}"   ),
+                           ( "direction", f"{int(self.direction):d}"),
+                           ( "speed"    , f"{self.speed:3f}"        ),
+                           ( "home"     , f"{self.homestate:d}"     ),
+                           ( "receipt"  , f"{self.receipt:d}"       )
                         ])
-        gadgetcmd            = dict([("Process", devstate)])
-        d2                 = dict([(f"{self.name}", gadgetcmd)])
-        d3                 = dict([(f"{self.flexname}", d2)])
-        jdict              = json.dumps(d3)
+        gadgetcmd          = dict([("process"         , devstate)])
+        d2                 = dict([(f"{self.name}"    , gadgetcmd)])
+        jdict              = json.dumps(d2)
         self.display.display(f'{jdict}')
 
     ### Collimator.send_state()

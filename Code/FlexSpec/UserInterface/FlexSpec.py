@@ -35,6 +35,7 @@ from ParallacticAngle     import FlexOrientation
 from Network              import FlexNetwork
 from CameraFocusBokeh     import CameraFocus
 from FlexTextInput        import FlexTextInput
+from Flex_Instrument      import Flex_Instrument
 
 #############################################################################
 #
@@ -122,24 +123,26 @@ if (1):  # This is main! leave set to 1
     # set a few main constants
     width          = 600                              # width of the main things
     flexname       = "FlexSpec_Rodda"
-    fstitle        = TextInput(value=f"{flexname}", background='Black',
-                               disabled=False, width=width)
+    instrument     = Flex_Instrument(flexname,width=width)  # initialize the instrument with flexname
+    #fstitle        = TextInput(value=f"title{flexname}", background='Black',
+    #                           disabled=False, width=width)
 
     display        = FlexPublish("f{flexname}",width=width)
 
     slits          = BokehOVIOSlit   (flexname,display=display,width=width)
-    grating        = BokehGrating    (flexname,display=display,width=width)
+    grating        = BokehGrating    (instrument,display=display,width=width)  # instrument carries flexname.
     pangle         = FlexOrientation (flexname,display=display,width=width)
     guider         = Guider          (flexname,display=display,width=width)
     collimator     = Collimator      (flexname,display=display,width=width)
     camerafocus    = CameraFocus     (flexname,display=display,width=width)
-    network        = FlexNetwork     (flexname,display=display,width=width)
+    network        = FlexNetwork     (instrument,display=display,width=width)
 
-    fstitle.on_change('value_input', settitle) # call back for this
+    #fstitle.on_change('value_input', settitle) # call back for this
 
     #-------------------------------- Tab 1 -------------------------------------
     # The control tab (left most)
-    l1             = column(fstitle,                Spacer(width=width, height=5, background='black'),
+    l1             = column(instrument.layout()  ,  Spacer(width=width, height=5, background='black'),
+                            #fstitle              ,  Spacer(width=width, height=5, background='black'),
                             grating.     layout(),  Spacer(width=width, height=5, background='black'),
                             collimator.  layout(),  Spacer(width=width, height=5, background='black'),
                             pangle.      layout())

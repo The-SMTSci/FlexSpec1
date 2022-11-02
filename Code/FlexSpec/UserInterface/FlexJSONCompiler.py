@@ -23,18 +23,31 @@
 # __author__  = 'Wayne Green'
 # __version__ = '0.1'
 # __all__     = ['FlexJSONCompilerException','FlexJSONCompiler']   # list of quoted items to export
+# class FlexJSONCRCException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FlexJSONCRC(object):
+#     #__slots__ = [''] # add legal instance variables
+#     def __init__(self):                                     # FlexJSONCRC::__init__()
+#     def encode(self,jsonstr):                               #  FlexJSONCRC.encode()
+#     def decode(self,jsoncrc):                               # FlexJSONCRC.decode()
+#     def debug(self,msg="",skip=[],os=sys.stderr):           # FlexJSONCRC::debug()
 # class FlexJSONCompilerException(Exception):
 #     def __init__(self,message,errors=None):
 #     @staticmethod
 #     def __format__(e):
 # class FlexJSONCompiler(object):
 #     def __init__(self,                                      # FlexJSONCompiler::__init__()
-#     def compile(self,filename : str = self.infilename):     # FlexJSONCompiler.compile()
+#     def setfilename(self,filename):                         # FlexJSONCompiler.setfilename()
+#     def compile(self,filename : str = None):     # FlexJSONCompiler.compile()
 #     def compilerecord(self,                                 # FlexJSONCompiler.compilerecord
-#     def writefile(filename):
+#     def writefile(self,filename=None):
 #     def debug(self,msg="",skip=[],os=sys.stderr):           # FlexJSONCompiler::debug()
 #     def uncompilerecord(self,                               # FlexJSONCompiler.uncompilerecord()
-#     def uncompile(self,os="",verboseflag = False):          # FlexJSONCompiler.uncompile()
+#     def uncompile(self,infile="",verboseflag = False):          # FlexJSONCompiler.uncompile()
+#     @staticmethod
+#     def encode(payload : str):
 # if __name__ == "__main__":
 #
 #
@@ -53,7 +66,8 @@ import re
 import json
 import zlib                                        # calculate the CRCs
 from io import BytesIO                             # needed for byte manips.
-
+from FlexFileManager import BinaryFilemanager,  BinaryFileManagerException, BinaryFileManagerEOF
+from RpiFlexCharmap import *
 if(0):
     import traceback
 
@@ -96,6 +110,93 @@ __author__  = 'Wayne Green'
 __version__ = '0.1'
 __all__     = ['FlexJSONCompilerException','FlexJSONCompiler']   # list of quoted items to export
 
+_charmap = RpiFlexCharmap()   # global scope, used for testing.
+_crcfix  = re.compile(r' ')
+
+##############################################################################
+# FlexJSONCRCException
+#
+##############################################################################
+class FlexJSONCRCException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(FlexJSONCRCException,self).__init__("FlexJSONCRC "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return f" FlexJSONCRC: {e.__str__()}\n"
+# FlexJSONCRCException
+
+
+##############################################################################
+# FlexJSONCRC
+#
+##############################################################################
+class FlexJSONCRC(object):
+    """ A class to make/unmake crc's from JSON protocol. This is a CRC32
+    BigEndian 8 bits.
+    """
+
+    def __init__(self):                                     # FlexJSONCRC::__init__()
+        """Initialize this class."""
+        #super().__init__()
+        # (wg-python-property-variables)
+
+    ### FlexJSONCRC.__init__()
+
+    def encode(self,jsonstr : (bytes,str))->bytes:                        #  Flexjsonstr::encode()
+        """Given a payload a json string , return a CRC bytes object with
+        8 ASCII values of HEX characters for the nybbles of a 32-bit BigEndian
+        CRC.
+
+        """
+        json     = jsonstr                           # grab input, assume its bytes
+        bytescrc = b''
+        if(isinstance(jsonstr, str)):
+            json = jsonstr.encode()                  # turn into bytes
+        if(isinstance(json,bytes)): # HEREHEREHERE
+            bytescrc = bytes([f"{c:02x}" for c in json]) #  _crcfix.sub('0',"%08d" % zlib.crc32(json)).encode()
+        else:
+            raise FlexjsonstrException(f"FlexJSONCRC encode must be of type str or byte. Found {type(jsonstr)}")
+
+        return bytescrc
+
+    ###  FlexJSONCRC.encode()
+
+    def decode(self,jsoncrc : (str,bytes)) -> int:          # FlexJSONCRC::decode()
+        """With a 8 byte crc value of type byte (str), convert
+        back into an int"""
+        intcrc = None
+        if(isinstance(jsoncrc,str)):
+            json = str.encode()
+        if(isinstance(json,bytes)):
+            intcrc = json.decode()
+        else:
+            raise FlexJSONCRCException(f"FlexJSONCRC decode must be of type str or byte. Found {type(jsoncrc)}")
+
+        return intcrc
+
+    ### FlexJSONCRC.decode()
+
+    def debug(self,msg="",skip=[],os=sys.stderr):           # FlexJSONCRC::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("FlexJSONCRC - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### FlexJSONCRC.debug()
+
+# class FlexJSONCRC
+
 ##############################################################################
 # FlexJSONCompilerException
 #
@@ -115,13 +216,20 @@ class FlexJSONCompilerException(Exception):
 #
 ##############################################################################
 class FlexJSONCompiler(object):
-    """ FlexJSONCompiler developed to take a input stream of test lines
-    and produce a binary .bin file for testing.
-    There are handy routines within this process.
+    """ FlexJSONCompiler: compile and uncompile stream-images with FlexSpec packets.
+    The packet may have <RS> (record separators for linux development support) (or not)
+    and consists mainly of:
+       [<RS>]<SOH>C1C2C3C4C5 C6C7C8<STX>...flex legal json...<ETX>
+    images. The idea is to make a .bin file for testing (with the <RS>, initial
+    bootstrap code, and to decypher strings as they come in.
+
+    The CRC is written as series of 8 characters, each a nybble of the 4 byte
+    BIG endian crc sum.
+
+    Python hates bytes.
 
     """
-    # CRC is written as series of 8 characters, each a nybble of the 4 byte
-    # BIG endian crc sum.
+
     # class variables
     xlate = {ord('0') :  0, ord('1') :  1, ord('2') :  2, ord('3') :  3,
              ord('4') :  4, ord('5') :  5, ord('6') :  6, ord('7') :  7,
@@ -129,12 +237,13 @@ class FlexJSONCompiler(object):
              ord('C') : 12, ord('D') : 13, ord('E') : 14, ord('F') : 15,
              ord('a') : 10, ord('b') : 11, ord('c') : 12, ord('d') : 13,
              ord('e') : 14, ord('f') : 15
-            }
+            } # convert chars into integers
 
-    ASCII_RS   = chr(0x1e).encode()                          # reference as FlexJSONCompiler.XXXXX_X
-    ASCII_SOH  = chr(1)   .encode()                          # declare actual bytes (0x1e) key Serial1
-    ASCII_STX  = chr(2)   .encode()                          # with ascii control chars
-    ASCII_ETX  = chr(3)   .encode()
+    ASCII_RS   = chr(0x1e).encode()  # FlexJSONCompiler.ASCII_RS
+    ASCII_SOH  = chr(1)   .encode()  # FlexJSONCompiler.ASCII_SOH
+    ASCII_STX  = chr(2)   .encode()  # FlexJSONCompiler.ASCII_STX
+    ASCII_ETX  = chr(3)   .encode()  # FlexJSONCompiler.ASCII_ETX
+
     MAXSIZE    = 2048                                        # prevent runaway loop
 
     msgsplit = re.compile(r'[ ]*=[ ]*')                      # GII display's panel image splitter
@@ -157,11 +266,21 @@ class FlexJSONCompiler(object):
         self.dumperrecno = 0                                 # try to he helpful
         self.binimage    = None                              # compiled image seek(0) to start from top
         self.crc         = None
+        if(not os.path.exists(infilename)):
+            raise FlexJSONCompilerException(f"file {infilename} not found.")
+        try:
+            self.infile      = BinaryFilemanager(open(infilename,'rb'))
+        except Exception as e:
+            raise FlexJSONCompilerException(f"Trouble opening file {infilename}")
 
     ### FlexJSONCompiler.__init__()
 
     def setfilename(self,filename):                         # FlexJSONCompiler.setfilename()
-        """Single place to monkey-type the file name"""
+        """Single place to monkey-type the file name
+            io._io.StringIO        ff = io.StringIO(sys.version); readable/writable/seekable too.
+            io._io.BytesIO         bb = io.BytesIO(f.read())      readable/writable/seekable too.
+            io.__io.BufferedReader bb = open('fn.bin','rb')       f.mode 'rb'   "
+        """
         try:
             if(self.infile is None):
                 if(not isinstance(self.infilename,io._io.StringIO)):
@@ -200,12 +319,6 @@ class FlexJSONCompiler(object):
                 payload       = parts[0].encode()        # turn to raw bytes
                 self.crc      = zlib.crc32(payload)      # calculate the CRC
                 self.compilerecord(payload,self.binimage)# add this record to the image
-#                    self.binimage.write(ASCII_RS)            # write ASCII Record Separator
-#                    self.binimage.write(ASCII_SOH)           # write the SOH
-#                    self.binimage.write(("%08X" % crc).encode())  # 8 bytes CRC zero padded
-#                    self.binimage.write(ASCII_STX)           # the STX char
-#                    self.binimage.write(payload)             # the payload as bytes
-#                    self.binimage.write(ASCII_ETX)           # the ETX
         except Exception as e:
             print(f"Oops FlexJSONCompiler.py: file |{filename}| not found\n{e.__str__()}",file=sys.stderr)
             print(f"{os.getcwd()}",file=sys.stderr)
@@ -217,20 +330,20 @@ class FlexJSONCompiler(object):
     ### FlexJSONCompiler.compile()
 
     def compilerecord(self,                                 # FlexJSONCompiler.compilerecord
-                      payload : str,               # the 'json string'
-                      clear   : bool = False       # clear self.binimage
+                      payload : str,                              # the 'json string'
+                      clear   : bool = False                      # clear self.binimage
                      ):
         """Given a simple json string;
         return <RS><SOH>CcCcCcCc<STX>bytes of string<ETX>
         """
         if(self.binimage is None):
-            self.binimage = BytesIO()            # create an BytesIO instance, use write semantics
+            self.binimage = BytesIO()                             # create an BytesIO instance, use write semantics
         if(self.recsep):
             self.binimage.write(FlexJSONCompiler.ASCII_RS)        # write ASCII Record Separator
         self.binimage.write(FlexJSONCompiler.ASCII_SOH)           # write the SOH
-        self.binimage.write(("%08X" % self.crc).encode())  # 8 bytes CRC zero padded
+        self.binimage.write(("%08X" % self.crc).encode())         # 8 bytes CRC zero padded
         self.binimage.write(FlexJSONCompiler.ASCII_STX)           # the STX char
-        self.binimage.write(payload)             # the payload as bytes
+        self.binimage.write(payload)                              # the payload as bytes
         self.binimage.write(FlexJSONCompiler.ASCII_ETX)           # the ETX
 
         return self.binimage
@@ -245,10 +358,10 @@ class FlexJSONCompiler(object):
         if(filename is not None):
             self.outfilename = filename
         with open(self.outfilename,'wb') if(not isinstance(filename,io._io.TextIOWrapper)) else filename as bof: # a binary output file.
-            self.binimage.seek(0)                # rewind now
-            c = bof.write(self.binimage.read())  # write this batch of bytes to special file.
+            self.binimage.seek(0)                                 # rewind now
+            c = bof.write(self.binimage.read())                   # write this batch of bytes to special file.
         if(options.verboseflag):
-            print(f"Wrote {c} bytes")            # chat about it.
+            print(f"Wrote {c} bytes")                             # chat about it.
 
         return self
 
@@ -272,12 +385,11 @@ class FlexJSONCompiler(object):
     ### FlexJSONCompiler.debug()
 
     def uncompilerecord(self,                               # FlexJSONCompiler.uncompilerecord()
-                        fh,                   # open('rb') filestream handle or str:filename
-                        os,                   # the output stream open('w[+]')
-                        verboseflag = False): # be chatty and raise on errors
+                        infilehandle,                    # opened ('rb')   filestream handle or str:filename
+                        outfilehandle): # be chatty and raise on errors
 
         """\
-        Given an open 'file handle' or filename, transliterate bytes at a time.
+        Given an open 'file handle' or filename, transliterate bytes for an image of record(s).
         The format of FlexSpec1 record is presumed to be:
 
         <RS><SOH>C1C2C3C4C5C6C7C8<STX>{valid json}<ETX>
@@ -294,122 +406,69 @@ class FlexJSONCompiler(object):
                newlines accumulate as warnings.
         """
         try:
-            openflag = False
-            if(isinstance(filename,str)):
-                fh = open(filename,'rb')
-                openflag = True                              # close it if we open it
-            offset = -1
             self.dumperrecno += 1                            # Update the count
-
-            try:                                             # get the first byte
-               offset += 1;                                  # or die trying
-               b      = fh.read(1)
-               if(b == b''):
-                   if(openflag):
-                       fh.close()                            # we opened it.
-                   return;                                   # effective end of file.
-            except Exception as e:
-                print("FlexJSONCompiler.py: unable to read. returning -1",file=sys.stderr)
-                return -1
-
+            errors           = []                            # accumulate errors this record
+# HEREHEREHERE
             try:
-                if(b[0] == FlexJSONCompiler.ASCII_RS[0]):
-                    print("<RS>",file=os,end="")
-                else:
-                    raise FlexJSONCompilerException(f"Expecting <RS=0x01> found {b:x}")
-
-                offset += 1;
-                b      = fh.read(1)
-                if(b == b''):
-                    print("FlexJSONCompiler.py: eof0 found", file=sys.stderr)
-                    return;
-                if(b[0] == FlexJSONCompiler.ASCII_SOH[0]):
-                    print("<SOH>",end="")
-                else:
-                    raise FlexJSONCompilerException(f"Expecting <SOH=0x01> found {b:x}")
-
-                rawcrc = bytearray()
-                ppcrc  = []
-                crc    = 0
-                for i in range(8):
-                    offset += 1;
-                    b      = fh.read(1)[0]
-                    if(b == b''):
-                        print("FlexJSONCompiler.py: eof1 found", file=sys.stderr)
-                        return;
-                    ppcrc.append(chr(b))
-                    crc = ((crc << 4) | FlexJSONCompiler.xlate[b])
-                    rawcrc.append(b)
-
-                offset += 1;
-                b      = fh.read(1)
-                if(b == b''):
-                    print("FlexJSONCompiler.py: eof2 found", file=sys.stderr)
-                    return;
-                if(b[0] == FlexJSONCompiler.ASCII_STX[0]):
-                    print("<STX>",file=os,end="")
-                else:
-                    print(f"FlexJSONCompiler.py: expecting <STX=0x01> found {b}",file=sys.stderr)
-
-                payload = []
-                for i in range(FlexJSONCompiler.MAXSIZE):
-                    offset += 1;
-                    b      = fh.read(1)
-                    if(b == b''):
-                        print("eof3 found", file=sys.stderr)
-                        return;
-                    if(b[0] == FlexJSONCompiler.ASCII_ETX[0]):
-                        payload = ''.join(payload)
-                        print(f"{payload}<ETX>",file=os)
-                        payloadcrc = zlib.crc32(payload.encode())
-                        print(f"FlexJSONCompiler.py: CRC {crc} = {payloadcrc} Payload CRC.",file=os) # print regardless -v
-                        break;
-                    payload.append(chr(b[0]))
-            except FlexJSONCompilerException as de:        # not to sure about this recovery method(!?)
-                   print(f"FlexJSONCompiler.py: record {self.dumperrecno}\n{de.__str__()}",file=sys.stderr)
-                   try:
-                       while b := fh.read():     # try to find an ETX to realign.
-                           if(b == b''):
-                               print("eof4 found", file=sys.stderr)
-                               return;
-                           if(b == FlexJSONCompiler.ETX):
-                                break
-                   except Exception as ee:
-                       raise FlexJSONCompilerException(f"FlexJSONCompiler.py: unable to recover {self.filename}\n{ee.__str__()}")
-                       raise
+                working = True
+                while(working):                                 # assume the infile is aligned on <RS>
+                    errmsg = "Seeking RS (Record Separator)"
+                    #if(self.dev) ...
+                    seeking = FlexJSONCompiler.ASCII_RS
+                    skipped, ch = self.infile.find(seeking)  # skipped of none is good
+                    if(not skipped):
+                        rawcrc = b''                         # prepare the CRC
+                        for i in range(8):
+                            rawcrc += self.getch()
+                        for c in rawcrc:
+                            crc = (crc << 4) | c
+                    else:
+                        errors.append(msg := f"Unable to find a record seeking {seeking} {infile.count}")
+                        raise FlexJSONCompilerException(msg)
+                    seeking = FlexJSONCompiler.ASCII_SOH
+                    skipped, ch = self.infile.find(seeking)
+                    if(not skipped):
+                        seeking = FlexJSONCompiler.ASCII_ETX
+                        skipped, ch = self.infile.find(seeking)  # Ah HA! skipped is the record
+                        print(skipped)
+                        if(not _charmap.validjson(skipped)):
+                            error.append(msg := f"Bad payload {skipped} {infile.count}")
+                            raise FlexJSONCompilerException(msg)
+                        json    = skipped.encode()           # Brew up the string version
+                        #jsoncrc = zlib.crc32(json)           # get its crc
+                        jsoncrc = _crcfix.sub('0',"%08s" % zlib.crc32(json).decode())
+                        print(f"{crc} = {jsoncrc} ? {json}") # print TODO finish thought here.
+                    else:
+                        errors.append(msg:=f"Unable to find a record seeking {seeking} {infile.count}")
+                        raise FlexJSONCompilerException(msg)
             except Exception as e:
-                print(f"FlexJSONCompiler.py: error dumping file {self.filename}, record {self.dumperrecno}, offset={offset}\n{e.__str__()}",file=sys.stderr)
-                raise
+                print(f"Caught\n{e.__str__()}")
         except Exception as e:
-            print(f"FlexJSONCompiler.py: General error.",file=sys.stderr)
-            if(verboseflag):
-                raise
-        finally:
-            if(openflag):
-                fh.close()
+            print(f"Outer Caught\n{e.__str__()}")
 
         return self
 
     ### FlexJSONCompiler.uncompilerecord()
 
-    def uncompile(self,os="",verboseflag = False):          # FlexJSONCompiler.uncompile()
+    def uncompile(self,infile="",verboseflag = False):          # FlexJSONCompiler.uncompile()
         """just pretty print the file. walk through the file structure.
            Call uncompilerecord for each 'record' in the file. Any proper
            non-printable values are stated in readable form. E.g.: 0x01
            is <SOH>; 0x02 is <STX> 0x03 is <ETX> others are debatable
         """
-        if(os == ""):
-            os = sys.stdout
+        if(infile == ""):
+            infile = sys.stdout
         else:
-            os = open(os,'w')                # ASCII file afterall
+            infile = open(infile,'w')                # ASCII file afterall
 
         try:
             fh = open(self.filename,'rb')    # filename = "FakeMessage.bin"
             for i in range(100):
-                if(-1 == self.uncompilerecord(fh,os, verboseflag)):
+                if(-1 == self.uncompilerecord(fh,infile, verboseflag)):
                    break
         except Exception as e:
-            print(f"error in uncompile for file {filename}\n{e.__str__()}",file=sys.stderr)
+            errors.append(msg:=f"error in uncompile for file {filename}\n{e.__str__()}")
+            print(msg,file=sys.stderr)
             print(f"   {e}", file=sys.stderr)
             #print(traceback.format.exc(),file=sys.stderr)
             sys.exit(1)
@@ -418,13 +477,15 @@ class FlexJSONCompiler(object):
 
     @staticmethod
     def encode(payload : str):
-        """Add the wrapper for the payload"""
-        epayload = payload.encode()
-        crc = zlib.crc32(epayload)
-        record = FlexJSONCompiler.ASCII_RS+FlexJSONCompiler.ASCII_SOH
-        record += bytes(hex(crc).encode())+FlexJSONCompiler.ASCII_STX
-        record += epayload
-        record += FlexJSONCompiler.ASCII_ETX
+        """Add the wrapper for the payload.
+        <SOH>crc<STX>payload<ETX>
+        """
+        epayload  = payload.encode()
+        crc       = zlib.crc32(epayload)
+        record    = FlexJSONCompiler.ASCII_RS+FlexJSONCompiler.ASCII_SOH
+        record   += bytes(_crcfix.sub('0',"%08s" % crc.decode()))  # it might happen
+        record   += epayload
+        record   += FlexJSONCompiler.ASCII_ETX
 
         return record
 
@@ -461,25 +522,20 @@ if __name__ == "__main__":
 
     (options, args) = opts.parse_args()
 
-    # process options
-    output      = options.output
-    uncompile   = options.uncompile
-    verboseflag = options.verboseflag
 
     # (wg-python-atfiles)
+    goodbytes   = goodjson.encode()
+    crc         = _crcfix.sub('0',"%08d" % zlib.crc32(goodbytes)).encode()
+    fh          = io.BytesIO(chr(0x1e).encode() + chr(1).encode() + crc + chr(2).encode() + goodbytes + chr(3).encode())
+    jc          = FlexJSONCompiler(fh,options=optinos) # PDB-DEBUG
 
     if(len(args) == 0):
         args.append('gui_scenario_display.txt') # hack in default file
-
-#    for filename in args:                    # process the files
-#        d = FlexJSONCompiler(filename,output,options=options)   # use default gencrc.out
-#        if(uncompile):
-#            d.uncompile()
-#            sys.exit(1)                      # only do this one thing.
-#        d.compile()
     goodjson      = """{"kzin" : {"process"  : {"halpha" : "1", "hbeta" : "1"}}}"""
     #byte_goodjson = FlexJSONCompiler.encode(goodjson)
     record = FlexJSONCompiler(goodjson,options)
     record.compile()
     record.debug()
-    record.writefile("foo.bin") # PDB-DEBUG
+    record.writefile("foo.bin")
+    with open(output,"rb") as f:
+        record.uncompile("foo.txt")                   # PDB-DEBUG

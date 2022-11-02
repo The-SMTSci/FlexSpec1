@@ -223,8 +223,6 @@ class FlexPublish(object):
             print(f"{e.__str__()}")             # local console
             data = data.encode()                # this needs to be bytes
             s.close()
-        self.data = data
-
         return data                             # return data or errors as bytes
 
     ### FlexPublish.send()

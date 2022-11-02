@@ -19,6 +19,7 @@ import sys
 # __doc__ = """
 # __author__  = 'Wayne Green'
 # __version__ = '0.1'
+# __all__     = ['BinaryFilemanager',
 # class BinaryFileManagerException(Exception):
 #     def __init__(self,message,errors=None):
 #     @staticmethod
@@ -28,14 +29,19 @@ import sys
 #     @staticmethod
 #     def __format__(e):
 # class BinaryFilemanager(object):
-#        class provides both lookahead and infinite pushback opportunities.
-#     def __init__(self,fh):                # BinaryFilemanager::__init__
-#     def getch(self):                      # BinaryFilemanager::getch()
-#     def peek(self):                       # BinaryFilemanager::peek()
-#     def eof(self):                        # BinaryFilemanager::eof()
-#     def pushback(self,ch):                # BinaryFilemanager::pushback()
+#     def __init__(self,fh,/,maxstack=1024):                  # BinaryFilemanager::__init__
+#     def push(self,ch) -> 'self':                            # BinaryFilemanager::push()
+#     def getch(self,/,count=1) -> bytes:                     # BinaryFilemanager::getch()
+#     def peek(self) -> bytes:                                # BinaryFilemanager::peek()
+#     def eof(self) -> bool:                                  # BinaryFilemanager::eof()
+#     def ischar(self,ch):                                    # BinaryFilemanager.ischar()
+#     def find(self,ch,/,pushback=False) -> (bytes,bytes):    # BinaryFilemanager.find()
+#     def pushback(self,ch : bytes) -> 'self':                # BinaryFilemanager::pushback()
 # if __name__ == "__main__":
 #
+#
+#
+# 2022-10-29T09:25:25-0600 wlg
 #############################################################################
 __doc__ = """
 
@@ -85,54 +91,113 @@ class BinaryFileManagerEOF(Exception):
 # BinaryFileManagerEOF
 
 ##############################################################################
-# BinaryFilemanager -- meat of the coconut. 
+# BinaryFilemanager -- meat of the coconut.
 #
 ##############################################################################
 class BinaryFilemanager(object):
-    """class BinaryFilemanager(object)
-       Given a filehandle opened 'rb', manage processing the file.  This
-       class provides both lookahead and infinite pushback opportunities.
-       For example while looking for <ETX> we find a <RS>; then pushback
-       the <RS> and have another go later.
+    """class BinaryFilemanager(object) Given a filehandle opened 'rb',
+       manage processing the file.  This class provides both one char
+       lookahead and infinite pushback opportunities.  For example
+       while looking for <ETX> we find a <RS>; then pushback the <RS>
+       and try another logic-path.
+    push(ch)
+    getch() getch(10)
+    peek()
+    ischar(ch)
+    find(ch) find(ch,True)
+    pushback(ch)
     """
-    def __init__(self,fh):                                  # BinaryFilemanager::__init__
-        self.fh     = fh                    # the file handle
-        self.nextch = fh.read(1)            # may be EOF
-        self.count  = 0                     # track the logical position
-        self.stack  = b''                   # init to signal EOF
 
-    ### BinaryFilemanager.()
+    def __init__(self,fh,/,maxstack=1024):                  # BinaryFilemanager::__init__
+        """Set up the file handle open 'rb', manage an infinite look
+        back, with one char lookahead."""
+        self.fh        = fh                    # the file handle
+        self.nextch    = fh.read(1)            # may be EOF
+        self.position  = 0                     # track the logical position
+        self.stack     = b''                   # init to signal EOF
+        self.maxstack  = maxstack              # upper limit on push backs
 
-    def getch(self):                                        # BinaryFilemanager::getch()
-        ret = b''                           # be safe...
-        if(len(self.stack) != 0):           # something pushed back
-            print(f"stack is {len(self.stack)}")
-            ret        = self.stack[0]      # get the char
-            self.stack = self.stack[1:]     # manage pushback stack
-            self.count += 1                 # (re) advance the logical position
+    ### BinaryFilemanager.__init__()
+
+    def push(self,ch) -> 'self':                            # BinaryFilemanager::push()
+        """If the length of the stack is sane, push length of ch
+        characters back for later tries. Pevent find(ch) for a ch
+        that is way way far away.
+        """
+        if((len(stack) + len(ch)) < self.maxstack):
+            self.stack = self.stack + ch
         else:
-            ret        = self.nextch        # OK pending next char
-            if(ret == b''):                 # here is where we may hit EOF
-                raise ValueError
-            self.nextch = self.fh.read(1)
-            self.count += 1
-        return ret                          # single exit
+            raise OverflowError("BinaryFilemanager: pushback overflowed {self.maxstack} bytes")
+
+        return self
+
+    ### BinaryFilemanager.push()
+
+    def getch(self,/,count=1) -> bytes:                     # BinaryFilemanager::getch()
+        """Get the the char (or more with count >= 1).
+        Raises EOFError"""
+        ret = b''                              # be safe...
+        if(len(self.stack) != 0):              # something pushed back
+            print(f"stack is {len(self.stack)}")
+            ret            = self.stack[0]         # get the char
+            self.stack     = self.stack[1:]        # manage pushback stack
+            self.position += 1                 # (re) advance the logical position
+        else:
+            ret        = self.nextch           # OK pending next char
+            if(ret == b''):                    # here is where we may hit EOF
+                raise BinaryFileManagerEOF(f"fh at {fh.tell()} or {self.position} by our reckoning.")
+            self.nextch    = self.fh.read(count)
+            self.position += 1
+        return ret                             # single exit
 
     ### BinaryFilemanager.getch()
 
-    def peek(self):                                         # BinaryFilemanager::peek()
-        return self.nextch                   # allow look-ahead
+    def peek(self) -> bytes:                                # BinaryFilemanager::peek()
+        """Take a peek at the next available character.
+        The peek is buffered 1 deep w.r.t. the file handle.
+        """
+        return self.nextch                     # allow look-ahead
 
     ### BinaryFilemanager.peek()
 
-    def eof(self):                                          # BinaryFilemanager::eof()
+    def eof(self) -> bool:                                  # BinaryFilemanager::eof()
+        """Duh -- Is the next char really the EOF"""
         return self.nextch == b''
 
     ### BinaryFilemanager.eof()
 
-    def pushback(self,ch):                                  # BinaryFilemanager::pushback()
-        self.stack = ch + self.stack;        # push on to byte array
-        self.count =- 1
+    def ischar(self,ch):                                    # BinaryFilemanager.ischar()
+        """If not EOF then ask if the next char may be the one you are looking
+        for. This saves peek() and test on your end.
+        """
+        return (isinstance(ch,b'') and ch == self.nextch())
+
+    ### BinaryFilemanager.ischar()
+
+    def find(self,ch,/,pushback=False) -> (bytes,bytes):    # BinaryFilemanager.find()
+        """Find the character, return ch, skipped if(b'') is False.
+        This function is here mainly to assist with error recovery
+        with the main idea is that ch is nearby.
+        """
+        skipped = b''
+        try:
+            while((c := self.getch()) != ch):  # expect character nearby skipped is empty...
+               skipped = skipped + ch          # ...if successful, or what we had to skip
+        except BinaryFileManagerEOF as eof:
+            if(pushback):
+                self.pushback(skipped)
+            c       = None                     # did not find it
+            skipped = b''                      # put it all back.
+        return skipped,c                       # return None and a ch  or [bads],ch
+
+    ### BinaryFilemanager.find()
+
+    def pushback(self,ch : bytes) -> 'self':                # BinaryFilemanager::pushback()
+        """Pushback one or more characters such that getch gets the
+        first (subsecent) one(s) from this action before picking up
+        with the original reads from fh."""
+        self.push(ch)                           # push one or more on to byte array if OK
+        self.position =- len(ch)                # adjust the count.
 
         return self
 
@@ -164,10 +229,12 @@ if __name__ == "__main__":
                 fm = BinaryFilemanager(f)
                 while(not fm.eof() and fm.count < 10):
                     print(f"{fm.count:3d} {fm.getch()}")
-                print(f"{fm.count} bytes from file {filename}")
+                print(f"{fm.count} bytes from file {filename}",file=sys.stderr)
             print(f"File {filename} complete.")
         except BinaryFileManagerEOF as eof:
-            print(f"EOF found for file {filename}")
+            print(f"EOF found for file {filename}",file=sys.stderr)
+        except OverflowError as over:
+            print(f"Overflow, pushed back too many things",file=sys.stderr)
         except BinaryFileManagerException as ex:
-            print(f"Exception with {filename}\n{ex.__str__()}")
+            print(f"Exception with {filename}\n{ex.__str__()}",file=sys.stderr)
 

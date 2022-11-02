@@ -196,12 +196,12 @@ class BokehKzinRing(object):
         self.hαslider      .on_change('value', lambda attr, old, new: self.update_slider ("halpha_value" , attr, old, new))
 
         # // coordinate with lampcheckboxes_handler
-        self.process        = Button    (align='end', label=f"{self.name} On",  disabled=False,
+        self.onbutton       = Button    (align='end', label=f"On",  disabled=False,
+                                                   button_type="warning", width=self.wwidth//2)
+        self.offbutton      = Button    (align='end', label=f"Off",  disabled=False,
                                                    button_type="success", width=self.wwidth//2)
-        self.offbutton      = Button    (align='end', label=f"{self.name} Off",  disabled=False,
-                                                   button_type="primary", width=self.wwidth//2)
 
-        self.process        .on_click (lambda : self.update_process())
+        self.onbutton        .on_click (lambda : self.update_onbutton())
         self.offbutton      .on_click (lambda : self.update_offbutton())
 
 
@@ -222,15 +222,16 @@ class BokehKzinRing(object):
 
     ### BokehKzinRing.update_offbutton()
 
-    def update_process(self):                                   # BokehKzinRing::update_button_in()
-        """update_process Button via an event lambda"""
+    def update_onbutton(self):                                   # BokehKzinRing::update_button_in()
+        """update_onbutton Button via an event lambda"""
         #os = io.StringIO()
         #self.debug(f"{self.name} Debug",skip=['varmap'], os=os)
         #os.seek(0)
+        self.display.display(BokehKzinRing.brre.sub("<br/>",f"Things in onbutton{dir(self.onbutton._property_values)}"))
         self.onoff = 1
         msg = self.send_state()
 
-    ### BokehKzinRing.update_process()
+    ### BokehKzinRing.update_onbutton()
 
     def update_debugbtn(self):                                  # BokehKzinRing::update_button_in()
         """update_debugbtn Button via an event lambda"""
@@ -279,7 +280,7 @@ class BokehKzinRing(object):
                               self.hβslider,                    # Marker for BLUE  LED  - broad band led
                               self.oiiislider,                  # Marker for GREEN LED
                               self.hαslider,                    # Marker for REF   LED
-                              row(self.process,self.offbutton),
+                              row(self.onbutton,self.offbutton),
                               #row(self.shutter.layout())
                             )  ))
         return self
