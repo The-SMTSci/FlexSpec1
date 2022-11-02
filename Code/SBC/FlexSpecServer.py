@@ -34,11 +34,12 @@ localhost usually resolves to 127.0.0.1, use 127.0.0.1 for faster work
 #
 ##############################################################################
 def flexserve():
-    """Tie bokeh to serial port"""
+    """Tie bokeh to serial* port"""
     print("FlexSpec1 dispatch-server.py: FlexSpec1 server started.")
     time.sleep(1)
     #systemd.daemon.notify('READY=1')
     flag = True
+    msg = ""
     if(verboseflag):
        msg = "starting loop" ; print(f"msg flag = {flag}")
     while(flag):
@@ -47,7 +48,7 @@ def flexserve():
                 msg = "opening socket" ; print(f"msg")
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 if(verboseflag):
-                    msg = "bind" ; print(f"{msg}")
+                    msg = f"bind HOST={HOST} PORT={PORT} " ; print(f"{msg}")
                 s.bind((HOST, PORT))
                 if(verboseflag):
                     msg = "listen" ; print(f"{msg}")
@@ -56,7 +57,7 @@ def flexserve():
                     msg = "accept" ; print(f"{msg}")
                 conn, addr = s.accept()
                 with conn:
-                    print('FlexSpecServer.py: Connection from:', addr)
+                    print('FlexSpecServer.py: (1) Connection from:', addr)
                     while True:
                         if(verboseflag):
                             msg = "data" ; print(f"{msg} conn={conn} addr={addr}")
@@ -64,12 +65,13 @@ def flexserve():
                         if not data:
                             break
                         conn.sendall(data)
-                        print(f"FlexSpecServer: {data}")        # local console
+                        print(f"FlexSpecServer: (2) {data}")        # local console
                         if(data == b'end'):
                             flag = 0
                 print("FlexSpec1 dispatch-server.py: Connection transaction complete.")
         except Exception as e:
-            print(f"FlexSpecServer ERROR: {e.__str__()}")
+            print(f"FlexSpecServer: (3) ERROR: {msg} {e.__str__()}")
+            raise
     
     print("Socket complete, exiting")
 
