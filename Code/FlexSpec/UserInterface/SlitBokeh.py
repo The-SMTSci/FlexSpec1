@@ -11,14 +11,15 @@ import sys
 import io
 import re
 import json
-from FlexPublish    import fakedisplay
+from FlexPublish     import fakedisplay
+from Flex_Instrument import Flex_Instrument
 
-from bokeh.events   import ButtonClick
-from bokeh.io       import curdoc
-from bokeh.layouts  import column, row, Spacer
-from bokeh.models   import ColumnDataSource, Div, Slider, TextInput, Button
-from bokeh.models   import RadioGroup
-from bokeh.models   import Select
+from bokeh.events    import ButtonClick
+from bokeh.io        import curdoc
+from bokeh.layouts   import column, row, Spacer
+from bokeh.models    import ColumnDataSource, Div, Slider, TextInput, Button
+from bokeh.models    import RadioGroup
+from bokeh.models    import Select
 
 #from bokeh.models.widgets import Tabs, Panel
 
@@ -140,15 +141,16 @@ class BokehOVIOSlit(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, flexname : str = "Default",
-                 name : str = "OvioSlit",
+    def __init__(self, instrument : Flex_Instrument,
+                 name : str = "ovioslit",
                  display = fakedisplay,
                  width=200): # BokehOVIOSlit::__init__()
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
         self.display     = display
-        self.flexname    = flexname         # the name of the instrument for this instance
+        self.insrument   = instrument
+        self.flexname    = instrument.flexname  # the name of the instrument for this instance
         self.name        = name             # the name of the device in this instrument
         self.wwidth      = width            # display width for its Bokeh widgets
         self.slit        = "20"             # initial condition
@@ -190,11 +192,10 @@ class BokehOVIOSlit(object):
         devstate = dict( [ ( "slit"         , self.slit),  # ascii text of the slit width.
                           (  "illuminator"  , f"{self.lamp:d}")
                          ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , "0")])
-        slitcmd['Receipt'] = "1"                             # set the receipt as desired
-        d2 = dict([(f"{self.name}", slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
+        slitcmd = dict([("process", devstate), ("receipt" , "0")])
+        d2      = dict([('slit'              , slitcmd)])
+        d3      = dict([(f"{self.flexname}"  , d2)])
+        jdict   = json.dumps(d3)
         #self.display.display(f'{{ {jdict} , "returnreceipt" : 1 }}')
         self.display.display(f'{jdict}')
 

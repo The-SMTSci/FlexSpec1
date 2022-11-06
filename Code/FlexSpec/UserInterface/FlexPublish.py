@@ -48,8 +48,9 @@ PORT = 65432        # The port used by the server
 #     def configure(self,**kwds):                       # FlexPublish.configure()
 #     def update_clear(self):                           # FlexPublish::update_clear()
 #     def clear(self):                                  # FlexPublish.clear
-#     def send(self,msg):                               # FlexPublish.send()
+#     def send(self,payload):                               # FlexPublish.send()
 #     def display(self,msg : str = "\n",color='Bisque'): # FlexPublish.display
+#     def message(self,jsonstr : str = "") -> 'self':   # FlexPublish.message()
 #     def read(self):                                   # FlexPublish.read()
 #     def layout(self):
 #     def debug(self,msg="",skip=[],os=sys.stderr):     # FlexPublish::debug()
@@ -139,20 +140,20 @@ class FlexPublish(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self,
+    def __init__(self,                                 # FlexPublish::__init__()
                  name    : str = "",
                  display : str = fakedisplay,
-                 width   : int = 300,
-                 host    : str = _HOST,
-                 port    : str = _PORT
-    ):               # FlexPublish::__init__()
+                 width   : int = 300,       # hack width
+                 host    : str = _HOST,     # hostname or url
+                 port    : str = _PORT      # the port that is needed
+    ): 
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
         self.message           = ""          # build up the message here.
         self.messagecnt        = 1           # form a runnning variable for messages
         self.host              = host
-        self.port              = int(port)                # ducktype port as string/int
+        self.port              = int(port)   # ducktype port as string/int
         self.wwidth            = width
 
         self.panel             = Div       (text="Msg", width=self.wwidth,
@@ -239,6 +240,15 @@ class FlexPublish(object):
         return self
 
     ### FlexPublish.display()
+
+    def message(self,jsonstr : str = "") -> 'self':   # FlexPublish.message()
+       """Place to display something."""
+       FlexPublish.brre.sub("<br/>",message)
+
+       return self
+
+    ### FlexPublish.message()
+
 
     def read(self):                                   # FlexPublish.read()
         """Return the original accumulated messages sans

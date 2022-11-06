@@ -171,21 +171,37 @@ class BokehKzinRing(object):
 
         self.slider_values = BokehKzinRing.SliderValues()
 
+        self.slidebk = '#003913'
+
         # Labels merge spaces into one space.  (7 different 'lamps' for use )
-        self.wheatslider    = Slider(title=f"Incandescent Intensity", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.nearslider     = Slider(title=f"NeAr Lamp", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.augflatslider  = Slider(title=f"Blue Boost LEDs", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.hβslider       = Slider(title=f"Hβ Finder LED", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
-        self.oiiislider     = Slider(title=f"O[III] Finder LED", bar_color='firebrick',
-                                     value = -1, start = -1, end = 100, step = 1, width=self.wwidth)
-        self.hαslider       = Slider(title=f"Hα Finder LED", bar_color='firebrick',
-                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth)
+####         self.wheatslider    = Slider(title=f"Incandescent Intensity", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+####         self.nearslider     = Slider(title=f"NeAr Lamp", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+####         self.augflatslider  = Slider(title=f"Blue Boost LEDs", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+####         self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+####         self.hβslider       = Slider(title=f"Hβ Finder LED", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+####         self.oiiislider     = Slider(title=f"O[III] Finder LED", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1, end = 100, step = 1, width=self.wwidth//8)
+####         self.hαslider       = Slider(title=f"Hα Finder LED", bar_color='firebrick',orientation='vertical',
+####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.wheatslider    = Slider(title=f"GoW", bar_color=self.slidebk,orientation='vertical', background=self.slidebk,
+                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.nearslider     = Slider(title=f"NeAr", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.augflatslider  = Slider(title=f"Boost", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.flatslider     = Slider(title=f"Flat", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.hβslider       = Slider(title=f"Hβ", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.oiiislider     = Slider(title=f"O[III]", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1, end = 100, step = 1, width=self.wwidth//8)
+        self.hαslider       = Slider(title=f"Hα", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
 
         self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
         self.wheatslider   .on_change('value', lambda attr, old, new: self.update_slider ("wheat_value"  , attr, old, new))
@@ -272,14 +288,15 @@ class BokehKzinRing(object):
     def layout(self):                                           # BokehKzinRing::layout()
         """Get the layout in gear"""
         return(row ( column ( #self.LampCheckBoxes,             # Physical layout the user.
-                              self.nearslider,                  # Relco -
-                              self.wheatslider,                 # Tungstun flat
-                              self.augflatslider,               # ... add in some BLUE LED boost
-                              self.flatslider,                  # ... and/or toss in WHITE LIGHT LED
+                            row(
+                              column(self.hβslider),                    # Marker for BLUE  LED  - broad band led
+                              column(self.oiiislider),                  # Marker for GREEN LED
+                              column(self.hαslider),                    # Marker for REF   LED
+                              column(self.nearslider),                  # Relco -
+                              column(self.wheatslider),                 # Tungstun flat
+                              column(self.augflatslider),               # ... add in some BLUE LED boost
+                              column(self.flatslider)),                  # ... and/or toss in WHITE LIGHT LED
                               Spacer(width=self.wwidth, height=3, background='black'),
-                              self.hβslider,                    # Marker for BLUE  LED  - broad band led
-                              self.oiiislider,                  # Marker for GREEN LED
-                              self.hαslider,                    # Marker for REF   LED
                               row(self.onbutton,self.offbutton),
                               #row(self.shutter.layout())
                             )  ))

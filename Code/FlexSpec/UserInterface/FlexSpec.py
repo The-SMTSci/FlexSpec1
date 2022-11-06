@@ -36,6 +36,7 @@ from Network              import FlexNetwork
 from CameraFocusBokeh     import CameraFocus
 from FlexTextInput        import FlexTextInput
 from Flex_Instrument      import Flex_Instrument
+from Flex_Dispatcher      import Flex_Dispatcher
 
 #############################################################################
 #
@@ -129,7 +130,8 @@ if (1):  # This is main! leave set to 1
 
     display        = FlexPublish("f{flexname}",width=width)
 
-    slits          = BokehOVIOSlit   (flexname,display=display,width=width)
+    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=width)
+    slits          = BokehOVIOSlit   (instrument,display=display,width=width)
     grating        = BokehGrating    (instrument,display=display,width=width)  # instrument carries flexname.
     pangle         = FlexOrientation (flexname,display=display,width=width)
     guider         = Guider          (flexname,display=display,width=width)
@@ -137,6 +139,17 @@ if (1):  # This is main! leave set to 1
     camerafocus    = CameraFocus     (flexname,display=display,width=width)
     network        = FlexNetwork     (instrument,display=display,width=width)
 
+    gadgets = dict([('kzin'       , kzin1       ), # tie the flexspec gadgets to their methods.
+                    ('display'    , display     ),
+                    ('slits'      , slits       ),
+                    ('grating'    , grating     ),
+                    ('pangle'     , pangle      ),
+                    ('collimator' , collimator  ),
+                    ('camerafocus', camerafocus )
+                   ])
+
+    dispatcher = Flex_Dispatcher(instrument,gadgets)
+    dispatcher.debug()
     #fstitle.on_change('value_input', settitle) # call back for this
 
     #-------------------------------- Tab 1 -------------------------------------
@@ -151,7 +164,6 @@ if (1):  # This is main! leave set to 1
 
     #-------------------------------- Tab 2 -------------------------------------
     # The kzin control
-    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=width)
     l2             = kzin1.layout()
     tab2           = Panel(child=l2,title='Kzin Calibration')
 
