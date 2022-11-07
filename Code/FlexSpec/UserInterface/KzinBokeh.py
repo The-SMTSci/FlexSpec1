@@ -12,6 +12,7 @@ import sys
 import io
 import re
 import json
+import datetime
 from FlexPublish          import fakedisplay
 
 
@@ -136,14 +137,26 @@ class BokehKzinRing(object):
         """Manage object values"""
         def __init__(self):
             self.values = dict((
-            ("wheat_value"   ,"0"),
-            ("hbeta_value"   ,"0"),
-            ("oiii_value"    ,"0"),
-            ("halpha_value"  ,"0"),
-            ("flat_value"    ,"0"),
-            ("augflat_value" ,"0"),
-            ("near_value"    ,"0")
+            ("wheat"   ,"0"),
+            ("hbeta"   ,"0"),
+            ("oiii"    ,"0"),
+            ("halpha"  ,"0"),
+            ("flat"    ,"0"),
+            ("augflat" ,"0"),
+            ("near"    ,"0")
             ))
+        def insertquery(self,name : str = "kzin") -> str:
+            """Make an insert query for the ring.
+            name is the name of the kzin"""
+            vallist = ['name','tstamp']
+            values  = [f"'{name}'", f"'{datetime.datetime.now()}'"]
+            for k,v in self.values.items():
+                vallist.append(f"""{k}""")
+                values.append(f"{v}")
+            inslist = '(' + ','.join(vallist)+ ')'
+            insvals = '(' + ','.join(values) + ')'
+            stmt = f"""insert into kzinvalues {inslist} values {insvals};"""
+            return stmt
     # SliderValues
 
     #__slots__ = [''] # add legal instance variables
@@ -171,36 +184,33 @@ class BokehKzinRing(object):
 
         self.slider_values = BokehKzinRing.SliderValues()
 
-        self.slidebk = '#003913'
-
-        # Labels merge spaces into one space.  (7 different 'lamps' for use )
-####         self.wheatslider    = Slider(title=f"Incandescent Intensity", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-####         self.nearslider     = Slider(title=f"NeAr Lamp", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-####         self.augflatslider  = Slider(title=f"Blue Boost LEDs", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-####         self.flatslider     = Slider(title=f"Flat Intensity", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-####         self.hβslider       = Slider(title=f"Hβ Finder LED", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-####         self.oiiislider     = Slider(title=f"O[III] Finder LED", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1, end = 100, step = 1, width=self.wwidth//8)
-####         self.hαslider       = Slider(title=f"Hα Finder LED", bar_color='firebrick',orientation='vertical',
-####                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.wheatslider    = Slider(title=f"GoW", bar_color=self.slidebk,orientation='vertical', background=self.slidebk,
-                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.nearslider     = Slider(title=f"NeAr", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.gowcolor       = 'antiquewhite'      # set the colors in one place
+        self.nearcolor      = 'fuchsia'           # https://docs.bokeh.org/en/latest/docs/reference/colors.html
+        self.boostcolor     = 'dodgerblue'
+        self.flatcolor      = 'gainsboro'
+        self.oiii           = 'mediumslateblue'
+        self.hb             = 'lime'
+        self.ha             = 'firebrick'
+        self.wheatslider    = Slider(title=f"GoW", bar_color='firebrick', orientation='vertical',
+                                     background=self.gowcolor, direction='rtl',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.augflatslider  = Slider(title=f"Boost", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.nearslider     = Slider(title=f"NeAr", bar_color='firebrick', orientation='vertical',
+                                     background=self.nearcolor, direction='rtl',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.flatslider     = Slider(title=f"Flat", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.augflatslider  = Slider(title=f"Boost", bar_color='firebrick', orientation='vertical',
+                                     background=self.boostcolor, direction='rtl',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.hβslider       = Slider(title=f"Hβ", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.flatslider     = Slider(title=f"Flat", bar_color='firebrick', orientation='vertical',
+                                     background=self.flatcolor, direction='rtl',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
-        self.oiiislider     = Slider(title=f"O[III]", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.hβslider       = Slider(title=f"Hβ", bar_color='firebrick',orientation='vertical',
+                                     background=self.oiii, direction='rtl',
+                                     value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
+        self.oiiislider     = Slider(title=f"O[III]", bar_color='firebrick',orientation='vertical',
+                                     background=self.hb, direction='rtl',
                                      value = -1, start = -1, end = 100, step = 1, width=self.wwidth//8)
-        self.hαslider       = Slider(title=f"Hα", bar_color=self.slidebk,orientation='vertical',background=self.slidebk,
+        self.hαslider       = Slider(title=f"Hα", bar_color='firebrick',orientation='vertical',
+                                     background=self.ha, direction='rtl',
                                      value = -1, start = -1,  end = 100, step = 1, width=self.wwidth//8)
 
         self.nearslider    .on_change('value', lambda attr, old, new: self.update_slider ("near_value"   , attr, old, new))
@@ -212,18 +222,39 @@ class BokehKzinRing(object):
         self.hαslider      .on_change('value', lambda attr, old, new: self.update_slider ("halpha_value" , attr, old, new))
 
         # // coordinate with lampcheckboxes_handler
+        pwidth = self.wwidth//12
         self.onbutton       = Button    (align='end', label=f"On",  disabled=False,
-                                                   button_type="warning", width=self.wwidth//2)
+                                                   button_type="warning", width=5*pwidth)
         self.offbutton      = Button    (align='end', label=f"Off",  disabled=False,
-                                                   button_type="success", width=self.wwidth//2)
+                                                   button_type="success", width=5*pwidth)
+        self.recordbutton   = Button    (align='end', label=f"Record",  disabled=False,
+                                                   button_type="success", width=2*pwidth)
 
         self.onbutton        .on_click (lambda : self.update_onbutton())
-        self.offbutton      .on_click (lambda : self.update_offbutton())
+        self.offbutton       .on_click (lambda : self.update_offbutton())
+        self.recordbutton    .on_click (lambda : self.update_recordbutton())
 
 
     ### BokehKzinRing.__init__()
 
-    def update_slider(self,memberval,attr,old,new):                        # BokehGrating::cwave()
+    def update_recordbutton(self):                          # BokehGrating::cupdate_slider()
+        """Send the state to a database somewhere"""
+        query = self.slider_values.insertquery()
+        self.display.display(f"""Record Not Implemented\n{query}""")
+
+    ### BokehGrating.update_recordbutton()
+
+
+    def update_slider(self,memberval,attr,old,new):         # BokehGrating::cupdate_slider()
+        """Get the new slider value and send it.
+        This is a call by a lambda from many sliders, sending its
+        corresponding value into the mix."""
+        self. slider_values.values[memberval] = new
+
+    ### BokehGrating.update_slider()
+
+
+    def update_slider(self,memberval,attr,old,new):         # BokehGrating::cwave()
         """Get the new slider value and send it.
         This is a call by a lambda from many sliders, sending its
         corresponding value into the mix."""
@@ -231,14 +262,14 @@ class BokehKzinRing(object):
 
     ### BokehGrating.cwave()
 
-    def update_offbutton(self):                                 # BokehKzinRing::update_offbutton()
+    def update_offbutton(self):                             # BokehKzinRing::update_offbutton()
         """Set internal variables to off."""
         self.onoff = 0
         msg = self.send_state()
 
     ### BokehKzinRing.update_offbutton()
 
-    def update_onbutton(self):                                   # BokehKzinRing::update_button_in()
+    def update_onbutton(self):                              # BokehKzinRing::update_button_in()
         """update_onbutton Button via an event lambda"""
         #os = io.StringIO()
         #self.debug(f"{self.name} Debug",skip=['varmap'], os=os)
@@ -249,7 +280,7 @@ class BokehKzinRing(object):
 
     ### BokehKzinRing.update_onbutton()
 
-    def update_debugbtn(self):                                  # BokehKzinRing::update_button_in()
+    def update_debugbtn(self):                              # BokehKzinRing::update_button_in()
         """update_debugbtn Button via an event lambda"""
         os = io.StringIO()
         self.debug(f"{self.name} Debug", os=os)
@@ -258,7 +289,7 @@ class BokehKzinRing(object):
 
     ### BokehKzinRing.update_edebugbtn()
 
-    def send_state(self):                                       # BokehKzinRing::send_state()
+    def send_state(self):                                   # BokehKzinRing::send_state()
         """Several ways to send things
            schematic  2021-08-27T11:32:01-0600
         """
@@ -285,19 +316,21 @@ class BokehKzinRing(object):
 
     ### BokehKzinRing.send_state()
 
-    def layout(self):                                           # BokehKzinRing::layout()
+    def layout(self):                                       # BokehKzinRing::layout()
         """Get the layout in gear"""
         return(row ( column ( #self.LampCheckBoxes,             # Physical layout the user.
                             row(
                               column(self.hβslider),                    # Marker for BLUE  LED  - broad band led
                               column(self.oiiislider),                  # Marker for GREEN LED
                               column(self.hαslider),                    # Marker for REF   LED
+                              Spacer(width=10, height=self.wwidth//2, background='black'),
                               column(self.nearslider),                  # Relco -
-                              column(self.wheatslider),                 # Tungstun flat
+                              Spacer(width=10, height=self.wwidth//2, background='black'),
                               column(self.augflatslider),               # ... add in some BLUE LED boost
-                              column(self.flatslider)),                  # ... and/or toss in WHITE LIGHT LED
-                              Spacer(width=self.wwidth, height=3, background='black'),
-                              row(self.onbutton,self.offbutton),
+                              column(self.wheatslider),                 # Tungstun flat
+                              column(self.flatslider)),                 # ... and/or toss in WHITE LIGHT LED
+                              Spacer(width=self.wwidth, height=5, background='black'),
+                              row(self.onbutton,self.offbutton,self.recordbutton),
                               #row(self.shutter.layout())
                             )  ))
         return self

@@ -43,7 +43,8 @@ function usage {
 # port       localhost:5000 for use on the same machine list with ip -4 a
 intervaltime="3600000"            # Run for 100 hours 
 currpid=""                        # remember the pid of the FlexServer
-ipname="$(hostname).local"        # -i the hostname bonjour format
+#ipname="$(hostname).local"        # -i the hostname bonjour format
+ipname='localhost'
 port="5006"                       # -p the port address (override)
 verboseflag=""                    # -v be chatty
 
@@ -127,6 +128,8 @@ if test "$verboseflag" != "" ; then
    echo "   port   $iplink"
    echo "   bkhost $bkhost"
    echo "   bkcmd  $bkcmd"                  # the command we are about to do.
+   echo "Environment"
+   env >Run.log
 fi
 
 # echo pid; then the command.  '$$' is the pid of this script
