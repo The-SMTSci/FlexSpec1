@@ -37,6 +37,7 @@ from CameraFocusBokeh     import CameraFocus
 from FlexTextInput        import FlexTextInput
 from Flex_Instrument      import Flex_Instrument
 from Flex_Dispatcher      import Flex_Dispatcher
+from Flex_Shutter         import Flex_Shutter
 
 #############################################################################
 #
@@ -70,9 +71,24 @@ __doc__ = """
 /home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexSpec.py
 [options] files...
 
-Main "Program" (bokeh remote client) on a SBC (Raspberry pi etc.)
+The FlexSpec 'instrument' uses an Arduino or similar microprocessor.
+The processor supports a number of 'gadgets' that control sub-insrumentation.
+A 'gadget' is a widget without a window. 
 
-The kitchen sink of devices is in this mix to assist with writing
+Here gadgets cover the Kzin ring, collimator, grating rotator, etc.
+They are considered 'Patrons' of their device within the Postmaster
+paragigm we use where a json string containing the state for
+the gadget is passed to the Arduino, and a similar string
+is returned reflecting the actual state the gadget was able to
+achieve. This accounts for things like stepper-motor intervals
+known only to the instrument.
+
+This program constitutes a "main program" (bokeh remote client) on a
+SBC (Raspberry pi etc.). It looks for an utilizes a dispatch server
+on HOST at PORT. This is a 'Postmaster' responsible for the hosting
+RPi to allow other avenues of messages to the Instrument.
+
+A kitchen sink of devices is in this mix to assist with writing
 proper FITS headers when the time comes.
 
 This module relies on the RunFlexSpec script and a dispatch
@@ -88,16 +104,17 @@ The remote device 'reacts' to the new knowledge of the
 state of these classes by setting it's internal state
 (by moving things or turing things on/off).
 
+More complete layout discussion 
+https://medium.com/y-data-stories/python-and-bokeh-part-iii-tutorial-116aa2e873eb
+
 
 """
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
 
-
 def settitle(attr,old,new):
     print(f"FlexSpec settitle old={attr}, old={old}, new={new}")
-
 
 ##############################################################################
 #                                    Main
@@ -130,13 +147,14 @@ if (1):  # This is main! leave set to 1
 
     display        = FlexPublish("f{flexname}",width=width)
 
-    kzin1          = BokehKzinRing("Tony's Kzin Ring",display=display,width=width)
+    shutter        = Flex_Shutter    (instrument,display=display,width=width)
+    kzin1          = BokehKzinRing   (instrument,display=display,width=width,shutter=shutter)
     slits          = BokehOVIOSlit   (instrument,display=display,width=width)
     grating        = BokehGrating    (instrument,display=display,width=width)  # instrument carries flexname.
-    pangle         = FlexOrientation (flexname,display=display,width=width)
-    guider         = Guider          (flexname,display=display,width=width)
-    collimator     = Collimator      (flexname,display=display,width=width)
-    camerafocus    = CameraFocus     (flexname,display=display,width=width)
+    pangle         = FlexOrientation (flexname,display=display,width=width)    # TODO change flexname to instrument
+    guider         = Guider          (flexname,display=display,width=width)    # TODO change flexname to instrument
+    collimator     = Collimator      (flexname,display=display,width=width)    # TODO change flexname to instrument
+    camerafocus    = CameraFocus     (flexname,display=display,width=width)    # TODO change flexname to instrument
     network        = FlexNetwork     (instrument,display=display,width=width)
 
     gadgets = dict([('kzin'       , kzin1       ), # tie the flexspec gadgets to their methods.
@@ -187,7 +205,7 @@ if (1):  # This is main! leave set to 1
     ############################ Create the main tab ############################
     # Tab n is the last tab (here devoted to a report column)
 
-    tabn           = Panel(child = ln, title="Display")
+    tabn           = Panel(child = ln, title="Display")   # TODO Tuck the display back as a main panel tabs
 
     tabs           = Tabs(tabs=[tab1,tab2,tab3,tab4,tabn])
 

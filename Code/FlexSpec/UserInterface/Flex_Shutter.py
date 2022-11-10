@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # FlexSpec1/Code/FlexSpec/UserInterface/Shutter.py
 # (wg-python-fix-pdbrc)
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
 
 ### HEREHEREHERE
 
@@ -36,26 +38,26 @@ from bokeh.models.widgets import Tabs, Panel
 # __doc__ = """
 # __author__  = 'Wayne Green'
 # __version__ = '0.1'
-# __all__     = ['FlexShutterException','FlexShutter']   # list of quoted items to export
-# class FlexShutterException(Exception):
+# __all__     = ['Flex_ShutterException','Flex_Shutter']   # list of quoted items to export
+# class Flex_ShutterException(Exception):
 #     def __init__(self,message,errors=None):
 #     @staticmethod
 #     def __format__(e):
-# class FlexShutter(object):
+# class Flex_Shutter(object):
 #     #__slots__ = [''] # add legal instance variables
-#     def __init__(self, flexname : str = "Default",
-#     def update_closebutton(self):                               # FlexShutter::update_closebutton()
-#     def update_openbutton(self):                                # FlexShutter::update_openbutton()
-#     def debug(self,msg="",skip=[],os=sys.stderr):               # FlexShutter::debug()
+#     def __init__(self, flexname :'Flex_Instrument',  # Flex_Shutter::__init__()
+#     def update_closebutton(self):                               # Flex_Shutter::update_closebutton()
+#     def update_openbutton(self):                                # Flex_Shutter::update_openbutton()
+#     def debug(self,msg="",skip=[],os=sys.stderr):               # Flex_Shutter::debug()
 #     def send_state(self):                                       # FlexSShutter::send_state()
-#     def layout(self):                                           # FlexShutter::layout()
+#     def layout(self):                                           # Flex_Shutter::layout()
 #
 #
-#
+# 2022-11-10T08:24:34-0700 wlg
 #############################################################################
 __doc__ = """
 
-/home/git/external/SAS_NA1_3D_Spectrograph/Code/FlexShutter.py
+/home/git/external/SAS_NA1_3D_Spectrograph/Code/Flex_Shutter.py
 [options] files...
 
 Manage a shutter control for the FlexSpec Bokeh GUI
@@ -65,81 +67,83 @@ Manage a shutter control for the FlexSpec Bokeh GUI
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
-__all__     = ['FlexShutterException','FlexShutter']   # list of quoted items to export
+__all__     = ['Flex_ShutterException','Flex_Shutter']   # list of quoted items to export
 
 
 ##############################################################################
-# FlexShutterException
+# Flex_ShutterException
 #
 ##############################################################################
-class FlexShutterException(Exception):
+class Flex_ShutterException(Exception):
     """Special exception to allo
 w differentiated capture of exceptions"""
     def __init__(self,message,errors=None):
-        super(FlexShutterException,self).__init__("FlexShutter "+ message)
+        super(Flex_ShutterException,self).__init__("Flex_Shutter "+ message)
         self.errors = errors
     @staticmethod
     def __format__(e):
-        return f" FlexShutter: {e.__str__()}\n"
-# FlexShutterException
+        return f" Flex_Shutter: {e.__str__()}\n"
+# Flex_ShutterException
 
 ##############################################################################
-# FlexShutter
+# Flex_Shutter
 #
 ##############################################################################
-class FlexShutter(object):
+class Flex_Shutter(object):
     """ Manage the Orientation of a Nano
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, flexname : str = "Default",
-                 name  = "Shutter",
+    def __init__(self, flexname :'Flex_Instrument',  # Flex_Shutter::__init__()
+                 gadgetname = "shutter",
                  display = fakedisplay,
-                 pangle : str = "0.0", width=200):  # FlexShutter::__init__()
+                 width : int = 250
+               ): 
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname     = flexname
-        self.name         = name
-        self.display      = display
-        self.wwidth       = width
-        self.openshutter  = 0
+        self.flexname     = flexname              # The instrument -- if user changes name we know it
+        self.name         = gadgetname            # the target gadget in the Arduino
+        self.display      = display               # the displayer we're using
+        self.wwidth       = width                 # the width for this display widget
+        self.openshutter  = 0                     # states of the buttons init to both off == unknown
         self.closeshutter = 0
-        self.spacer       = Spacer(width=self.wwidth, height=5, background='black')
 
+        self.openbutton   = Button    ( label="Open",      disabled=False, button_type="success",  width=self.wwidth//2)
+        self.closebutton  = Button    ( label="Close",     disabled=False, button_type="danger", width=self.wwidth//2)
 
-        self.openbutton       = Button    ( label="Open",      disabled=False, button_type="danger",  width=self.wwidth//2)
-        self.closebutton      = Button    ( label="Close",     disabled=False, button_type="success", width=self.wwidth//2)
+        self.row           = row()
+        self.background   = 'lime'
 
-        self.openbutton       .on_click(lambda : self.update_openbutton ())
-        self.closebutton      .on_click(lambda : self.update_closebutton ())
+        self.openbutton   .on_click(lambda : self.update_openbutton ())
+        self.closebutton  .on_click(lambda : self.update_closebutton ())
 
-    ### FlexShutter.__init__()
+    ### Flex_Shutter.__init__()
 
-    def update_closebutton(self):                               # FlexShutter::update_closebutton()
+    def update_closebutton(self):                               # Flex_Shutter::update_closebutton()
         """Update the home command. """
         self.closeshutter = 1
         self.send_state()
         self.closeshutter = 0
 
-    ### FlexShutter.update_closebutton()
+    ### Flex_Shutter.update_closebutton()
 
-    def update_openbutton(self):                                # FlexShutter::update_openbutton()
+    def update_openbutton(self):                                # Flex_Shutter::update_openbutton()
         """Update the read command. """
         self.openshutter = 1
         self.send_state()
         self.openshutter = 0
 
-    ### FlexShutter.update_openbutton()
+    ### Flex_Shutter.update_openbutton()
 
-    def debug(self,msg="",skip=[],os=sys.stderr):               # FlexShutter::debug()
+    def debug(self,msg="",skip=[],os=sys.stderr):               # Flex_Shutter::debug()
         """Help with momentary debugging, file to fit.
            msg  -- special tag for this call
            skip -- the member variables to ignore
            os   -- output stream: may be IOStream etc.
         """
         import pprint
-        print("FlexShutter - %s " % msg, file=os)
+        print("Flex_Shutter - %s " % msg, file=os)
         for key,value in self.__dict__.items():
             if(key in skip):
                continue
@@ -147,31 +151,35 @@ class FlexShutter(object):
             pprint.pprint(value,stream=os,indent=4)
         return self
 
-    ### FlexShutter.debug()
+    ### Flex_Shutter.debug()
 
     def send_state(self):                                       # FlexSShutter::send_state()
         """Several ways to send things
         """
-        devstate = dict( [ ( "open"    , '"d"' % self.openshutter),  # quoted ascii numbers
-                           ( "close"   , '"d"' % self.closeshutter)
-                        ])
-        slitcmd = dict([("Process", devstate), ("Receipt" , "1")])
-        d2 = dict([(f"{self.name}",     slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
-        jdict = json.dumps(d3)
+        devstate   = dict( [ ( "open"    , f'{self.openshutter}' ),  # quoted ascii numbers
+                             ( "close"   , f'{self.closeshutter}'),
+                             ( "receipt" , "1")
+                           ])
+        shuttercmd = dict([  ( "process"         , devstate)  ])   # Walk the parcel into existance.
+        d2         = dict([  (f"{self.name}"     , shuttercmd)])
+        d3         = dict([  (f"{self.flexname.flexname}" , d2)        ])
+
+        jdict      = json.dumps(d3)
+
         self.display.display(f'{jdict}')
 
-    ### FlexShutter.send_state()
+    ### Flex_Shutter.send_state()
 
-    def layout(self):                                           # FlexShutter::layout()
+    def layout(self):                                           # Flex_Shutter::layout()
         """Create the layout"""
-        return(row ( column ( self.parallacticangle,
-                              row(self.closebutton, self.openbutton)
-                            )  ))
+        return(row ( column ( Spacer(width=self.wwidth, height=1),
+                              row(self.closebutton, self.openbutton, background=self.background)
+                            )
+              ))
 
-    ### FlexShutter.layout()
+    ### Flex_Shutter.layout()
 
-# class FlexShutter
+# class Flex_Shutter
 
 ##############################################################################
 #                                    Main
@@ -187,10 +195,10 @@ if (0):  # set to 1 for hokeh regression test
 
     (options, args) = opts.parse_args()
 
-    display        = FlexPublish("FlexShutter Test")
-    pangle         = FlexShutter("FlexSpec_Rodda",display=display)
+    display        = FlexPublish("Flex_Shutter Test")
+    shutter         = Flex_Shutter("FlexSpec_Rodda",display=display)
     curdoc().theme = 'dark_minimal'
-    curdoc().title = "Pangle Test"
-    curdoc().add_root(row(pangle.layout()))
+    curdoc().title = "Shutter Test"
+    curdoc().add_root(row(shutter.layout()))
 
 

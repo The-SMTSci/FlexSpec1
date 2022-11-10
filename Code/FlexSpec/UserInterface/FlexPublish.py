@@ -13,7 +13,7 @@ import sys
 import re
 import time
 import socket
-
+                      
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import Button, Div
 
@@ -43,18 +43,20 @@ PORT = 65432        # The port used by the server
 #     def __format__(e):
 # def _fulltimestamp():
 # class FlexPublish(object):
-#     #__slots__ = [''] # add legal instance variables
-#     def __init__(self,
+#     def __init__(self,                                # FlexPublish::__init__()
 #     def configure(self,**kwds):                       # FlexPublish.configure()
 #     def update_clear(self):                           # FlexPublish::update_clear()
 #     def clear(self):                                  # FlexPublish.clear
-#     def send(self,payload):                               # FlexPublish.send()
+#     def send(self,payload):                           # FlexPublish.send()
+#     def postmessage(self,                             # FlexPublish.postmessage()
 #     def display(self,msg : str = "\n",color='Bisque'): # FlexPublish.display
 #     def message(self,jsonstr : str = "") -> 'self':   # FlexPublish.message()
 #     def read(self):                                   # FlexPublish.read()
 #     def layout(self):
 #     def debug(self,msg="",skip=[],os=sys.stderr):     # FlexPublish::debug()
 #
+#
+# 2022-11-09T07:40:36-0700 wlg - added postmessage
 #############################################################################
 __doc__ = """
 
@@ -69,8 +71,7 @@ own backend server.
 
 In addition, manage a real/fake Bokeh Div for display of messages.
 
-
-The instance should not be inherited.
+An instance should not be inherited.
 
 
 """
@@ -82,7 +83,7 @@ __all__     = ['FlexPublishException','FlexPublish','fakedisplay']   # list of q
 _tfmt = '%Y-%m-%dT%H:%M:%S'
 
 #############################################################################
-# fakedisplay
+# fakedisplay - place holder for early debugging. Retained.
 #############################################################################
 class fakedisplay(object):
    """Do-nothing place holder for testing Publish."""
@@ -122,8 +123,8 @@ def _fulltimestamp():
 
 # fulltimestamp
 
-_HOST = '127.0.0.1'  # The server's hostname or IP address
-_PORT = 65432        # The port used by the server
+_HOST = '127.0.0.1'  # Default server's hostname or IP address Isolate to localhost
+_PORT = 65432        # Default port used by the server
 
 
 ##############################################################################
@@ -131,30 +132,31 @@ _PORT = 65432        # The port used by the server
 #
 ##############################################################################
 class FlexPublish(object):
-    """ Add an DIV element for use by more than one outfit.
+    """ Add a DIV element for use by more than one widget.
     Assemble the messages, then clear etc. A debug fashion
     for a tabbed-panel.
+    Use 'postmessage() to put text into the display without
+    server intervention.
     """
-    #__slots__ = [''] # add legal instance variables
-    # (setq properties `("" ""))
 
-    brre     = re.compile(r'\n')                         # used to convert newline to <br/>
+    brre     = re.compile(r'\n')            # Convert newline to HTML <br/>
 
-    def __init__(self,                                 # FlexPublish::__init__()
+    def __init__(self,                                # FlexPublish::__init__()
                  name    : str = "",
                  display : str = fakedisplay,
                  width   : int = 300,       # hack width
                  host    : str = _HOST,     # hostname or url
                  port    : str = _PORT      # the port that is needed
-    ): 
-        """Initialize this class."""
-        #super().__init__()
-        # (wg-python-property-variables)
-        self.message           = ""          # build up the message here.
+                ) -> 'self':
+        """The FlexPublish class handles sending content to the backend
+        server, displaying any responses. It also allows posting a message
+        (postmessage) from within the code without the backend server."""
+
+        self.message           = ""          # build up the message here. The internal log
         self.messagecnt        = 1           # form a runnning variable for messages
-        self.host              = host
+        self.host              = host        # ip address of the host
         self.port              = int(port)   # ducktype port as string/int
-        self.wwidth            = width
+        self.wwidth            = width       # the width of the Div
 
         self.panel             = Div       (text="Msg", width=self.wwidth,
                                             style={'overflow-y':'scroll','height':'500px'},
@@ -190,19 +192,19 @@ class FlexPublish(object):
     def clear(self):                                  # FlexPublish.clear
         """Clean the conent and div. Permit one of the
         subscribers to clear for all."""
-        self.message = ""
-        self.panel.text       = message
-        self.messagecnt       = 1                    # reset the message count
+        self.message      = ""
+        self.panel.text   = message
+        self.messagecnt   = 1                   # reset the message count
 
         return self
 
     ### FlexPublish.clear
 
-    def send(self,payload):                               # FlexPublish.send()
+    def send(self,payload):                           # FlexPublish.send()
         """Connect to socket and send the message., Return the data.
         Designd to be called by self.display
         """
-        data = "CONNECTION FAILURE"          # assume the worst
+        data = "CONNECTION FAILURE"             # assume the worst
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 msg = "settimeout"
@@ -228,14 +230,31 @@ class FlexPublish(object):
 
     ### FlexPublish.send()
 
-    def display(self,msg : str = "\n",color='Bisque'): # FlexPublish.display
-        """append to content display to the div """
+    def postmessage(self,                             # FlexPublish.postmessage()
+                    msg : str = "\n",
+                    color='Bisque'): # FlexPublish.postmessage
+        """Append a user 'message' to the panel's div.
+        Color allows for warnings, errrors etc.
+        Does not interact with the dispatcher."""
         self.panel.background = color
         ts                    = _fulltimestamp()
-        retmsg = self.send(msg).decode()
-        self.message          = self.message  + f'\n# {ts}\n' + f'msg{self.messagecnt} = {retmsg}' + "\n"
-        self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)
-        self.messagecnt       += 1    # increment the variable.
+        self.message          = self.message  +   + f'\n# {ts}\n' + f'msg{self.messagecnt} = {msg}' + "\n" # prep response
+        self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)   # put the text into display div
+        self.messagecnt       += 1                                           # increment the variable.
+
+        return self
+
+    ### FlexPublish.postmessage()
+
+    def display(self,msg : str = "\n",color='Bisque'): # FlexPublish.display
+        """Send the message and append the response to the panel's div.
+        Color allows for warnings, errrors etc."""
+        self.panel.background = color
+        ts                    = _fulltimestamp()
+        retmsg                = self.send(msg).decode()                      # send the message to the dispatcher get response
+        self.message          = self.message  + f'\n# {ts}\n' + f'msg{self.messagecnt} = {retmsg}' + "\n" # prep response
+        self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)   # put the text into display div
+        self.messagecnt       += 1                                           # increment the variable.
 
         return self
 
@@ -248,7 +267,6 @@ class FlexPublish(object):
        return self
 
     ### FlexPublish.message()
-
 
     def read(self):                                   # FlexPublish.read()
         """Return the original accumulated messages sans
@@ -280,10 +298,6 @@ class FlexPublish(object):
             pprint.pprint(value,stream=os,indent=4)
 
         return self
-
-    ### FlexPublish.debug()
-
-    __FlexPublish_debug = debug  # really preserve our debug name if we're inherited
 
 # class FlexPublish
 
