@@ -93,28 +93,28 @@ class Flex_LogException(Exception):
 class Flex_Log(object):
     """ Provide logging to main system: /var/log/flexspec_<name>
     """
-    def __init__(self):                                      # Flex_Log::__init__()
+    def __init__(self,verboseflag = False):                   # Flex_Log::__init__()
         """Initialize this class."""
         # create self.logger
         logging.basicConfig(filename='/var/log/flexspec', encoding='utf-8',
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                            level=logging.DEBUG,
-                            verbose = False)
+                            format       ='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                            level        =logging.DEBUG,
+                            verboseflag  = False)
 
 
-        self.logger  = logging.getLogger('FlexSpec1')
-        self.verbose = verbose
+        self.logger      = logging.getLogger('FlexSpec1')
+        self.verboseflag = verboseflag
         self.logger.setLevel(logging.DEBUG)
 
     ### Flex_Log.__init__()
 
     def test(self):                                          # Flex_Log.test()
         """Send a few test messages"""
-        self.logger.debug('debug message')
-        self.logger.info('info message')
-        self.logger.warning('warn message')
-        self.logger.error('error message')
-        self.logger.critical('critical message')
+        self.logger.debug    ('debug message')
+        self.logger.info     ('info message')
+        self.logger.warning  ('warn message')
+        self.logger.error    ('error message')
+        self.logger.critical ('critical message')
 
         return self
 
@@ -182,9 +182,9 @@ class Flex_Log(object):
     def verbose(tf=False):                                   # Flex_Log.verbose()
         """Set Verbose, return self"""
         if(isinstance(tf,bool)):
-            self.verbose = tf
-        else:
-            msg = f"Flex_log.verbose() expects type bool, got {type(tf)}"
+            self.verboseflag = tf
+        if(self.verboseflag):
+            msg = f"Flex_Log.verbose() expects type bool, got {type(tf)}"
             self.critical(msg)
             raise Flex_LogException(msg);
 
@@ -199,7 +199,7 @@ class Flex_Log(object):
 #                               Regression Tests
 ##############################################################################
 # HEREHEREHERE
-if __name__ == "__main__":
+if (0):
     opts = optparse.OptionParser(usage="%prog "+__doc__)
 
     opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",

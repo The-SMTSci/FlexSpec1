@@ -102,8 +102,7 @@ class Collimator(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self,                                          # Collimator::__init__()
-                 flexname : str   = "Default",
+    def __init__(self, instrument : str   = "Flex_Instrument",  # Collimator::__init__()
                  name     : str   = "Collimator",
                  display          = fakedisplay,
                  position : str   = "0.0",
@@ -112,7 +111,7 @@ class Collimator(object):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname        = flexname         # name of the FlexSpec tied to this python instance
+        self.instrument      = instrument     # name of the FlexSpec tied to this python instance
         self.name            = name             # name of the C++ instance in FlexSpec box
         self.display         = display          # the FlexDisplay to report
         self.wwidth          = width            # c++ instance width to guide bokeh widgits herein
@@ -219,7 +218,7 @@ class Collimator(object):
                            ( "receipt"  , f"{self.receipt:d}"       )
                         ])
         gadgetcmd          = dict([("process"         , devstate)])
-        d2                 = dict([(f"{self.name}"    , gadgetcmd)])
+        d2                 = dict([(f"{self.instrument.flexname}"    , gadgetcmd)])
         jdict              = json.dumps(d2)
         self.display.display(f'{jdict}')
 

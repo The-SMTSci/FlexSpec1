@@ -104,15 +104,15 @@ class Guider(object):
 
     brre     = re.compile(r'\n')                         # used to convert newline to <br/>
 
-    def __init__(self, flexname : str = "Default",
+    def __init__(self, instrument : 'Flex_Instrumentstr',# Guider::__init__()
                  name : str = "Guider",
                  display = fakedisplay,
                  position : str = "0.0",
-                 maxrange : float = 1.5, width : int = 200):  # Guider::__init__()
+                 maxrange : float = 1.5, width : int = 200):  
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname    = flexname          # name of this instrument
+        self.instrument  = instrument          # name of this instrument
         self.name        = name              # name this instance recognizes
         self.display     = display           # where to put debug info
 
@@ -223,7 +223,7 @@ class Guider(object):
         slitcmd = dict([("Process", devstate), ("Receipt" , 0)])
         slitcmd['Receipt'] = 1                             # set the receipt as desired
         d2 = dict([(f"{self.name}", slitcmd)])
-        d3 = dict([(f"{self.flexname}", d2)])
+        d3 = dict([(f"{self.instrument.flexname}", d2)])
         jdict = json.dumps(d3)
         self.display.display(f'{jdict}')
 

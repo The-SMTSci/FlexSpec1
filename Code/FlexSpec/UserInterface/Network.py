@@ -129,7 +129,7 @@ class FlexNetwork(object):
     """
     urlre  = re.compile(r'')
 
-    def __init__(self, flexname : 'Insrument' ,                        # FlexNetwork::__init__()
+    def __init__(self, instrument : 'Insrument' ,                        # FlexNetwork::__init__()
                        username = None,                     # the user's name
                        password = None,                     # password
                        hostip   = None,                     # the URL for the spectrpgraph
@@ -138,7 +138,7 @@ class FlexNetwork(object):
         """Get the details together and manage network"""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname        = flexname
+        self.instrument      = instrument
         self.width           = width
         self.connected       = False
         self.display         = display
@@ -234,7 +234,7 @@ class FlexNetwork(object):
                              ("receipt"   , "1"                        )
                            ])
         netcmd = dict([("process", loginstate)])
-        d2     = dict([(f"{self.flexname.flexname}", netcmd)])
+        d2     = dict([(f"{self.instrument.flexname}", netcmd)])
         jdict  = json.dumps(d2)    # {"process" : {"network" : {...host, uname, passwd, receipt=1...}
         self.display.display(f'{jdict}')
 

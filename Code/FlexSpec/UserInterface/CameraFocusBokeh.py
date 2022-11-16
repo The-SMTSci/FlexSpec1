@@ -136,15 +136,17 @@ class CameraFocus(object):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, name : str = "Science Camera",
+    def __init__(self, instrument : 'Flex_Instrument', /,       # CameraFocus::__init__()
+                 name      = 'collimator',
                  display   = fakedisplay,
                  width     = 250,
-                 pin=4): # CameraFocus::__init__()
+                 pin=4): 
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
         self.wwidth         = width
         self.display        = display
+        self.instrument     = instrument
         self.name           = name
         self.stepin         = 0
         self.stepout        = 0
@@ -206,13 +208,15 @@ class CameraFocus(object):
           {"sciencecamera" : {"in" : "", "out" : "", "reciept" : "1"}
         dict( [ ("in",  '"%d"' % self.stepin), ("out" , ), ("reciept", "1")] )
         """
-        cmddict = dict( [ ("cammera", f"{self.name}"      ),
+        devstate = dict( [ ("cammera", f"{self.name}"      ),
                           ("in"     , f"{self.stepin:3d}" ),
                           ("out"    , f"{self.stepout:3d}"),
                           ("reciept", "1")
                         ])
-
-        d2 = dict([(f"{self.name}", dict([("process", cmddict)]))])
+        gadgetcmd    = dict([("process", devstate)])
+        d2 = dict([(f"{self.name.lower()}", gadgetcmd)])
+        d3           = dict([(f"{self.instrument.flexname}", d2)])
+        jdict        = json.dumps(d3)
         jdict = json.dumps(d2)
         self.display.display(f'{jdict}')
 

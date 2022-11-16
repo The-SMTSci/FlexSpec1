@@ -24,6 +24,7 @@ from bokeh.models         import RadioGroup
 from bokeh.models         import Select
 from bokeh.models.widgets import Tabs, Panel
 
+from Flex_Log             import *
 from SlitBokeh            import BokehOVIOSlit
 from KzinBokeh            import BokehKzinRing
 from ParallacticAngle     import FlexOrientation
@@ -73,7 +74,7 @@ __doc__ = """
 
 The FlexSpec 'instrument' uses an Arduino or similar microprocessor.
 The processor supports a number of 'gadgets' that control sub-insrumentation.
-A 'gadget' is a widget without a window. 
+A 'gadget' is a widget without a window.
 
 Here gadgets cover the Kzin ring, collimator, grating rotator, etc.
 They are considered 'Patrons' of their device within the Postmaster
@@ -104,14 +105,28 @@ The remote device 'reacts' to the new knowledge of the
 state of these classes by setting it's internal state
 (by moving things or turing things on/off).
 
-More complete layout discussion 
+More complete layout discussion
 https://medium.com/y-data-stories/python-and-bokeh-part-iii-tutorial-116aa2e873eb
 
-
+https://docs.bokeh.org/en/latest/docs/user_guide/embed.html#bokeh-applications
 """
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
+
+# Related to css and Bokeh
+#class MyResources(Resources):
+#    """ https://stackoverflow.com/questions/44607084/background-color-of-bokeh-layout """
+#    @property
+#    def css_raw(self):
+#        return super().css_raw + [
+#            """.bk-root {
+#                    background-color: #000000;
+#                    border-color: #000000;
+#                    }
+#            """
+#        ]
+## class MyResources
 
 def settitle(attr,old,new):
     print(f"FlexSpec settitle old={attr}, old={old}, new={new}")
@@ -139,41 +154,38 @@ if (1):  # This is main! leave set to 1
     (options, args) = opts.parse_args()
 
     # set a few main constants
-    width          = 600                              # width of the main things
+    width          = 600                              # width of the main div
     flexname       = "FlexSpec_Rodda"
-    instrument     = Flex_Instrument(flexname,width=width)  # initialize the instrument with flexname
-    #fstitle        = TextInput(value=f"title{flexname}", background='Black',
-    #                           disabled=False, width=width)
+    logger         = Flex_Log()
+    instrument     = Flex_Instrument(logger,flexname,width=width)  # initialize the instrument with flexname
 
     display        = FlexPublish("f{flexname}",width=width)
 
     shutter        = Flex_Shutter    (instrument,display=display,width=width)
     kzin1          = BokehKzinRing   (instrument,display=display,width=width,shutter=shutter)
     slits          = BokehOVIOSlit   (instrument,display=display,width=width)
-    grating        = BokehGrating    (instrument,display=display,width=width)  # instrument carries flexname.
-    pangle         = FlexOrientation (flexname,display=display,width=width)    # TODO change flexname to instrument
-    guider         = Guider          (flexname,display=display,width=width)    # TODO change flexname to instrument
-    collimator     = Collimator      (flexname,display=display,width=width)    # TODO change flexname to instrument
-    camerafocus    = CameraFocus     (flexname,display=display,width=width)    # TODO change flexname to instrument
+    grating        = BokehGrating    (instrument,display=display,width=width)
+    pangle         = FlexOrientation (instrument,display=display,width=width)
+    guider         = Guider          (instrument,display=display,width=width)
+    collimator     = Collimator      (instrument,display=display,width=width)
+    camerafocus    = CameraFocus     (instrument,display=display,width=width)
     network        = FlexNetwork     (instrument,display=display,width=width)
 
-    gadgets = dict([('kzin'       , kzin1       ), # tie the flexspec gadgets to their methods.
-                    ('display'    , display     ),
-                    ('slits'      , slits       ),
-                    ('grating'    , grating     ),
-                    ('pangle'     , pangle      ),
-                    ('collimator' , collimator  ),
-                    ('camerafocus', camerafocus )
-                   ])
+    gadgets        = dict([('kzin'       , kzin1       ), # tie the flexspec gadgets to their methods.
+                           ('display'    , display     ),
+                           ('slits'      , slits       ),
+                           ('grating'    , grating     ),
+                           ('pangle'     , pangle      ),
+                           ('collimator' , collimator  ),
+                           ('camerafocus', camerafocus )
+                         ])
 
-    dispatcher = Flex_Dispatcher(instrument,gadgets)
+    dispatcher     = Flex_Dispatcher(instrument,gadgets)
     dispatcher.debug()
-    #fstitle.on_change('value_input', settitle) # call back for this
 
     #-------------------------------- Tab 1 -------------------------------------
     # The control tab (left most)
     l1             = column(instrument.layout()  ,  Spacer(width=width, height=5, background='black'),
-                            #fstitle              ,  Spacer(width=width, height=5, background='black'),
                             grating.     layout(),  Spacer(width=width, height=5, background='black'),
                             collimator.  layout(),  Spacer(width=width, height=5, background='black'),
                             pangle.      layout())

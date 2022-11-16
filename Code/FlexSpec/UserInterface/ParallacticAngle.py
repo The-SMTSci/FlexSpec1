@@ -2,16 +2,19 @@
 # -*- coding: utf-8 -*-
 #
 # (wg-python-fix-pdbrc)
-
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 " (buffer-file-name) ))
+#
 ### HEREHEREHERE
 
 import os
 import optparse
 import sys
 import re
-from FlexPublish          import fakedisplay
 import json
-
+from FlexPublish          import fakedisplay
+from Flex_Instrument      import Flex_Instrument
 
 from bokeh                import events
 from bokeh.events         import ButtonClick
@@ -94,24 +97,23 @@ class FlexOrientation(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self,                                          # FlexOrientation::__init__()
-                 name     : str  = "IMU",              # The internal device name
-                 flexname : str  = "pangle",           # The program's name
-                 display         = fakedisplay,        # display for results
-                 pangle   : str  = "0.0",              # The parallactic angle in fraction degrees
-                 width    : int  = 200):               # the width for bokeh display
+    def __init__(self,instrument : 'Flex_Instrument',      # FlexOrientation::__init__()
+                 name     : str               = "pangle",      # The internal device name
+                 display  : 'Flex_Publish'    = fakedisplay,   # display for results
+                 pangle   : str               = "0.0",         # The parallactic angle in fraction degrees
+                 width    : int               = 200):          # the width for bokeh display
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname  = flexname
-        self.name      = name
-        self.display   = display
-        self.wwidth    = width
-        self.pangle    = float(pangle)
-        self.home      = 0
-        self.receipt   = 1                              # always ask for an update
-        self.read      = 0
-        self.spacer    = Spacer(width=self.wwidth, height=5, background='black')
+        self.instrument       = instrument
+        self.name             = name
+        self.display          = display
+        self.wwidth           = width
+        self.pangle           = float(pangle)
+        self.home             = 0
+        self.receipt          = 1                              # always ask for an update
+        self.read             = 0
+        self.spacer           = Spacer(width=self.wwidth, height=5, background='black')
 
         self.parallacticangle = Slider    (title=f"Parallactic Angle", bar_color='firebrick',
                                            value = self.pangle, start = 0,  end = 180,
@@ -183,7 +185,7 @@ class FlexOrientation(object):
                                    ])
         gadgetcmd          = dict([("process", devstate)])
         d2                 = dict([(f"{self.name}", gadgetcmd)])
-        d3                 = dict([(f"{self.flexname}", d2)])
+        d3                 = dict([(f"{self.instrument.flexname}", d2)])
         jdict              = json.dumps(d3)
         self.display.display(f'{jdict}')
 

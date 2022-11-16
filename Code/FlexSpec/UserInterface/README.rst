@@ -89,3 +89,58 @@ were added, formatting of the code, usual beautification things.
 Work has began on the serial interface extension(s) to the
 main backend dispatch server. Written in python, with the
 target machine being the Raspberry Pi 4B+.
+
+
+.. note::
+
+    myapp
+       |
+       +---__init__.py
+       +---app_hooks.py
+       +---main.py
+       +---request_handler.py
+       +---static
+       +---theme.yaml
+       +---templates
+            +---index.html
+
+.. note::
+
+    myapp
+       |
+       +---__init__.py
+       |
+       +---app_hooks.py
+       +---data
+       |    +---things.csv
+       |
+       +---helpers.py
+       +---main.py
+       |---models
+       |    +---custom.js
+       |
+       +---request_handler.py
+       +---static
+       |    +---css
+       |    |    +---special.css
+       |    |
+       |    +---images
+       |    |    +---foo.png
+       |    |    +---bar.png
+       |    |
+       |    +---js
+       |        +---special.js
+       |
+       |---templates
+       |    +---index.html
+       |
+       +---theme.yaml
+    
+
+
+
+
+
+
+
+

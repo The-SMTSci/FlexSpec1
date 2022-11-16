@@ -119,12 +119,12 @@ class BokehGrating(Flex_Patron):
 
     #__slots__ = [''] # add legal instance variables
     # (setq properties '("" ""))
-    def __init__(self, flexname : 'Instrument', /,     # BokehGrating::__init__()
-                       name     : str           = "grating",   # internal Ardnino name
-                       grating  : str           = "300 l/mm",  # Our opinion Ardnino's l/mm
-                       display  : 'FlexPublish' = fakedisplay, # Browser thingy to publish things
-                       width    : int           = 200,         # Bokeh: width of our  <DIV>
-                       notify   : bool          = False):      # Bokeh/Dispatch send out initial notification
+    def __init__(self, instrument : 'Flex_Instrument', /,     # BokehGrating::__init__()
+                       name       : str           = "grating",   # internal Ardnino name
+                       grating    : str           = "300 l/mm",  # Our opinion Ardnino's l/mm
+                       display    : 'FlexPublish' = fakedisplay, # Browser thingy to publish things
+                       width      : int           = 200,         # Bokeh: width of our  <DIV>
+                       notify     : bool          = False):      # Bokeh/Dispatch send out initial notification
         """
         If requested grating in choices, then use it otherwise add it.
         The grating is a mechanized component of the 'Instrument', with the
@@ -138,7 +138,7 @@ class BokehGrating(Flex_Patron):
 
         self.grating       = self.GratingInserts.index(grating)
         self.display       = display                   # the name of the display for status trace
-        self.flexname      = flexname                  # Name of associated instrument
+        self.instrument    = instrument                # Name of associated instrument
         self.name          = name                      # Name of this instance
         self.wwidth        = width                     # govern the width of the Bokeh widgets
         self.notify        = notify                    # send(or not) out notification on startuy.
@@ -226,11 +226,12 @@ class BokehGrating(Flex_Patron):
         """Send a home command"""
         self.send_state()
 
+
     ### BokehGrating.update_homebutton()
 
     def send_state(self):                                   # BokehGrating::send_state()
         """Several ways to send things"""
-        flexname = self.flexname                         # get the actual latest name.
+        flexname = self.instrument.flexname                         # get the actual latest name.
         devstate = dict( [ ( "grating"   , self.grating),
                            ( "cwave"     , f"{self.cwave:d}"),
                            ( "home"      , f"{self.home:d}"),
@@ -239,7 +240,7 @@ class BokehGrating(Flex_Patron):
                          ])
         gadgetcmd             = dict([("process", devstate)])
         d2                    = dict([(f"{self.name.lower()}", gadgetcmd)])
-        d3                    = dict([(f"{self.flexname}", d2)])
+        d3                    = dict([(f"{flexname}", d2)])
         jdict                 = json.dumps(d3)
         self.display.display(f'{jdict}')
 
