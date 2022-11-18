@@ -98,8 +98,7 @@ class Flex_Log(object):
         # create self.logger
         logging.basicConfig(filename='/var/log/flexspec', encoding='utf-8',
                             format       ='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                            level        =logging.DEBUG,
-                            verboseflag  = False)
+                            level        =logging.DEBUG)
 
 
         self.logger      = logging.getLogger('FlexSpec1')
@@ -142,11 +141,14 @@ class Flex_Log(object):
     def warning(self, msg : str = "debug") -> 'self':        # Flex_Log.warning()
         """Warning message"""
         self.logger.warning(f"FlexSpec {msg}")
+
         return self
+
     ### Flex_Log.warning()
 
     def error(self, msg : str = "debug") -> 'self':          # Flex_Log.error()
         """Error message"""
+
         self.logger.error(f"FlexSpec {msg}")
 
         return self
@@ -155,6 +157,7 @@ class Flex_Log(object):
 
     def critical(self, msg : str = "debug") -> 'self':       # Flex_Log.critical()
         """Critical message"""
+
         self.logger.critical(f"FlexSpec {msg}")
 
         return self
@@ -179,14 +182,14 @@ class Flex_Log(object):
 
     ### Flex_Log._debug()
 
-    def verbose(tf=False):                                   # Flex_Log.verbose()
+    def verbose(self,tf=False):                                   # Flex_Log.verbose()
         """Set Verbose, return self"""
         if(isinstance(tf,bool)):
             self.verboseflag = tf
         if(self.verboseflag):
             msg = f"Flex_Log.verbose() expects type bool, got {type(tf)}"
             self.critical(msg)
-            raise Flex_LogException(msg);
+            #raise Flex_LogException(msg);
 
         return self
 
@@ -199,7 +202,7 @@ class Flex_Log(object):
 #                               Regression Tests
 ##############################################################################
 # HEREHEREHERE
-if (0):
+if (__name__ == '__main__'):
     opts = optparse.OptionParser(usage="%prog "+__doc__)
 
     opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
@@ -217,10 +220,10 @@ if (0):
                     ("critical" , log.critical )
                    ])
 
-    with open(filename,'r') if filename else sys.stdin as f:
+    with open(args[0],'r') as f:
         for l in f:
             if('#' in l):
                 continue
-            parts = l.strip().split()
-            lpg = loggers.get(parts[0].strip(),log.critical)
+            parts = list(map(str.strip,l.split(':')))
+            loggers.get(parts[0].strip(),log.critical)(parts[0])
 

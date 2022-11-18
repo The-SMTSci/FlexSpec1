@@ -14,13 +14,14 @@ import re
 import json
 import datetime
 from FlexPublish          import fakedisplay
+from Flex_Log             import Flex_Log
 
 from bokeh                import events
 from bokeh.events         import ButtonClick
 from bokeh.io             import curdoc
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import CheckboxButtonGroup, ColumnDataSource, Slider, TextInput, Button
-from bokeh.models         import Tooltip, CustomJS, Div
+from bokeh.models         import Tooltip, CustomJS
 from bokeh.plotting       import figure
 from bokeh.models         import RadioGroup
 from bokeh.models         import Select
@@ -177,21 +178,20 @@ class BokehKzinRing(object):
     #
     ##################################################################
     def __init__(self, instrument : 'Flex_Instrument',          # BokehKzinRing::__init__()
-                 gadgetname   : str = "kzin",
                  display          : 'FlexPublish' = fakedisplay,
+                 gadgetname       : str = "kzin",
                  width            : int = 250,
                  shutter          : 'FlexShutter' = None):
         """Setup the UI, manage the callbacks, layout, messaging etc for the
         Kzin widget."""
 
         self.wwidth              = width               # overall width of the display area
-        self.display             = display.display     # the FlexPublish display widget
+        self.instrument          = instrument
         self.flexname            = instrument.flexname # the string that is the instrument's gadgetname
         self.gadgetname          = gadgetname          # 
         self.display             = instrument.display  # FlexPublish to send text to
         self.receipt             = 1                   # always ask for an update
         self.shutter             = shutter             # if one is in the mix
-
         self.slider_values       = BokehKzinRing.SliderValues()
 
         self.gowcolor            = 'darkkhaki'         # manage the slider color values in one place
@@ -202,8 +202,8 @@ class BokehKzinRing(object):
         self.hβ                  = 'lime'
         self.hα                  = 'firebrick'
         pwidth                   = self.wwidth//12                       # uniform width/spacing
-        twidth                   = self.wwidth//8
-
+        twidth                   = self.wwidth//7
+        self.instrument.logger.info("Kzin signing in.")
 
 ######################################### associated text inputs ###################################
 
@@ -277,6 +277,9 @@ class BokehKzinRing(object):
                                                    button_type="warning", width=5*pwidth)
         self.offbutton      = Button    (label=f"Off",  align='end', disabled=False,
                                                    button_type="success", width=5*pwidth)
+        self.debugbutton    = Button    (label=f"Debug",  align='end', disabled=False,
+                                                   button_type="success", width=5*pwidth)
+
 
         self.profiles            = Select(title="Load Recent Configuration", options = self.configurations, width = self.wwidth)
 
@@ -284,6 +287,7 @@ class BokehKzinRing(object):
         self.resetbutton   .on_click (lambda : self.update_resetbutton())
         self.onbutton      .on_click (lambda : self.update_onbutton())
         self.offbutton     .on_click (lambda : self.update_offbutton())
+        self.debugbutton   .on_click (lambda : self.update_debugbtn())
 
 ###################################################################################################
         #self.resettip            = Tooltip(content="Reset to off (-1) do not send to instrument.", position="right", target=self.resetbutton)
@@ -351,11 +355,8 @@ class BokehKzinRing(object):
 
     def update_onbutton(self):                              # BokehKzinRing::update_button_in()
         """update_onbutton Button via an event lambda"""
-        #os = io.StringIO()
-        #self.debug(f"{self.gadgetname} Debug",skip=['varmap'], os=os)
-        #os.seek(0)
-        self.display.display(BokehKzinRing.brre.sub("<br/>",f"Things in onbutton{dir(self.onbutton._property_values)}"))
         self.onoff = 1
+        self.instrument.logger.info("BokehKzinRing.update_onbutton() - button pressed")
         msg = self.send_state()
 
     ### BokehKzinRing.update_onbutton()
@@ -373,6 +374,7 @@ class BokehKzinRing(object):
         """Several ways to send things
            schematic  2021-08-27T11:32:01-0600
         """
+        self.instrument.logger.info("BokehKzinRing.send_state() starting")
         #                    JSON TXT      Bokeh                    PY Variable
         devstate   = dict( [ ( "wheat"   , f'"{self.slider_values.values["GoW"    ]}"'), # Tungstun
                              ( "callamp" , f'"{self.slider_values.values["NeAr"   ]}"'), # CAL Relco
@@ -386,11 +388,14 @@ class BokehKzinRing(object):
                            ])
 
         gadgetcmd  = dict([("process", devstate)])
-        d2         = dict([(f"{self.gadgetname}", gadgetcmd)])     # Add in my decice (instance with in one instrument) gadgetname
-        d3         = dict([(f"{self.flexname}", d2)])        # Add in my 'Instrument' gadgetname (vis-a-vis other instruments)
-        jdict      = json.dumps(d3)                          # make string image
+        package    = dict([(f"{self.gadgetname}", gadgetcmd)])     # Add in my decice (instance with in one instrument) gadgetname
+        envelope   = dict([(f"{self.flexname}", package)])         # Add in my 'Instrument' gadgetname (vis-a-vis other instruments)
+        jdict      = json.dumps(envelope)                          # make string image
+        self.instrument.logger.info(f"pre display call BokehKzinRing.{jdict} jdict")
 
-        self.display.display(f'{jdict}')                     # send it to browser DIV, and off to communications port.
+        data = self.display.display(f'{jdict}')              # send it to browser DIV, and off to communications port.
+        self.instrument.logger.info(f"post display call {data} jdict")
+        #self.display.postmessage(data)
 
     ### BokehKzinRing.send_state()
 
@@ -416,6 +421,7 @@ class BokehKzinRing(object):
                             row(self.onbutton,self.offbutton,self.resetbutton),
                             row(self.savebutton, Spacer(width=5,background='white'),self.profiles), # The configurations
                             #row(self.shutter.layout()][self.shutter is None])          # hack shutter if needed
+                            row(self.debugbutton),
                             self.shutter.layout()          # hack shutter if needed
                           )  ))
         return self

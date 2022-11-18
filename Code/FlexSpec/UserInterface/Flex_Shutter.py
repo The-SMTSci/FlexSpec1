@@ -94,7 +94,7 @@ class Flex_Shutter(object):
     """
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
-    def __init__(self, flexname :'Flex_Instrument',  # Flex_Shutter::__init__()
+    def __init__(self, instrument :'Flex_Instrument',  # Flex_Shutter::__init__()
                  gadgetname = "shutter",
                  display = fakedisplay,
                  width : int = 250
@@ -102,7 +102,7 @@ class Flex_Shutter(object):
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.flexname     = flexname              # The instrument -- if user changes name we know it
+        self.instrument   = instrument              # The instrument -- if user changes name we know it
         self.name         = gadgetname            # the target gadget in the Arduino
         self.display      = display               # the displayer we're using
         self.wwidth       = width                 # the width for this display widget
@@ -162,7 +162,7 @@ class Flex_Shutter(object):
                            ])
         shuttercmd = dict([  ( "process"         , devstate)  ])   # Walk the parcel into existance.
         d2         = dict([  (f"{self.name}"     , shuttercmd)])
-        d3         = dict([  (f"{self.flexname.flexname}" , d2)        ])
+        d3         = dict([  (f"{self.instrument.flexname}" , d2)        ])
 
         jdict      = json.dumps(d3)
 

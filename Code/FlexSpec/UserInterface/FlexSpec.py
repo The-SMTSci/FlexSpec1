@@ -12,6 +12,7 @@ import os
 import optparse
 import sys
 import re
+import logging
 
 from bokeh                import events
 from bokeh.events         import ButtonClick
@@ -156,10 +157,11 @@ if (1):  # This is main! leave set to 1
     # set a few main constants
     width          = 600                              # width of the main div
     flexname       = "FlexSpec_Rodda"
-    logger         = Flex_Log()
-    instrument     = Flex_Instrument(logger,flexname,width=width)  # initialize the instrument with flexname
-
+    logger         = Flex_Log() # logging.getLogger(__name__) # 
+    logger.info(f"FlexSpec {flexname} starting...")
     display        = FlexPublish("f{flexname}",width=width)
+    instrument     = Flex_Instrument(logger,flexname,display,width=width)  # initialize the instrument with flexname
+
 
     shutter        = Flex_Shutter    (instrument,display=display,width=width)
     kzin1          = BokehKzinRing   (instrument,display=display,width=width,shutter=shutter)

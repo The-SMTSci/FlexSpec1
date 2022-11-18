@@ -13,7 +13,8 @@ import sys
 import re
 import time
 import socket
-                      
+import logging
+
 from bokeh.layouts        import column, row, Spacer
 from bokeh.models         import Button, Div
 
@@ -37,6 +38,8 @@ PORT = 65432        # The port used by the server
 #    def clear(self,*kwds):
 #    def read(self,*kwds):
 #    def layout(self,*kwds):
+#    def postmessage(*kwds):
+#    def send(*kwds):
 # class FlexPublishException(Exception):
 #     def __init__(self,message,errors=None):
 #     @staticmethod
@@ -54,6 +57,7 @@ PORT = 65432        # The port used by the server
 #     def read(self):                                   # FlexPublish.read()
 #     def layout(self):
 #     def debug(self,msg="",skip=[],os=sys.stderr):     # FlexPublish::debug()
+#
 #
 #
 # 2022-11-09T07:40:36-0700 wlg - added postmessage
@@ -86,7 +90,9 @@ _tfmt = '%Y-%m-%dT%H:%M:%S'
 # fakedisplay - place holder for early debugging. Retained.
 #############################################################################
 class fakedisplay(object):
-   """Do-nothing place holder for testing Publish."""
+   """Do-nothing place holder for testing Publish. Keep in sync with FlexPublish
+   class
+   """
    def display(self,*kwds):
        pass
    def clear(self,*kwds):
@@ -95,6 +101,10 @@ class fakedisplay(object):
        pass
    def layout(self,*kwds):
        return row()
+   def postmessage(*kwds):
+      pass
+   def send(*kwds):
+      pass
 
 # fakedisplay
 
@@ -159,7 +169,7 @@ class FlexPublish(object):
         self.wwidth            = width       # the width of the Div
 
         self.panel             = Div       (text="Msg", width=self.wwidth,
-                                            style={'overflow-y':'scroll','height':'500px'},
+                                            style={'overflow-y':'auto','height':'500px'},
                                             background='Bisque')
         self.clear_button      = Button    ( label="Clear",  disabled=False,
                                              button_type="warning", width=self.wwidth)
@@ -204,10 +214,11 @@ class FlexPublish(object):
         """Connect to socket and send the message., Return the data.
         Designd to be called by self.display
         """
+        logging.info("FlexPublish.send() starting")
         data = "CONNECTION FAILURE"             # assume the worst
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                msg = "settimeout"
+                #msg = "settimeout"
                 #s.settimeout(1.5)              # seconds
                 msg = "connect"
                 s.connect((HOST, PORT))         # requires a tuple.
@@ -216,16 +227,17 @@ class FlexPublish(object):
                 msg = "recv"
                 data = s.recv(1024)             # the returned data.
         except socket.timeout as to:
-           data = f"FlexPublish: ERROR: Timeout Error to.__str__()"
-           print(data)
-           data = data.encode()                 # this needs to be bytes
-           s.close()
+            data = f"FlexPublish: ERROR: Timeout Error to.__str__()"
+            print(data)
+            data = data.encode()                 # this needs to be bytes
+            s.close()
         except Exception as e:
             data = f"FlexPublish: ERROR: Publish Send Error: {HOST} {PORT}\n{e.__str__()}\n{payload}\nerrmsg={msg}\n"
             print(data)
             print(f"{e.__str__()}")             # local console
             data = data.encode()                # this needs to be bytes
             s.close()
+        logging.info("FlexPublish.send() complete")
         return data                             # return data or errors as bytes
 
     ### FlexPublish.send()
@@ -256,7 +268,7 @@ class FlexPublish(object):
         self.panel.text       = FlexPublish.brre.sub("<br/>",self.message)   # put the text into display div
         self.messagecnt       += 1                                           # increment the variable.
 
-        return self
+        return retmsg
 
     ### FlexPublish.display()
 
