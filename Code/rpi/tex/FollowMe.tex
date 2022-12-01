@@ -215,7 +215,7 @@ This FlexBerry implementation uses Ubuntu 22.04 and NOT the Raspbian
 image based on Ubuntu programs. The prescription for making this
 system is contained in the GitHub repo TheSMTSci/FlexSpec1 repo. This
 must be installed on the FlexBerry early on during its creation. This
-document steps you through the install. See Section \ref{sec:raspbian}
+document steps you through the install. See Section \ref{sec:RaspberryPi}
 
 This section builds the first working image, copy this image to an
 iso file and make duplicate SD cards for use through out the system.
@@ -422,11 +422,12 @@ network.
 
 \ltodo{Other Packages}{Explain other packages and subsytems.}
 
+\input{Raspberry.tex}
 \input{CA.tex}
 \input{CertMe.tex}
 \input{FileSharing.tex}
 \input{flexnginx.tex}
-
+\input{DNS.tex}
 
 %%%ADDAPPENDIX
 
@@ -434,10 +435,10 @@ network.
 %% (wg-bibitem)
 
 %%\clearpage
-\addcontentsline{toc}{section}{References}
-\renewcommand*{\refname}{My Bibliography and References}
+\addcontentsline{References}{section}{References}
+\renewcommand*{\refname}{Bibliography and References}
 \bibliographystyle{apalike}	% bibliographystyle{apalike} and \usepackage{natbib}
-\bibliography{MasterBib}	% expects file "MasterBib.bib"
+\bibliography{FollowMe}	% expects file "MasterBib.bib"
 
 
 

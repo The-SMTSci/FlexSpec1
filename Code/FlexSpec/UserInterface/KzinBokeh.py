@@ -179,8 +179,8 @@ class BokehKzinRing(object):
     ##################################################################
     def __init__(self, instrument : 'Flex_Instrument',          # BokehKzinRing::__init__()
                  display          : 'FlexPublish' = fakedisplay,
-                 gadgetname       : str = "kzin",
-                 width            : int = 250,
+                 gadgetname       : str           = "kzin",
+                 width            : int           = 250,
                  shutter          : 'FlexShutter' = None):
         """Setup the UI, manage the callbacks, layout, messaging etc for the
         Kzin widget."""
@@ -188,7 +188,7 @@ class BokehKzinRing(object):
         self.wwidth              = width               # overall width of the display area
         self.instrument          = instrument
         self.flexname            = instrument.flexname # the string that is the instrument's gadgetname
-        self.gadgetname          = gadgetname          # 
+        self.gadgetname          = gadgetname          #
         self.display             = instrument.display  # FlexPublish to send text to
         self.receipt             = 1                   # always ask for an update
         self.shutter             = shutter             # if one is in the mix
@@ -222,8 +222,6 @@ class BokehKzinRing(object):
         self.hβvalue        .on_change("value", lambda attr, old, new: self.update_textfield (self.hβvalue       , attr, old, new))
         self.oiiivalue      .on_change("value", lambda attr, old, new: self.update_textfield (self.oiiivalue     , attr, old, new))
         self.hαvalue        .on_change("value", lambda attr, old, new: self.update_textfield (self.hαvalue       , attr, old, new))
-
-
 
         self.textfields = dict([ ("wheat_value"   , self.wheatvalue  ),   # map the membername to its textinput widget
                                  ("near_value"    , self.nearvalue   ),
@@ -376,15 +374,15 @@ class BokehKzinRing(object):
         """
         self.instrument.logger.info("BokehKzinRing.send_state() starting")
         #                    JSON TXT      Bokeh                    PY Variable
-        devstate   = dict( [ ( "wheat"   , f'"{self.slider_values.values["GoW"    ]}"'), # Tungstun
-                             ( "callamp" , f'"{self.slider_values.values["NeAr"   ]}"'), # CAL Relco
-                             ( "hbeta"   , f'"{self.slider_values.values["Hβ"     ]}"'), # M3 BLUE LED
-                             ( "oiii"    , f'"{self.slider_values.values["O[III]" ]}"'), # M2 GREEN LED
-                             ( "halpha"  , f'"{self.slider_values.values["Hα"     ]}"'), # M1 RED LED
-                             ( "uvboost" , f'"{self.slider_values.values["Boost"  ]}"'), # Blue boost
-                             ( "flat"    , f'"{self.slider_values.values["Flat"   ]}"'), # MID WHITE LED
-                             ( "state"   , f'"{self.onoff}"'),                           # State  ON/OFF
-                             ( "receipt" , f'"{self.receipt}"')                          # get update
+        devstate   = dict( [ ( "wheat"   , f'{self.slider_values.values["GoW"    ]}'), # Tungstun
+                             ( "callamp" , f'{self.slider_values.values["NeAr"   ]}'), # CAL Relco
+                             ( "hbeta"   , f'{self.slider_values.values["Hβ"     ]}'), # M3 BLUE LED
+                             ( "oiii"    , f'{self.slider_values.values["O[III]" ]}'), # M2 GREEN LED
+                             ( "halpha"  , f'{self.slider_values.values["Hα"     ]}'), # M1 RED LED
+                             ( "uvboost" , f'{self.slider_values.values["Boost"  ]}'), # Blue boost
+                             ( "flat"    , f'{self.slider_values.values["Flat"   ]}'), # MID WHITE LED
+                             ( "state"   , f'{self.onoff}'),                           # State  ON/OFF
+                             ( "receipt" , f'{self.receipt}')                          # get update
                            ])
 
         gadgetcmd  = dict([("process", devstate)])
@@ -408,11 +406,11 @@ class BokehKzinRing(object):
                                 column(self.oiiislider,    self.oiiivalue),                  # Marker for GREEN LED
                                 column(self.hαslider,      self.hαvalue),                    # Marker for REF   LED
 
-                                Spacer(width=10, height=self.wwidth//2, background='black'), # vertical separator 
+                                Spacer(width=10, height=self.wwidth//2, background='black'), # vertical separator
 
                                 column(self.nearslider,    self.nearvalue),                  # Relco -
 
-                                Spacer(width=10, height=self.wwidth//2, background='black'), # vertical separator 
+                                Spacer(width=10, height=self.wwidth//2, background='black'), # vertical separator
 
                                 column(self.augflatslider, self.augvalue),                   # ... add in some BLUE LED boost
                                 column(self.wheatslider,   self.wheatvalue),                 # Tungstun flat

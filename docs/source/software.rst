@@ -48,6 +48,19 @@ KStars/INDI/Ekos:
 
 *   Sextractor (image to data conversion)
 
+Scripts
+-------
+
+The predominent script is bash:
+
+`Variable substitution <https://tldp.org/LDP/abs/html/parameter-substitution.html}`_
+describes the rather obtuse syntax to fix variables on the fly. Handy for removing
+spaces from filenames; changing FITS file extensions from 'FTS' to 'fits' etc.
+
+Bash is spring-loaded on Linux systems and the fastest way to do things.
+It allows fast access to the utility programs like sed, awk, etc.
+What takes several minutes at a DOS command line, takes but several
+seconds in bash.
 
 Networking
 ----------
@@ -148,6 +161,18 @@ TODO: Cite the trademarks etc.
 
 .. |reg|    unicode:: U+000AE .. REGISTERED SIGN
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
+
+
+Python
+------
+
+The FlexSpec1 project makes extensive use of Python3 and many support packages.
+In particular the Flask/Bokeh combination for the front-end GUI like WEBAPP.
+Other utility programs the team developed are included.
+
+See the `Official PEP <https://peps.python.org/pep-0420/>`_ Python
+Extension Proposals (the actual rules of python).  Pay attention to
+PEP 0, for the coding standards, we mostly follow.
 
 
 Other Packages

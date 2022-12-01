@@ -63,3 +63,44 @@ and special "in-band" control.
 Here the characters ``{}"":,`` are strictly reserved for JSON use
 to promote very restricted hand-coded JSON capability for lesser
 machines. 
+
+Why a simple subset of ASCII for JSON strings
+---------------------------------------------
+
+Many transport layers support "in band" processing of values. The
+FlexSpec1 protocol features the use of STX/ETX to frame a message,
+together with a proper subset if ANSI ASCII characters. The FlexSpec1
+subset's characters match patterns as defined by Python -- a language
+that is a fundamental part of FlexSpec programming.  The python REs
+are [A-Za-z]+ numbers [0-9.+-]+ whitespace [\t\n ]* and certain
+punctuation [:",{}] as being significant in the JSON sense. All other
+values from 0x32-0x7e are deemed legal, and we ignore DEL at 0x7f.
+Each JSON string must meet simple ArduinoJson requirements 
+
+Why not use UTF8:
+
+Code point  UTF-8 conversion
+First code     Last code       Byte 1   Byte 2   Byte 3   Byte 4
+   point         point
+U+0000         U+007F          0xxxxxxx 
+U+0080         U+07FF          110xxxxx 10xxxxxx 
+U+0800         U+FFFF          1110xxxx 10xxxxxx 10xxxxxx 
+U+10000        [nb 2]U+10FFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+
+While UTF-8 includes ASCII (U+0000 U+007F  Byte 1 0xxxxxxx), a transmissin
+error can switch characters into 2 byte protocols and trip parsers. The
+limit to pure ANSI ASCII allows for 256 byte look up tables, at the expense
+of 128 additional illegal spaces. This is rather small compared to the number
+of opcodes to implement test logic. So ANSI ASCII it is.
+
+We recognize non-US people want to use extended characters, but,
+frankly, given operational overhead extended characters serves no real
+purpose in instrument control. This is not quite consistent with the
+Postal Patron's names but the sacrafice was deemed reasonable.
+
+Note: UTF-8 is the imposition of a variable length 'charcter', deemed
+wchar in C++, where 'bytes' as strings are not as richly supported
+with Pythons array structure. 
+
+Note: Wide UTF-8 REGEXPs are afoot -- See Dr. Brian Kernighan's recent
+work extendeding the RE structure with AWK.

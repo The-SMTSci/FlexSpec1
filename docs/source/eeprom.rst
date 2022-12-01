@@ -4,6 +4,9 @@ EEPROM
 
 The FS1 uses an 24FC256 I2C EEPROM module to store information. The module
 is at I2C J11 and uses processor Pins 24 for SCL and 25 for SDA on Pin 25.
+Its official address is 0x50. 
+
+The EEPROM only supports 
 
 We are using the AMC256 prom with ..math`256\times 1024 = 262144` bits
 for 32768 bytes or ..math`32 \times 1024` pages.
@@ -118,10 +121,12 @@ The values are placed at locations within the EEPROM.
 
 
 
+If page write is available use the beginTransmission(), ... write() ...
+and endTransmission() calls. In our case, from 1 to 64 bytes may be written.
 
 
 
-
+https://www.arduino.cc/reference/en/language/functions/communication/wire/begintransmission/
 
 
 ..

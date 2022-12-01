@@ -118,12 +118,12 @@ class CameraFocus(object):
 
     sciencechoices = [ "QHY       268",  # sampled from BeSS database
                        "QHY       600 M",
-                       "QHY       600 M",
                        "SX        694",
                        "SX        814",
                        "Atik      314 L",
                        "Atik      414 e",
                        "Atik      460 Ex"
+                       "ASI       174 MM",
                        "ASI       183 MM",
                        "ASI      1600",
                        "ASI      2600",
@@ -137,17 +137,19 @@ class CameraFocus(object):
     #__slots__ = [''] # add legal instance variables
     # (setq properties `("" ""))
     def __init__(self, instrument : 'Flex_Instrument', /,       # CameraFocus::__init__()
-                 name      = 'collimator',
-                 display   = fakedisplay,
-                 width     = 250,
+                 display    = fakedisplay,
+                 gadgetname = "scicamera",
+                 width      = 250,
+                 name       = 'collimator',
                  pin=4): 
         """Initialize this class."""
         #super().__init__()
         # (wg-python-property-variables)
-        self.wwidth         = width
-        self.display        = display
+        self.wwidth         = width         # the width of the dispaly
+        self.display        = display       # the FlexPublish Div
         self.instrument     = instrument
-        self.name           = name
+        self.gadgetname     = gadgetname
+        self.camera         = "camera"            # the type of camera
         self.stepin         = 0
         self.stepout        = 0
         self.camerafocus    = 0             # the device starts in off state.
@@ -170,11 +172,11 @@ class CameraFocus(object):
     ### CameraFocus.__init__()
 
     def update_cameraname(self,attr,old,new):              # Network::update_connectbutton()
-        self.name = new
+        self.camera = new
 
     def update_camerachoices(self,attr,old,new):                     # BokehRoboFocuser::update_button_in()
         """update_debugbtn Button via an event lambda"""
-        self.name = new # self.slitchoices.value
+        self.camera = new # self.slitchoices.value
         self.cameraname.value = new
         self.send_state() # display(f"{self.slit}")
 
@@ -197,7 +199,7 @@ class CameraFocus(object):
     def update_debugbtn(self):                                  # CameraFocus::update_button_in()
         """update_debugbtn Button via an event lambda"""
         os = io.StringIO()
-        self.debug(f"{self.name} Debug", os=os)
+        self.debug(f"{self.gadgetname} Debug", os=os)
         os.seek(0)
         self.display.display(CameraFocus.brre.sub("<br/>",os.read()))
 
@@ -208,16 +210,16 @@ class CameraFocus(object):
           {"sciencecamera" : {"in" : "", "out" : "", "reciept" : "1"}
         dict( [ ("in",  '"%d"' % self.stepin), ("out" , ), ("reciept", "1")] )
         """
-        devstate = dict( [ ("cammera", f"{self.name}"      ),
+        devstate  = dict( [ ("cammera", f"{self.camera}"      ),
                           ("in"     , f"{self.stepin:3d}" ),
                           ("out"    , f"{self.stepout:3d}"),
                           ("reciept", "1")
                         ])
-        gadgetcmd    = dict([("process", devstate)])
-        d2 = dict([(f"{self.name.lower()}", gadgetcmd)])
-        d3           = dict([(f"{self.instrument.flexname}", d2)])
-        jdict        = json.dumps(d3)
-        jdict = json.dumps(d2)
+        gadgetcmd = dict([("process", devstate)])
+        package   = dict([(f"{self.gadgetname}", gadgetcmd)])
+        envelope  = dict([(f"{self.instrument.flexname}", package)])
+        
+        jdict        = json.dumps(envelope)
         self.display.display(f'{jdict}')
 
     ### CameraFocus.send_state()

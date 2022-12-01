@@ -1,6 +1,25 @@
 Using Docker
 ============
 
+Docker containers allow one to make a complete environment for certain
+key operations like latex, sphinx-docs etc without installing the
+packages into the host's filesystem. This avoids all sorts of collisions
+between versions of DLLs etc.
+
+FlexSpec1 uses sphinx-docs and the Ubuntu 22.04 linux. Rather than buy
+a linux computer -- simply using a docker container achieves our goals.
+The `FlexSpec1 <https://github.com/The-SMTSci/FlexSpec1>_` git repository
+has the **Dockerfiles** for this task.
+
+   docker build --tag mysphinx - sphinx.Dockerfile
+
+   docker build --tag flexdev - sphinx.Dockerfile
+
+Are examples.
+
+
+
+
 ..
     # create a docker account (free) if you are comfortable.
     # Download the latest docker desktop and run as administrator.

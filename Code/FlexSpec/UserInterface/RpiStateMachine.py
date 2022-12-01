@@ -7,7 +7,7 @@
 #
 #
 # (compile (format "python -m py_compile %s" (buffer-file-name)))
-# (compile (format "%s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
 #############################################################################
 ### HEREHEREHERE
 import os
@@ -16,7 +16,7 @@ import sys
 import re
 from RpiFlexCharmap import   *   # RpiFlexCharmap
 from FlexJSONCompiler import *   # FlexJSONCompiler
-from gencrctest import       *   # FlexJSONCompiler
+
 
 
 #############################################################################

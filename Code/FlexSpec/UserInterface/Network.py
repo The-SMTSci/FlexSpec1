@@ -129,17 +129,20 @@ class FlexNetwork(object):
     """
     urlre  = re.compile(r'')
 
-    def __init__(self, instrument : 'Insrument' ,                        # FlexNetwork::__init__()
-                       username = None,                     # the user's name
-                       password = None,                     # password
-                       hostip   = None,                     # the URL for the spectrpgraph
-                       display  = fakedisplay,              # the display for our logging
-                       width    = 200):                     # the default width
+    def __init__(self, instrument : 'Flex_Instrument' ,         # FlexNetwork::__init__()
+                       display    : 'FlexPublish' = fakedisplay,     # the display for our logging
+                       gadgetname : str = "network",       # network processed by dispatcher.
+                       width      : int = 200,             # the default width
+                       username   : str = None,            # the user's name
+                       password   : str = None,            # password
+                       hostip     : str = None):           # the URL for the spectrpgraph
         """Get the details together and manage network"""
         #super().__init__()
         # (wg-python-property-variables)
         self.instrument      = instrument
+        self.gadgetname      = gadgetname
         self.width           = width
+        self.flexname        = instrument.flexname # the string that is the instrument's gadgetname
         self.connected       = False
         self.display         = display
         self.connection      = None
@@ -154,8 +157,6 @@ class FlexNetwork(object):
         self.url_username    = None
         self.url_fragment    = None
         self.url_password    = None
-
-
 
         self.parsedurl       = None
 
@@ -228,15 +229,16 @@ class FlexNetwork(object):
     ### Network.layout()
 
     def send_state(self):                                       # Network.send_state()
-        loginstate = dict ([ ("host"      , self.connectionfield.value ),
+        devstate = dict ([ ("host"      , self.connectionfield.value ),
                              ("uname"     , self.username              ),
                              ("password"  , self.password              ),
                              ("receipt"   , "1"                        )
                            ])
-        netcmd = dict([("process", loginstate)])
-        d2     = dict([(f"{self.instrument.flexname}", netcmd)])
-        jdict  = json.dumps(d2)    # {"process" : {"network" : {...host, uname, passwd, receipt=1...}
-        self.display.display(f'{jdict}')
+        gadgetcmd = dict([("process"            , devstate)])
+        package   = dict([(f"{self.gadgetname}" , gadgetcmd)])
+        envelope  = dict([(f"{self.flexname}"   , package)])
+        jdict     = json.dumps(envelope)    # {"process" : {"network" : {...host, uname, passwd, receipt=1...}
+        data      = self.display.display(f'{jdict}')
 
     ### Network.send_state()
 
@@ -258,9 +260,6 @@ class FlexNetwork(object):
 
     ### FlexNetwork.debug()
 
-    __FlexNetwork_debug = debug  # really preserve our debug name if we're inherited
-
-   # (wg-python-properties properties)
 
 # class FlexNetwork
 

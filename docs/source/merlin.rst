@@ -12,6 +12,8 @@ to the recommended Raspberry Pi 3B, 3B+ or 4B computer. This is a
 35USD simple solution, web based and easy to use. This is all open-source
 code.
 
+Make sure to enable autoscroll on the terminal.
+
 The basics of GCode include a "letter" command and parameters.
 Comments are enclosed in parenthesis (this is a comment).
 

@@ -3,16 +3,45 @@ Remote Protocol
 
 The control structure is being developed in a platform agnostic network
 neutral fashion leveraging web applications (web apps) via bokeh and
-other tools.
+other tools. The idea is the UI side maintains a set of shared variables
+with the FlexSpec C++ classes. This shared subset of UI/C++ variables
+forms a **contract** between the two environments. Here we will refer
+to the classes outside of the FlexSpec C++ classes as the **client**.
+The client states what internal **state-of-affairs** the FlexSpec C++
+class is to achive and maintain. The FlexSpec C++ class may come
+close -- as in the case of converting a wavelength to a rotation
+of the grating. It will be the case that the specified wavelength
+will fall between two step intervals of the motor. In this
+case, the FlexSpec C++ will achieve its closest value, and
+report that back to the client; the client will then update
+its state-of-affairs to reflect that action. 
 
-The bokeh server is a Raspberry Pi, installed on one or more OTAs for
-the management and control of some of local (to the pier/mount/ota)
-devices.  The rest are left to management by LibIndi/EKOS in the usual
-fashion.  The local Bokeh/PostmasterServer are a peer in an
-asynchronous distributed network of peers. Any SBC/Desktop computer
-with a decent operating system may be used for the server. The ODroid,
-BeagleBone, Intel NUC etc. Some SBC :index:`SBC;Configuration`
-configuration will be required.
+The state-of-affairs will consist of pure ASCII characters to
+be shared between any client and the FlexSpec C++ class using
+a Pythonic JSON string image.
+
+The JSON (**J**ava**s**cript **O**bject **N**otation) is referred to
+as **data** in the literature. Python uses **dictionaries** that
+are, essentially, JSON like constructs. C++ on the other hand 
+does not have a nested key/value container in the Standard Template
+Library. We carefully use a subset of the JSON overall capabilities
+to transfer requests from the client, and to return the internal
+state-of-affairs from the FlexSpec C++ class.
+
+The Bokeh web-app UI is used. This avoids installing code on the
+user's machine. The web-app relies on a **dispatch** server to support
+a bokeh server running on a Raspberry Pi. A RPi may be installed on
+one or more OTAs for the management and control of local (to
+the pier/mount/ota) devices. This is where the FlexSpec stops. 
+
+
+The rest of scheduling/cameras/slewing related activities are left to
+management by LibIndi/EKOS in the usual fashion.  The local
+Bokeh/PostmasterServer are a peer in an asynchronous distributed
+network of peers. Any SBC/Desktop computer with a decent operating
+system may be used for the server. The ODroid, BeagleBone, Intel NUC
+etc. Some SBC :index:`SBC;Configuration` configuration will be
+required.
 
 Arduino class devices are designated as an SBM is a "Single Board
 Microcontroller".

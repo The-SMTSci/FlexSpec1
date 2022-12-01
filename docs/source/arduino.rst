@@ -154,3 +154,37 @@ Libraries
 ---------
 
    `ArduinoJson library <https://arduinojson.org/?utm_source=meta&utm_medium=library.properties>`_ 
+
+
+C++ Programming
+---------------
+
+The Arduino use C++11 standard, with exception-handling disabled. This does
+not allow the "try/throw/catch" mechanism.
+
+Arduino C++ does NOT honor namespace. Their use of map, ungarded, is
+an example. It should have been called somthing like ardmap. 
+
+Do not use using namespace std;
+
+Do not use <iostream> -- it is massive.
+
+You can use *#include <string>* and *std::string*. The STL string
+environment has a few helpers:
+overloaded to_string(X), where types of X include the integer and 
+float families. Not that pretty. You can hack up a string format
+routine.
+
+
+
+The Arduino "sketch" implements Serial that can be better managed with a
+small hex encoder; and std::string.
+
+Arduino uses its own twisted make procedure. ANY file in the same directory
+as the .ino file will be compiled and linked into the program. Be extremely
+careful to keep this directory clean.
+
+FlexSpec1 has a "FakeArduino.h" that allows compiling, and in many cases,
+running this code under Linux. The Serial interface is not identical,
+but some effort to allow its use is there.
+

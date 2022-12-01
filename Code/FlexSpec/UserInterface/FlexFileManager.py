@@ -57,7 +57,7 @@ binary files.
 
 __author__  = 'Wayne Green'
 __version__ = '0.1'
-__all__     = ['BinaryFilemanager',
+__all__     = ['BinaryFileManager',
                'BinaryFileManagerException',
                'BinaryFileManagerEOF'
               ]   # list of quoted items to export
@@ -94,7 +94,7 @@ class BinaryFileManagerEOF(Exception):
 # BinaryFilemanager -- meat of the coconut.
 #
 ##############################################################################
-class BinaryFilemanager(object):
+class BinaryFileManager(object):
     """class BinaryFilemanager(object) Given a filehandle opened 'rb',
        manage processing the file.  This class provides both one char
        lookahead and infinite pushback opportunities.  For example
@@ -185,9 +185,10 @@ class BinaryFilemanager(object):
                skipped = skipped + ch          # ...if successful, or what we had to skip
         except BinaryFileManagerEOF as eof:
             if(pushback):
-                self.pushback(skipped)
+                self.pushback(skipped)         # put it all back.
             c       = None                     # did not find it
-            skipped = b''                      # put it all back.
+            skipped = b''
+
         return skipped,c                       # return None and a ch  or [bads],ch
 
     ### BinaryFilemanager.find()

@@ -1,4 +1,76 @@
-\section{Domain Name Server}
+\subsection{DNS Details}
+
+This is where it gets sticky.
+
+access-control-list
+
+trust-anchors in bind.keys
+
+Block these zones from routing out.
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+/etc/bind:
+    bind.keys  -- trust anchors.
+    db.0       -- keep these routes very local
+    db.127
+    db.255
+    
+    db.empty   -- only on the machine
+    db.local
+    named.conf - simply include the named.conf.xxxx files
+       named.conf.default-zones
+       named.conf.local
+       named.conf.options
+    rndc.key      -secret key chmod c640 chown bind:bind
+    zones.rfc1918 - the list of socalled non-routable IP domains
+
+    db-{site}-local
+    db-{site}-reverse
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+Files we need to configure:
+
+
+
+
+Different machines call the ethernet interface by different
+names. Usually OS vendor dependent. You will find \dhl{eno1} and
+\dhl{eth0}. Currently Ubuntu 22.04 installs with \dhl{eth0}.
+
+This document is on a Comcast Business SOHO network, so I've left the
+IP addresses where they are. Comcast uses the 10 net. Not the best
+idea.  Most homes use the 192.168/13 net. The /13 refers to \dhl{CIDR
+  (Classless Inter-Domain Routing)
+  notation}\footnote{\url{https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing}}.
+
+Scenario: The home router connects the WAN (telco) to a LAN (local area network).
+Most home accounts do not have a fixed IP address, they are assigned from a pool
+of static IP addresses assigned by ICANN to the telco. Some use an internal
+network address that randomly ties to a pool of external (WAN) addresses -- making
+penetrating a home network from the outside difficult. Telco's 'rent' these blocks
+to you for a fee. You can hit external websites that will bounce back your IP
+address -- and you can 'borrow' that for a while.
+When Google was asked ``whats my ip address'' it gets
+back \dhl{2603:300b:509:500:dc35:2027:1f78:a426} -- this is an IP6 address.
+Uuf da. The IP4 address is 71.237.89.11. Lets see how that fares over the day.
+
+Thus we have to setup DNS with both addresses.
+
+
+
+
+FlexSpec uses the nginx engine with an external ``Certificate of Authority''
+(obtained from a CA provider). The nginx web server challenges the CA with
+its credentials and is able to establish a SSH connection with the remote
+caller. All login in steps are handled by nginx at the final address.
+
+
+
 
 In the FlexSpec1 scenario, there are one or many  pi's per OTA/Mount; one or many 
 mounts per observatory; one or many observatories per site and one or more sites
@@ -12,12 +84,12 @@ example.com and may be reached at the \dhl{obs1.example.com} domain
 name. In this the person far away just enters that name, example.com
 is undergoes a DNS lookup within the real DNS system, and a query is
 made of example.com to see if it can resolve a name, and if it can
-reslove the \dhl{obs1.example.com} name.  If, so packets are sent
+resolve the \dhl{obs1.example.com} name.  If, so packets are sent
 to the main machine, which in turn passes the packets on to the
 obs1 router.
 
 Lets have pier15 with two OTAs, one with a flexspec and the other
-performing \dhl{piggyback} duty. let ther be two Pi's:  myflex and mypiggy
+performing \dhl{piggyback} duty. let there be two Pi's:  myflex and mypiggy
 machines there. Now the domain name will be
 mypiggy.pier15.example.com.
 
@@ -29,24 +101,31 @@ This is were \dhl{bind9} comes into play.
 The FlexSpec1/Code/ directory has a script for each Pi to manage itself,
 and help with each router as we can.
 
+\subsection{ARPA}
 
-
+This is a ``backronym'', where the Advanced Research Project Agency (ARPA)
+originated ARPANET the early precursor-model for the modern Internet, it
+now simply means \dhl{Address and Routing Parameter Area}, where top level
+machines manage/delegate the addressing management. The critical idea
+of this is the single, and unmentioned ``.'' that is the ``top of the Internet''.
+This lone dot appears at the very end of every named address, for example
+\dhl{example.com.} (note the dot after com). This is critical, as it must
+append in bind (other) DNS management files.
 
 \begingroup \fontsize{10pt}{10pt}
 \selectfont
-%%\begin{Verbatim} [commandchars=\\\{\}]
 \begin{verbatim} 
-lsb_release -a  # get a short list of the machine
+
+
+lsb_release -a  # get a short description of the machine 'properties'
 ip r
+# default via 10.1.10.1 dev eno1 proto dhcp metric 100 
+# 10.1.10.0/24 dev eno1 proto kernel scope link src 10.1.10.232 metric 100 
+# 169.254.0.0/16 dev docker0 scope link metric 1000 linkdown 
+# 172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
 
 
-
-
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
-
-
+echo $(ip r | gawk -- '/kernel/ {printf("%s", $1);}')
 export mylocalnet=$(ip r | gawk -- '/kernel/ {printf("%s", $1);}')
 
 forward/reverse lookup zones
@@ -74,10 +153,7 @@ sudo cp db.local db.class.local  # our domain local
 
 edit db.class.local
 
-\begingroup \fontsize{10pt}{10pt}
-\selectfont
-%%\begin{Verbatim} [commandchars=\\\{\}]
-\begin{verbatim} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 $TTL   604800
 @          IN       SOA     class.local. root.class.local. (
                     2          ; serial  
@@ -90,28 +166,18 @@ $TTL   604800
 @    IN           A      10.1.10.70
 @    IN           AAAA   ::1
 flex              10.1.10.70
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sudo systemctl restart bind9
 sudo systemctl status bind9    # check for typos/syntax errors
 
 edit named.conf.local insert lookup zone
 
-\begingroup \fontsize{10pt}{10pt}
-\selectfont
-%%\begin{Verbatim} [commandchars=\\\{\}]
-\begin{verbatim} 
 //  add to end
 // reverse lookup zone
 zone "1.254.10.in-addr.arpa"  {
     type       master;
     file       "/etc/bind.db.10";
 };
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
 
 sudo systemctl restart bind9
 sudo systemctl status bind9    # check for typos/syntax errors
@@ -119,8 +185,7 @@ sudo systemctl status bind9    # check for typos/syntax errors
 edit db.10 file
 
 
-%%\begin{Verbatim} [commandchars=\\\{\}]
-\begin{verbatim} 
+
 ; BIND reverse data file for local 10.01.10.xx network
 
 $TTL   604800
@@ -133,25 +198,21 @@ $TTL   604800
 ;
 @    IN           NS     flex.
 10   IN           PTR    flex.class.local
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
 
 sudo systemctl restart bind9
 sudo systemctl status bind9    # check for typos/syntax errors
 
 edit resolv.conf and add log
 
-\begingroup \fontsize{10pt}{10pt}
-\selectfont
-%%\begin{Verbatim} [commandchars=\\\{\}]
-\begin{verbatim} 
+
+
+
+
+
 nameserver 10.01.10.70   
 options eth0 trust-ad
 search  class.local
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
+
 
 sudo systemctl restart bind9
 sudo systemctl status bind9    # check for typos/syntax errors
@@ -162,17 +223,22 @@ dig -x                 # look at us
 dig du.edu             # lool at something far away
 ping pier15.class.local
 
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
 
 
 \subsection{Notes}
 
 
-ip r | gawk --  '/proto/ {print $1;}'
 
 \begingroup \fontsize{10pt}{10pt}
 \selectfont
 %%\begin{Verbatim} [commandchars=\\\{\}]
 \begin{verbatim} 
+
+ip r | gawk --  '/proto/ {print $1;}'
+
 lsb_release -a
 No LSB modules are available.
 Distributor ID:	Ubuntu
@@ -198,3 +264,52 @@ default via 10.1.10.1 dev eth0 proto dhcp metric 100
 
 
 \url{https://www.youtube.com/watch?v=MPDXVkwUehs}
+
+
+\subsection{DNS Background}\section{Domain Name Server}
+
+Up-front things:
+
+Certain classes of internet addresses will not route.\footnote{\url{https://en.wikipedia.org/wiki/IP_address}}.
+
+\begingroup \fontsize{8pt}{8pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+10./24         ( Range: 10.0.0.0    : 10.255.255.255 )  instrument net
+169.254/16     ( Range: 169.254.0.0 : 169.254.255.255)  private network
+172.16.0.0/12  ( Range: 172.16.0.0  : 172.31.255.255 )  lan routable
+192.168.0.0/16 ( Range: 192.168.0.0 : 192.168.255.255)  lan routable
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+The ``Domain Name System''. originating in 1984 \cite{BIND_Manual1},
+developed under DARPA funds at Berkeley as \dhl{Berkeley Internet Name
+  Domain (BIND)}, serves as ``the'' top level domain name manager. The
+ICANN\footnote{Internet Corporation for Assigned Names and Numbers}
+DNS System uses a large number of secondary caches to resolve the
+human readable \dhl{domain name} into a
+network-routable\footnote{Routable protocol allows packets to be
+sa  forwarded from one network to another} (hardware) numeric
+\dhl{Internet Protocol Address}.  The addresses are either IP4, and
+lately IP6. Lookups worldwide take on the order of 10s to 100s of
+milliseconds -- event down the a public-facing IP address running on a
+FlexSpec telescope.
+
+To serve such a wide number of domain names, (est. 341.7 million) in 2022
+it is very obvious that the ``Domain'' needs to be divided into ``zones'' each
+divided into sub-zones. An example:  \dhl{pier.observatory.example.com} can
+be used to reference a sub-net for an observatory at <example.com>; that has 
+smaller subdomain called <pier>. The main router at example.com manages ``zones
+within it''. Here, perhaps one of several buildings -- or ``observatory''
+in this scenario. The router within each ``observatory'' (or the main
+site's router) has further zones -- here <pier> in this scenario. World
+governing infrastructure manages these ``Top Level Domains'' (TLDs). 
+The traffic into the reference machine at the end of that IP address,
+has a (extended) nameserver associated with it. The site administrators maintain
+that extended nameserver. It is presented with the fill name, parses that
+name, resolves what it can. That resolution may result in a further 
+request of a deeper-nested nameserver for more information. Eventually
+the local machine will return a name, perhaps with a different port,
+whereby a running program at the other end of this mess is engaged.

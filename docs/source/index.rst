@@ -9,15 +9,15 @@
     pip3 install pandas
     pip3 install bokeh
    
-    docker run -it --rm -v /home/git/external/SAS_NA1_3D_Spectrograph/docs:/docs \
+    docker run -it --rm -v /home/git/external/FlexSpec1/docs:/docs \
                         -v /home/wayne/anaconda3/lib:/opt/lib \
                            sphinxdoc/sphinx-latexpdf /bin/bash
    
-    docker run -it --rm -v /home/git/external/SAS_NA1_3D_Spectrograph/docs:/docs \
+    docker run -it --rm -v /home/git/external/FlexSpec1/docs:/docs \
                            sphinxdoc/sphinx-latexpdf-fs1 make html
    
    
-    docker run -it --rm -v /home/git/external/SAS_NA1_3D_Spectrograph/docs:/docs \
+    docker run -it --rm -v /home/git/external/FlexSpec1/docs:/docs \
                         -v /home/wayne/anaconda3:/opt/lib \
                         -e PYTHONPATH=/home/wayne/anaconda \
                            sphinxdoc/sphinx-latexpdf make html latexpdf
@@ -109,7 +109,8 @@ may be cloned from the `FlesSpec1 Github Repository <https://github.com/The-SMTS
    youtube
    printer
    merlin
-   
+   url
+
 Indices and tables
 ------------------
 
@@ -119,4 +120,4 @@ Indices and tables
 
 
 .. 
-   docker run -it --rm -v /home/git/external/SAS_NA1_3D_Spectrograph/docs:/docs                         sphinxdoc/sphinx-latexpdf-fs1 make html latexpdf
+   docker run -it --rm -v /home/git/external/FlexSpec1/docs:/docs sphinxdoc/sphinx-latexpdf-fs1 make html latexpdf

@@ -106,3 +106,21 @@ Tips for optics in a spectrograph
 .. |reg|    unicode:: U+000AE .. REGISTERED SIGN
 .. |copy|   unicode:: U+000A9 .. COPYRIGHT SIGN
 
+Adhesives
+---------
+
+ASTM E595 is the specification for low outgassing. 
+
+Outgassing Data for Selecting Spacecraft Materials Online
+
+https://outgassing.nasa.gov/
+
+
+PDF about gasses of common filiments:
+https://www.mdpi.com/1420-3049/27/12/3814/pdf?version=1655194705
+
+
+
+
+
+

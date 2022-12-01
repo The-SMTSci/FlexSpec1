@@ -85,3 +85,18 @@ Science Camera:
 #. Record the position.
 
 
+PHD2 Guiding Setup
+------------------
+
+A handy videos" 
+
+#. `Christopher Kovacs PHD2 Guiding <https://www.youtube.com/watch?v=zA2OrhXik6g>_`
+
+#. `Christopher Kovacs Kstars/Putty <https://www.youtube.com/watch?v=odChu13_5RM>_`
+
+
+#. Start Kstars
+#. Under Tools->Ekos
+#. Edit the profile.
+
+#. The profile should be setup with PHD2 and the path to the server.

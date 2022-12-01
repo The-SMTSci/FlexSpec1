@@ -1,6 +1,11 @@
 Serial Communication
 ====================
 
+The ACMn device is expected to implement ITU V.250 (Hayes 302) protocols,
+though that is seldom the case. We want the /dev/ttyn type of
+interface.
+
+CDC/PSTN
 
 Raspberry Pi
 ------------
@@ -122,5 +127,42 @@ serial port where Arduino/other SBMs reside.
     -----------------------------------------------------------------------------
 
     https://opensource.com/article/20/5/tio-linux  mknod trick
+
+
+Linux Minicom
+-------------
+
+A rough analog for PuTTY for Unix, old as the hills of Allentown.
+
+..
+
+    Disconnect the adapter, turn off the Arduino.
+    sudo -s # change terminal to red!
+    dmesg -C # clear the dmesg buffer
+    dmesg | grep USB
+    #NOTHING which is good
+    attach the adapter
+    dmesg | grep USB  # shows lots, find the /dev/XXXXXXX and use the XXXXXXX
+    minicom -s  # -s is vital
+    ... starts gives a config screen...
+    # in the screen, scroll down to serial
+    Set to dev to /dev/XXXXXXX
+    baud to desired, 8N1
+    hardware control to yes
+    software control to no
+    ... exit... setup
+
+
+Now, start arduino, and you should see stuff.
+Do your thing.
+
+#. **Note** from the keyboard Ctrl-A is the leadinto commands
+
+
+
+Related Videos
+--------------
+
+`Christopher Smith Minicom Video Linux <https://www.youtube.com/watch?v=AzX_Ni8TM0Y>`_
 
 
