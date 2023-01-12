@@ -64,8 +64,7 @@ if [[ "$(which git)" == "" ]] ; then
     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
         chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null     && \
-        apt update                                                   && \
-        apt install gh -y
+        apt update
 fi
 
 mkdir -p /home/git
@@ -88,14 +87,30 @@ usermod -aG tty     $FLEXUSER
 
 # load up on packages!
 
+apt install gh -y
+cat >> /home/$FLEXUSER/todo.txt <<EOF1
+Github:
+  - Using browser, login into your account 
+  - Under your icon -> settings
+  - Choose "SSH and GPG keys"
+  - Get past any two-layer auth business (I use google authenticator)
+  - Generate a classical token
+  - It will appear ONCE -- yeah ONCE so copy/paste it somewhere to be remembered
+  -   it looks something like: ghp_nng.............................
+  - Run "gh login" on the pi
+  - Do these steps:
+  - 
+EOF1
+
+
+
 apt     install -y ufw                       # uncomplicated firewall
 apt     install -y openssh-server            # add openssh capability
 systemctl status ssh                         # open the interface
-ufw allow ssh                                # allow ssh in the firewall
 
 apt     install -y linux-modules-extra-raspi # raspi-config hardware/boot bridge
 apt     install -y net-tools                 # both ip ifconfig worlds
-
+aot     install -y nmap                      # handy for network poking.
 apt     install -y curl                      # because,,, curl! (astrometry.net)
 apt     install -y gawk                      # IDIOTS -- don't ever use mawk!
 apt     install -y vim                       # because,,, vi!
@@ -131,15 +146,15 @@ git clone https://github.com/The-SMTSci/FlexSpec1.git
 cd ~/git/FlexSpec1/Code/HOME
 cp pi.aliases ~/.pi.aliases
 cp vimrc      ~/.vimrc
-cp vimrc /root                               # add a decent vimrc for sudo
+cp vimrc      /root                          # add a decent vimrc for sudo
 mkdir -p /var/www/html/FlexSpec1
 cp -pr ~/git/FlexSpec1/buil/hdtml/* /var/www/html/FlexSpec1 # install FlexHelp
 
 # helper for flex login
 cd $HOME/$FLEXUSER
-cat >> ~/.bashrc  <<EOF                      # add our aliases for FLEXUSER
+cat >> ~/.bashrc  <<EOF2                     # add our aliases for FLEXUSER
 source .pi.aliases
-EOF
+EOF2
 
 #############################################################################
 # This is a dedicated system, pound our opinion of python at the
@@ -177,7 +192,7 @@ apt     install  -y gsc
 #############################################################################
 apt install -y samba samba-tools smbclient cifs-utils
 systemctl enable --now smbd                  # retister for all reboots
-ufw allow samba
+
 usermod -aG sambashare flex
 smbpasswd -a "flex%time has come"
 mkdir -p /samba/{$FLEXUSER,flex}             # make shares for the two main users
@@ -220,13 +235,33 @@ cp $ANCHOR/nginx/sites-available/flexspec /etc/nginx/sites-available/flexspec
 # get it operational now.
 systemctl restart nginx
 
-ufw allow in on eth0 from 10.1.10.0/16
-ufw allow from 10.1.10.0/16 to any port 5006 proto tcp
-ufw allow from 10.1.10.0/16 to any port 5006 proto udp
+# Get the CIDR net/mask
 
-setxkbmap us  # needed because initial install went sideways
+netinterface=$(ip -f inet -o addr | awk -e '/e(th|no)[0-9]/ { print $2;}')
+cidrnet=$(ip -f inet -o addr | awk -e '/e(th|no)[0-9]/ { print $4;}')
 
-# ip -4 show eth0
+# ufw : 
+# /etc/ufw/before.rules
+# /etc/ufw/user.rules
+# /etc/ufw/user6.rules
+ufw allow in on $netinterface from $cidrnet
+ufw allow ssh                                        # allow ssh in the firewall
+ufw allow dns                                        # bind9
+ufw allow from $cidrnet to any port 5006 proto tcp   # Bokeh
+ufw allow from $cidrnet to any port 5006 proto udp
+ufw allow from $cidrnet to any port 7654 proto tcp   # libindi
+ufw allow from $cidrnet to any port 7654 proto udp
+ufw allow from $cidrnet to any port  443 proto tcp   # https
+ufw allow from $cidrnet to any port  443 proto udp
+ufw allow samba
+ufw allow from client_ip to any port nfs             # NFS share
+ufw allow 1194/udp                                   # VPN
+ufw allow 1194/tcp                                   # remember for next time TODO
+ufw disable
+ufw enable
+#setxkbmap us  # needed because initial install went sideways
+
+# ip -4 show $netinterface
 # ssh root@titan.local -N -D 5006
 
 #############################################################################
@@ -246,3 +281,20 @@ apt install -y filezilla                     # GUI to move files between systems
 apt install -y iraf
 apt install -y python-pyraf3
 
+#############################################################################
+# Netgate 100 setup: This is not on the FlexBerry RPi.
+# https://www.netgate.com/resources/videos-configuring-openvpn-remote-access-in-pfsense-software
+#############################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+# Endo of Followme.sh
