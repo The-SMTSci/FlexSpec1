@@ -1,0 +1,9 @@
+#!/bin/bash
+#############################################################################
+# Find the arduino if possible.
+#############################################################################
+export ARDUINO=$(dmesg | awk 'BEGIN{state = 0;}\
+  state==0 && /Manufacturer.*Arduino/ {state = 1;}\
+  state==1 && /tty[A-Za-z0-9]+/ { match($0,/(tty[A-Za-z0-9]+)/,arr); \
+    if(arr[1]  != "") printf("%s # ARDUINO\n", arr[1]); exit;}')
+printf "%s\n" "$ARDUINO"
