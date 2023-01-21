@@ -1,6 +1,6 @@
 /******************************************************************************
-* hello.ino -- 
-* (compile "g++ -I../../ -D__REGRESSION__ -g --std=c++11  -o hello -x c++ hello.ino && ./hello")
+* gigo.ino -- 
+* (compile "g++ -I../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
 *
 ******************************************************************************/
 #ifdef __REGRESSION__
@@ -24,34 +24,24 @@ void setup()
 
 
 /******************************************************************************
-* hello loop main loop
+* gigo loop main loop
 *
 ******************************************************************************/
 void loop()
 {
-   while(Serial.available())
-   {
-      buf = Serial.read();
-      Serial.print(buf,DEC);
-   }
-   while(Serial1.available())
-   {
-      buf = Serial1.read();
-      Serial1.print(buf,DEC);
-   }
+   Serial.println("Hello USB\n");
+   Serial1.println("Hello TTY\n");
+   delay(1000);
 
-
-
-} // hello loop
+} // gigo loop
 
 /*****************************************************************************
 *                                MAIN UNIT TEST
 *****************************************************************************/
-#if __UNIT_TEST__ == 1
+#ifdef __UNIT_TEST__
 int main(int c, char **v)
 {
-    std::cout << "No regression tests for hello." << std::endl;
-
+    std::cout << "No regression tests for gigo." << std::endl;
     return 0;
 } // main
 
