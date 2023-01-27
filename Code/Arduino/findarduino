@@ -2,8 +2,9 @@
 #############################################################################
 # Find the arduino if possible.
 #############################################################################
-export ARDUINO=$(dmesg | awk 'BEGIN{state = 0;}\
-  state==0 && /Manufacturer.*Arduino/ {state = 1;}\
-  state==1 && /tty[A-Za-z0-9]+/ { match($0,/(tty[A-Za-z0-9]+)/,arr); \
-    if(arr[1]  != "") printf("%s # ARDUINO\n", arr[1]); exit;}')
+export ARDUINO=$(dmesg | awk 'BEGIN{state = 0; mfg=""}\
+    state==0 && /Manufacturer.*Arduino/  {state = 1; mfg="Arduino"; next;}\
+    state==0 && /Manufacturer.*Seeed/    {state = 1; mfg="Seeed"  ; next;}\
+    state==1 && /tty[A-Za-z0-9]+/        {match($0,/(tty[A-Za-z0-9]+)/,arr); \
+    if(arr[1]  != "") printf("%s # %s\n", arr[1],mfg); state=0; mfg="";}')
 printf "%s\n" "$ARDUINO"
