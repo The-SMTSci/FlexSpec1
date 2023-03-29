@@ -2,6 +2,9 @@
 * gigo.ino -- 
 * (compile "g++ -I../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
 *
+* A simple Arduino sketch to tell each port "Hello" on 1 second intervals.
+*
+*
 ******************************************************************************/
 #ifdef __REGRESSION__
 #include "FakeArduino.h"

@@ -1,7 +1,12 @@
 /******************************************************************************
-* gigo.ino -- 
+* gigo.ino --
 * (compile "g++ -I../../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
 *
+* A simple program that listens on Serial and bounces its input back to
+* both the Serial and Serail1 ports. Designed to test the loopback on ports.
+*
+* (insert (format "\n* %s" (buffer-file-name)))
+* /home/git/external/FlexSpec1/Code/Arduino/gigo/gigo.ino
 ******************************************************************************/
 #ifdef __REGRESSION__
 #include "FakeArduino.h"
@@ -22,19 +27,18 @@ void setup()
 
 } // setup
 
-
 /******************************************************************************
 * gigo loop main loop
 *
 ******************************************************************************/
 void loop()
 {
-   while(Serial.available())
+   while(Serial.available())                // bounce back to serial
    {
       buf = Serial.read();
       Serial.print(buf,DEC);
    }
-   while(Serial1.available())
+   while(Serial1.available())               // bounce to Serial1 too.
    {
       buf = Serial1.read();
       Serial1.print(buf,DEC);
