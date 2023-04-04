@@ -1,0 +1,712 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# /home/wayne/play/Tony/GUICode/GUICode/GUIButtonsGrid.py
+# (wg-anaconda-pdb)
+# (wg-ureka-pdb)
+# (wg-python-fix-pdbrc)
+#
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
+#
+# TODO pop up file dialog for load/save
+#
+#
+#############################################################################
+import sys
+import os
+import optparse
+import time
+import serial
+import tkinter              as tk
+import tkinter.filedialog   as dialogs
+import tkinter.scrolledtext as ScrolledText
+
+#from FlexSpec1Values import *        # class for persistent vars. TODO bring back into this module.
+from serial import Serial
+from serial.threaded import ReaderThread, Protocol, LineReader
+
+__doc__ = """
+
+GUIButtonsGrid.py -- simple tkinter interface for FlexSpec1.
+
+-p --port       The port to use.
+-v --verbose    Be chatty about work.
+
+
+
+"""
+
+
+__author__  = 'Wayne Green, Tony Rodda'
+__version__ = '0.1'
+__all__     = ['','']   # list of quoted items to export
+
+
+actions = {}                                   # store   {button : [desc,entry] ... } entry may be None
+
+numberset = {'F','W'}                          # letters needing numbers from Entry fields.
+lightset  = {'I','N','R','B','G','U'}          # letters using float as percent*100
+
+commands  = {
+    #C   Description                            Entry field units
+    'L': 'Turns all lamps/LED  on',                              # L <end>
+    'O': 'Turns all lamps/LEDS off',                             # O <end>
+    'I': 'Lights  tungstun lamps                     [percent]', # I <end>
+    'N': 'Lights  NeAr Cal Lamp                      [percent]', # N <end>
+    'R': 'Lights  Red      LED                       [percent]', # R <end>
+    'B': 'Lights  Blue     LED                       [percent]', # B <end>
+    'G': 'Lights  Green    LED                       [percent]', # G <end>
+    'U': 'Lights  UV Boost LED                       [percent]', # U <end>
+    'F': 'MOVES collimating lens focus                 [steps]', # F <value> <end>
+    'W': 'ROTATES the grating to center wavelength [Angstroms]', # W <value> <end>
+    'J': 'Center on zero order to focus on slit',                # J <end>
+    'Z': 'Set collimating lens home to 0 ',                      # Z <value> <end>
+    'M': 'Reset collimating Focuses to zero',                    # M <end>
+    '?': 'Query status of the spectrometer',                     # Q get the status
+#    '!': 'Display current cache as YAML image'
+}
+
+##############################################################################
+# FlexSpec1ValuesException
+#
+##############################################################################
+class FlexSpec1ValuesException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(FlexSpec1ValuesException,self).__init__("FlexSpec1Values "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return f" FlexSpec1Values: {e.__str__()}\n"
+# FlexSpec1ValuesException
+
+
+##############################################################################
+# FlexSpec1Values
+#
+##############################################################################
+class FlexSpec1Values(object):
+    """ Manage the current values for the FlexSpec1.
+    Map the human names to the single letter codes the remote Arduino expects.
+
+    Use a dictionary that holds human names for the variables, and to facilitate
+       loading and saving to the ~/.config/flexspec1.yml file.
+
+    Uses properties to help with the lambda semantics for commands to tkinter widgets.
+    """
+
+    exampleyaml = """---
+FlexSpec1:
+   tungstun    : {}  # 0               Grain of Wheat Bulb value
+   near        : {} # 0               NeAr (other) Cal lamp
+   red         : {} # 0               Red   Finder LED
+   blue        : {} # 0               Blue  Finder LED 
+   green       : {} # 0               Green Finder LED 
+   uvboost     : {} # 0               UVBoost
+   collimator  : {} # 0               Collimator Value
+   grating     : {} # 5000.0          Grating Central Wavelength (Angstroms)
+   bgcolor     : {} # "gray12"        Color for background
+   textcolor   : {} # "DarkGoldenRod2"Color for text
+   actioncolor : {} # "light sky blue"          Color for buttons
+   port        : {} # "/dev/tty0"     port to attach
+"""
+
+    def __init__(self,actions,/,                               # { command : [desc,widget], ...} 
+                 tungstun   : int = 0,                         #      widgets tied to commands.
+                 near       : int = 0,                         
+                 red        : int = 0,                         # keyword argument parameters, not positional.
+                 blue       : int = 0,                         # allow initialization by name                
+                 green      : int = 0,                         # default lamps to zero percent (off)         
+                 uvboost    : int = 0,
+                 collimator : int = 0,                         # no idea about collimator
+                 grating    : float = 5000.0,                   # assume center wavelength of green
+                 yamlfile   : str   = os.getenv("HOME")+"/.config/flexspec1/flexspec1.yml"
+                ):                               # FlexSpec1Values::__init__()
+        """ Use **kwarg keyword argument parameters Default to mostly off.
+        """
+        self.actions                = actions     # 
+        self.values                 = {}
+        self.values['yamlfile']     = yamlfile
+        self.values['tungstun']     = tungstun    # old DNA
+        self.values['near']         = near
+        self.values['red']          = red
+        self.values['blue']         = blue
+        self.values['green']        = green
+        self.values['uvboost']      = uvboost
+        self.values['collimator']   = collimator
+        self.values['grating']      = grating
+        self.values['bgcolor']      = "gray12"                       # allow tuning up colors to taste.
+        self.values['textcolor']    = "DarkGoldenRod2"
+        self.values['actioncolor']  = "blue"
+
+
+                         # letter        Variable/Keyword
+        self.commandmap = { 'L'            : '',                      # map letter to our yaml value.
+                            'O'            : '',
+                            'I'            : 'tungstun',
+                            'N'            : 'near',
+                            'R'            : 'red',
+                            'B'            : 'blue',
+                            'G'            : 'green',
+                            'U'            : 'uvboost',
+                            'F'            : 'collimator',
+                            'W'            : 'grating',
+                            'J'            : '',
+                            'Z'            : '',
+                            'M'            : '',
+                            'Q'            : ''
+                          }
+                         # Variable/Keyword  Variable/Value
+        self.values     = { "tungstun"     : self.tungstun, # initialize with default provided values.
+                            "near"         : self.near,
+                            "red"          : self.red,
+                            "blue"         : self.blue,
+                            "green"        : self.green,
+                            "uvboost"      : self.uvboost,
+                            "collimator"   : self.collimator,
+                            "grating"      : self.grating,
+                            "bgcolor"      : "gray12",         # allow tuning up colors to taste.
+                            "textcolor"    : "DarkGoldenRod2",
+                            "actioncolor"  : "light coral"
+                          }
+
+        self.dialogoptions = {'filetypes'  : (("yaml","*.yaml"),("all files","*.*")),
+                              'initialdir' : f"{os.getenv('HOME')}/flexspec1/config.yaml"
+                             }
+
+    ### FlexSpec1Values.__init__()
+
+    def yaml_create(self):                                     # FlexSpec1Values.yaml_create()
+        """Create a yaml file."""
+        if(not os.path.exists(self.yamlfile)):
+            with open(self.yamlfile,'w') as o:
+                fileimage = FlexSpec1Values.exampleyaml.format( self.tungstun,   # match to exampleyaml above
+                                                                self.near,
+                                                                self.red,
+                                                                self.blue,
+                                                                self.green,
+                                                                self.uvboost,
+                                                                self.collimator,
+                                                                self.grating,
+                                                                self.bgcolor,
+                                                                self.textcolor,
+                                                                self.actioncolor
+                                                              )
+                print(fileimage,file=o)
+
+    ### FlexSpec1Values.yaml_create()
+
+    def yaml_load(self,filename=None):                         # FlexSpec1Values.yaml_load
+        """Pickup from lasttime from a yaml file:
+        Fail quietly if file does not exist.
+        """
+        if(filename is None):
+            filename = self.yamlfile
+        if(not os.path.exists(filename)):           # if file is missing make a fake one.
+            self.yaml_create()
+        if(not os.path.exists(filename)):
+            raise FlexSpec1ValuesException(f"Tried to create new yaml file {self.yamlfile} and failed.")
+        try:
+            self.values = yaml.safe_load(open(filename))
+        except Exception as e:
+            raise FlexSpec1ValuesException(f"Error opening {filename}\ne.__str__()")
+
+    ### FlexSpec1Values.yaml_load
+
+    def yaml_save(self,filename):                                   # FlexSpec1Values.yaml_save
+        """Save the values (back) to a file. Pickup from here next time.
+        Fail quietly if file does not exist.
+        """
+        newfn = dialogs.asksaveasfile(mode='w',**self.dialogoptions)
+
+        if(not os.path.exists(self.filename)):
+            return
+        try:
+            self.values = yaml.dump(self.values,open(self.filename,'w'))
+        except Exception as e:
+            raise FlexSpec1ValuesException(f"Error opening {filename}\ne.__str__()")
+
+    ### FlexSpec1Values.yaml_save
+
+    def debug(self,msg="",skip=[],os=sys.stderr):              # FlexSpec1Values::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("FlexSpec1Values - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### FlexSpec1Values.debug()
+
+   # (mapcar `wg-python-property (list "_tungstun" "_near" "_red""_blue" "_green" "_uvboost" "_collimator" "_grating"))
+
+
+#-----------------------------------------------------------------------------
+    def get(self,command):                                          # FlexSpec1Values.get()
+        """Get the value for command character"""
+        return self.values[self.values[command]]
+    ### FlexSpec1Values.get()
+
+    def add(self,command,value):                                    # FlexSpec1Values.add()
+        """Add the value to the yaml file indicated by command"""
+        try:
+            if(command in self.commandmap):
+                self.values[command] = value
+        except Exception as e:
+            print(f"FlexSpec1Values.add() error {command} {value}\n{e.__str__()}")
+            raise
+    ### FlexSpec1Values.add()
+
+
+        ##############################################################
+        #  Use properties to manage access to variables, as dict entries
+        #  for yaml file production
+        ##############################################################
+        # (setq properties `( "yamlfile"  "tungstun"  "near"  "red"  "blue"  "green"  "uvboost"  "collimator"  "grating"  "bgcolor"  "textcolor"  "actioncolor" ))
+        # (wg-python-properties properties)
+    ##################################################################
+    # yamlfile Properties
+    ##################################################################
+    @property # yamlfile
+    def yamlfile(self):
+        return self.values["yamlfile"]
+    @yamlfile.setter
+    def yamlfile(self,value):
+        self.values["yamlfile"] = value
+    @yamlfile.getter
+    def yamlfile(self):
+        return self.values["yamlfile"]
+    @yamlfile.deleter
+    def yamlfile(self):
+      del self.yamlfile
+
+    ##################################################################
+    # tungstun Properties
+    ##################################################################
+    @property # tungstun
+    def tungstun(self):
+        return self.values["tungstun"]
+    @tungstun.setter
+    def tungstun(self,value):
+        self.values["tungstun"] = value
+    @tungstun.getter
+    def tungstun(self):
+        return self.values["tungstun"]
+    @tungstun.deleter
+    def tungstun(self):
+      del self.values["tungstun"]
+
+    ##################################################################
+    # near Properties
+    ##################################################################
+    @property # near
+    def near(self):
+        return self.values["near"]
+    @near.setter
+    def near(self,value):
+        self.values["near"] = value
+    @near.getter
+    def near(self):
+        return self.values["near"]
+    @near.deleter
+    def near(self):
+      del self.values["near"]
+
+    ##################################################################
+    # red Properties
+    ##################################################################
+    @property # red
+    def red(self):
+        return self.values["red"]
+    @red.setter
+    def red(self,value):
+        self.values["red"] = value
+    @red.getter
+    def red(self):
+        return self.values["red"]
+    @red.deleter
+    def red(self):
+      del self.values["red"]
+
+    ##################################################################
+    # blue Properties
+    ##################################################################
+    @property # blue
+    def blue(self):
+        return self.values["blue"]
+    @blue.setter
+    def blue(self,value):
+        self.values["blue"] = value
+    @blue.getter
+    def blue(self):
+        return self.values["blue"]
+    @blue.deleter
+    def blue(self):
+      del self.values["blue"]
+
+    ##################################################################
+    # green Properties
+    ##################################################################
+    @property # green
+    def green(self):
+        return self.values["green"]
+    @green.setter
+    def green(self,value):
+        self.values["green"] = value
+    @green.getter
+    def green(self):
+        return self.values["green"]
+    @green.deleter
+    def green(self):
+      del self.values["green"]
+
+    ##################################################################
+    # uvboost Properties
+    ##################################################################
+    @property # uvboost
+    def uvboost(self):
+        return self.values["uvboost"]
+    @uvboost.setter
+    def uvboost(self,value):
+        self.values["uvboost"] = value
+    @uvboost.getter
+    def uvboost(self):
+        return self.values["uvboost"]
+    @uvboost.deleter
+    def uvboost(self):
+      del self.values["uvboost"]
+
+    ##################################################################
+    # collimator Properties
+    ##################################################################
+    @property # collimator
+    def collimator(self):
+        return self.values["collimator"]
+    @collimator.setter
+    def collimator(self,value):
+        values["collimator"] = value
+    @collimator.getter
+    def collimator(self):
+        return self.values["collimator"]
+    @collimator.deleter
+    def collimator(self):
+      del self.values["collimator"]
+
+    ##################################################################
+    # grating Properties
+    ##################################################################
+    @property # grating
+    def grating(self):
+        return self.values["grating"]
+    @grating.setter
+    def grating(self,value):
+        self.values["grating"] = value
+    @grating.getter
+    def grating(self):
+        return self.values["grating"]
+    @grating.deleter
+    def grating(self):
+      del self.values["grating"]
+
+    ##################################################################
+    # bgcolor Properties
+    ##################################################################
+    @property # bgcolor
+    def bgcolor(self):
+        return self.values["bgcolor"]
+    @bgcolor.setter
+    def bgcolor(self,value):
+        self.values["bgcolor"] = value
+    @bgcolor.getter
+    def bgcolor(self):
+        return self.values["bgcolor"]
+    @bgcolor.deleter
+    def bgcolor(self):
+      del self.values["bgcolor"]
+
+    ##################################################################
+    # textcolor Properties
+    ##################################################################
+    @property # textcolor
+    def textcolor(self):
+        return self.values["textcolor"]
+    @textcolor.setter
+    def textcolor(self,value):
+        self.values["textcolor"] = value
+    @textcolor.getter
+    def textcolor(self):
+        return self.values["textcolor"]
+    @textcolor.deleter
+    def textcolor(self):
+      del self.values["textcolor"]
+
+    ##################################################################
+    # actioncolor Properties
+    ##################################################################
+    @property # actioncolor
+    def actioncolor(self):
+        return self.values["actioncolor"]
+    @actioncolor.setter
+    def actioncolor(self,value):
+        self.values["actioncolor"] = value
+    @actioncolor.getter
+    def actioncolor(self):
+        return self.values["actioncolor"]
+    @actioncolor.deleter
+    def actioncolor(self):
+      del self.values["actioncolor"]
+
+
+
+
+# class FlexSpec1Values
+
+##############################################################################
+# SerialReaderProtocolRaw - Read byte(s) at a time.
+#
+##############################################################################
+class SerialReaderProtocolRaw(Protocol):              # SerialReaderProtocolRaw
+    tk_listener = None
+
+    def connection_made(self, transport):
+        """Called when reader thread is started"""
+        if self.tk_listener is None:
+            raise Exception("tk_listener must be set before connecting to the socket!")
+        #print("Connected, ready to receive data...")
+
+    def data_received(self, data):
+        """Called with snippets received from the serial port"""
+        self.tk_listener.after(0, self.tk_listener.on_data, data.decode())
+
+# SerialReaderProtocolRaw
+
+##############################################################################
+#                               MainFrame
+#
+##############################################################################
+class MainFrame(tk.Frame):                            # MainFrame
+    """Isolate this part to better manage the tk event loop"""
+    def __init__(self, widget, *args, **kwargs):              # MainFrame::__init__()
+        super().__init__(*args, **kwargs)
+        self.widget = widget
+
+    def on_data(self, data):                          # MainFrame::on_data()
+        print("Called from tk Thread:", data)
+        self.widget.insert(tk.END, data)
+
+# class MainFrame
+
+
+##############################################################################
+# FlexSpec1PortException
+#
+##############################################################################
+class FlexSpec1PortException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(FlexSpec1PortException,self).__init__("FlexSpec1Port "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return f" FlexSpec1Port: {e.__str__()}\n"
+# FlexSpec1PortException
+
+
+##############################################################################
+# FlexSpec1Port
+#
+##############################################################################
+class FlexSpec1Port(object):
+    """ Define a FlexSpec1 interface tie to a serial port
+    """
+    #__slots__ = [''] # add legal instance variables
+    # (setq properties `("" ""))
+    def __init__(self,port='/dev/tty0'):                               # FlexSpec1Port::__init__()
+        """Manage a port with asynchronous read."""
+
+        self.port = port
+        self.ser = serial.Serial(port, 9600, timeout=0)     # open the port here.
+
+    ### FlexSpec1Port.__init__()
+
+
+    def debug(self,msg="",skip=[],os=sys.stderr):           # FlexSpec1Port::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("FlexSpec1Port - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### FlexSpec1Port.debug()
+
+
+    def send_command(self,command,outputwindow):            # FlexSpec1Port.send_command()
+        """ This is called by a lambda expression tied to a tk.Button.
+        Sends output, and for things expecting a response, it hangs
+        in a loop. That loop needs attention.
+
+        send_command Function to send a command out the serial port
+        the action dict entry consists of the command letter as the key
+        and the entry is an array. The array is the description and
+        either a reference to a tk.Entry object or NONE.
+        The None is not checked.
+        """
+        val = command   # PDB-DEBUG
+        msg = "Starting send_command"
+        print(f"send_command Command {val} {command in numberset or command in lightset}")
+        try:
+            if(command in numberset or command in lightset):
+                if(command != ''):
+                    pval = actions[command][1].get()               # has [desc,widget]; get the widget
+                    print(f"send_command pval {pval}")
+                    msg += " adding cache"
+                    cache.add(command,pval)
+                    print(f"Returned from cache.add")
+                    msg += "building val"
+                    val = command + f" {pval}"    # persistent value
+        except Exception as e:
+            msg = f"send_command - {msg}\nExpecting float, got {val}\n{e}"
+            raise
+            print(msg,file=sys.stderr)
+        cmd = val.encode()
+        outputwindow.insert(tk.END,val+"\n")
+        self.ser.write(cmd)                                             # send the letter
+        if(command in numberset or command in lightset or command == 'Q'): #
+            for i in range(30):
+                time.sleep(.3)                                      # up to 2 seconds for something.
+                response = ser.read().decode()
+                if(len(response) != 0):
+                   outputwindow.insert(tk.END,response)
+                else:
+                    break
+
+    ### FlexSpec1Port.send_command()
+
+    def close(self):                                        # FlexSpec1Port.close()
+        """Close the serial port"""
+        self.ser.close()
+
+    ### FlexSpec1Port.close()
+
+
+# class FlexSpec1Port
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+# Create the GUI window, and a grid frame for the commands,descriptions
+# and entries to gather any parameters.
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+    opts.add_option("-p", "--port", action="store", dest="port",
+                   default='/dev/tty0',
+                   help="<str>     port name.")
+
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    (options, args) = opts.parse_args()
+    cache        = FlexSpec1Values(actions)                        # bind dict ref to cache.
+
+    ser          = FlexSpec1Port(options.port)
+
+    root         = tk.Tk()                                         # start Tk.
+    root.configure(background=cache.bgcolor)
+
+    root.title('FS1 Spectrograph Control Panel')
+    # Create a frame to grid commands into. Make 3 entry fields.
+    cmdframe     = tk.Frame(root,background=cache.bgcolor,bg=cache.bgcolor)
+
+
+    outputwindow = ScrolledText.ScrolledText(cmdframe)
+    outputwindow.config(bg="bisque",fg="black")                    # The running text.
+
+    # make the input section, buttons, descriptions and optional values
+    currow       = 0                                               # Loop marker for rows in the tk grid
+    for cmd,desc in commands.items():
+        btn = tk.Button(cmdframe, text=cmd,font=('courier',10),    # make button
+                           command=lambda c=cmd: send_command(c,outputwindow),
+                           fg=cache.textcolor,
+                           bg=cache.bgcolor)
+        btn.config(highlightbackground="black")
+
+        btn.grid(row=currow,column=0)                              # place button
+
+        hint = tk.Label(cmdframe,text=desc,justify=tk.LEFT,font=('courier',10),fg=cache.textcolor,
+                           bg=cache.bgcolor) # make the description
+        hint.grid(row=currow,column=1,sticky = tk.W)               # place desc in col 1 of this row
+
+        ent = None
+        if(cmd in lightset or cmd in numberset):
+            ent = tk.Entry(cmdframe,
+                           highlightcolor='red'
+                           )                               # make an entry if for the key
+            ent.grid(row=currow,column=2)                          # place grid the entry in col 2
+            ent.config(bg='bisque', # cache.bgcolor,
+                       fg=cache.textcolor,
+                       font=('courier',10),                        # use non-proportional text
+                       highlightbackground="black")
+
+        actions[cmd] = [btn,ent]                                   # save the layout in a dict
+        currow += 1                                                # advance the row
+
+    outputwindow.grid(columnspan=3)                                # grid window under all
+
+    actionframe = tk.Frame(cmdframe,background=cache.bgcolor)
+    load        = tk.Button(actionframe,text="Load",
+                            font=('courier',10),                   # pop up a file dialog, default ~/.config/FlexSpec1
+                            command = lambda : cache.yaml_load(),
+                            fg="black",
+                            bg=cache.actioncolor).grid(row=0,column=0)
+    save        = tk.Button(actionframe,text="Save",
+                            font=('courier',10),                   # pop up a file dialog, default ~/.config/FlexSpec1
+                            command = lambda : cache.yaml_save(cache),
+                            fg="black",
+                            bg=cache.actioncolor).grid(row=0,column=1)
+    finish      = tk.Button(actionframe,text="Exit",
+                            font=('courier',10),
+                            command = lambda : sys.exit(0),
+                            fg="black",
+                            bg=cache.actioncolor).grid(row=0,column=2)
+    actionframe.grid(columnspan=3)
+
+
+    # Now the command buttons, their description and unique persistent value is preserved.
+    cmdframe.pack(fill= tk.BOTH, expand= True, padx= 10, pady=20)
+
+    ##############################################################################
+    #                                   RUN THE GUI
+    #
+    ##############################################################################
+    try:
+        SerialReaderProtocolRaw.tk_listener  = MainFrame(outputwindow)      # Set listener to our reader
+#        serial_port                          = Serial(ser)                  # Initiate serial port
+        reader                               = ReaderThread(ser.ser,    # Initiate ReaderThread
+                                                            SerialReaderProtocolRaw)
+        reader.start()
+        root.mainloop()
+
+    except Exception as e:
+        print(f"Stopping hit error {e}",file=sys.stderr)
+        raise
+
