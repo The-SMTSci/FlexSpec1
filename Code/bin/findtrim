@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# (wg-astroconda-pdb)
+# (wg-python-fix-pdbrc)
+#
+#
+# (compile (format "python -m py_compile %s" (buffer-file-name)))
+# (compile (format "pydoc3 %s" (buffer-file-name)))
+#
+#############################################################################
+### HEREHEREHERE
+
+import os
+import optparse
+import sys
+import re
+import numpy as np
+from astropy.io import fits
+
+
+from matplotlib import pyplot as plt
+from matplotlib import rc
+
+
+
+__FSDEBUG = [False,True][os.getenv('FSDEBUG') == '']
+
+# (wg-python-types)
+#############################################################################
+#
+#
+#  /home/wayne/bin/findtrim
+# (wg-python-emacs-help)
+#
+# (wg-python-toc)
+#
+# __doc__ = """
+# __author__  = 'Wayne Green'
+# __version__ = '0.1'
+# __all__     = ['FindTrimException','FindTrim']   # list of quoted items to export
+# class FindTrimException(Exception):
+#     def __init__(self,message,errors=None):
+#     @staticmethod
+#     def __format__(e):
+# class FindTrim(object):
+#     def __init__(self,options,infiles : [] = []):           # FindTrim::__init__()
+#     def getfilenames(self):                                 # FindTrim.getfilenames()
+#     def debug(self,msg="",skip=[],os=sys.stderr):           # FindTrim::debug()
+#     def findtrim(self):                                     # FindTrim.findtrim()
+#     def getsection(self):                                   # FindTrim.getsection()
+# if __name__ == "__main__":
+#
+#
+#2023-04-19T21:54:49-0600 wlg -- initial hack
+#############################################################################
+
+__doc__ = """
+
+/home/wayne/bin/findtrim
+[options] files...
+
+  files may be free-list of files, a wildcard or an IRAF list file:
+  findtrim a.fits b.fits ... 
+  findtrim @l.l -p
+
+  -p  --plot   make plots of each file.
+
+
+"""
+
+
+__author__  = 'Wayne Green'
+__version__ = '0.1'
+__all__     = ['FindTrimException','FindTrim']   # list of quoted items to export
+
+
+##############################################################################
+# FindTrimException
+#
+##############################################################################
+class FindTrimException(Exception):
+    """Special exception to allow differentiated capture of exceptions"""
+    def __init__(self,message,errors=None):
+        super(FindTrimException,self).__init__("FindTrim "+ message)
+        self.errors = errors
+    @staticmethod
+    def __format__(e):
+        return f" FindTrim: {e.__str__()}\n"
+# FindTrimException
+
+
+##############################################################################
+# FindTrim
+#
+##############################################################################
+class FindTrim(object):
+    """ Find the trim section based on cals or flats.
+      FindTrim.getsection() return string of [X:X,Y:Y]
+    """
+
+    def __init__(self,options,infiles : [] = []):           # FindTrim::__init__()
+        """Initialize this class."""
+        #super().__init__()
+        # (wg-python-property-variables)
+        self.infiles = infiles
+        self.files = []
+        self.getfilenames()
+        self.options = options
+        self.trimsec = []
+
+    ### FindTrim.__init__()
+
+    def getfilenames(self):                                 # FindTrim.getfilenames()
+        """From the args, get the filenames into self.files"""
+        for v in self.infiles:
+            if('@' in v):
+                pre = ""
+                if("//" in v):
+                    pre,v = v.split('//')
+                if('@' in v):
+                    _,listname = v.split('@')
+                if(len(listname) == 2):
+                    pre,listname = listname
+                with open(listname,'r') as listoffiles:
+                    for f in listoffiles:
+                        self.files.append(pre+f.strip())
+            else:
+                self.files.append(v)
+
+        return self
+
+    ### FindTrim.getfilenames()
+
+    def debug(self,msg="",skip=[],os=sys.stderr):           # FindTrim::debug()
+        """Help with momentary debugging, file to fit.
+           msg  -- special tag for this call
+           skip -- the member variables to ignore
+           os   -- output stream: may be IOStream etc.
+        """
+        import pprint
+        print("FindTrim - %s " % msg, file=os)
+        for key,value in self.__dict__.items():
+            if(key in skip):
+               continue
+            print(f'{key:20s} =',file=os,end='')
+            pprint.pprint(value,stream=os,indent=4)
+        return self
+
+    ### FindTrim.debug()
+
+    def findtrim(self):                                     # FindTrim.findtrim()
+        """for the files in self.files; determine the trim area"""
+        ranges = []                                  # save [ [xmin,xmax,ymin,ymax],...]
+        for infile in self.files:
+            with fits.open(infile) as f:
+                try:
+                    trimsecs = {"xmin" : [],
+                                "xmax" : [],
+                                "ymin" : [],
+                                "ymax" : [],
+                               }
+                    h = f[0].header                  #           y  ,  x
+                    d = f[0].data                    # d.shape (4210, 6280)
+
+                    naxis1 = h["NAXIS1"]             # remember np is [naxis2,naxis1]
+                    naxis2 = h["NAXIS2"]
+                    w = np.where(d<0)
+                    if(len(w[0]) != 0):              # we have a winner
+                        w = np.where(d==0)
+                        dd=d[np.where(d>0)].reshape(naxis2,naxis2-len(w[0]))
+                    else:
+                        dd = d
+                    xsum       = dd.sum(axis=1)
+                    ysum       = dd.sum(axis=0)
+                    x          = range(len(xsum))          # same for ysum
+                    bgwhere    = np.where(dd < 500)
+                    bgestimate = dd[bgwhere].mean()
+                    mean       = bgestimate * naxis2       # dd.mean(dd < 500).mean() ignore signal
+                    xmean      = np.array([3.0*mean]*len(x))
+                    xwhere     = np.where(xsum > xmean)
+                    ywhere     = np.where(ysum > ysum.mean())
+                    xmin,xmax  = xwhere[0][0],xwhere[0][-1]
+                    ymin,ymax  = ywhere[0][0],ywhere[0][-1]
+                    trimsecs["xmin"].append(xmin)
+                    trimsecs["xmax"].append(xmax)
+                    trimsecs["ymin"].append(ymin)
+                    trimsecs["ymax"].append(ymax)
+                    if(self.options.plot):
+                        from matplotlib import pyplot as plt
+                        x = range(len(xsum))
+                        rangex    = range(len(xmean))
+                        plt.plot(rangex,xsum,lw=0.5,c="black")
+                        rangex    = range(xwhere[0][0],xwhere[0][-1])
+                        plt.plot(rangex,[xsum[xwhere[0][0]]]*len(rangex),lw=1,c='red')
+                        plt.grid()
+                        plt.xlabel('Column')
+                        plt.ylabel('Total Columns')
+                        plt.title(f"Y {xwhere[0][0]}-{xwhere[0][-1]}")
+                        plt.show()
+                        rangey    = range(len(ysum))       # how big is y
+                        plt.plot(rangey,ysum,lw=0.5)    # plot all data
+                        rangey    = range(ywhere[0][0],ywhere[0][-1])
+                        plt.plot(rangey,[ysum[ywhere[0][0]]]*len(rangey),c='red')
+                        plt.grid()
+                        plt.xlabel('Row')
+                        plt.ylabel('Total Rows')
+                        plt.title(f"Ysum,{ywhere[0][0]}-{ywhere[0][-1]} ")
+                        plt.show()                    # end of hidden plot range
+                except Exception as e:
+                    print(f"FindTrim Unexpected Error\n{e.__str__()}")
+                    raise
+        self.trimsecs = [min(trimsecs["xmin"]),
+                         max(trimsecs["xmax"]),
+                         min(trimsecs["ymin"]),
+                         max(trimsecs["ymax"])]
+        return self
+
+    ### FindTrim.findtrim()
+
+    def getsection(self):                                   # FindTrim.getsection()
+        """return the text for the section as [X:X,Y:Y]"""
+        t = self.trimsecs
+        return f"[{t[2]},{t[3]}:{t[0]},{t[1]}]"
+    ### FindTrim.getsection()
+
+   # (wg-python-properties properties)
+
+# class FindTrim
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+# HEREHEREHERE
+if __name__ == "__main__":
+    opts = optparse.OptionParser(usage="%prog "+__doc__)
+
+    opts.add_option("-p", "--plot", action="store_true", dest="plot",
+                   default=False,
+                   help="<bool>     make plots of ranges.")
+
+    opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be verbose about work.")
+
+    (options, args) = opts.parse_args()
+
+    # (wg-python-atfiles)
+    finder=FindTrim(options,args)
+    finder.findtrim()
+    print(f"{finder.getsection()}")
+    if(options.verboseflag):
+        finder.debug()
+
+
