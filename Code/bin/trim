@@ -360,7 +360,7 @@ class TrimFITSFile(object):
                     if(c[0] not in newh):                      # c[0] is keyword
                         newh.append(c)
                 hint = "hdu.writeto()"   # PDB-DEBUG
-                fits.writeto(outname,newd.T,header=h,output_verify='silentfix',overwrite=True)
+                fits.writeto(outname,newd.T,header=newh,output_verify='silentfix',overwrite=True)
                 if(self.verboseflag):
                     print(f"TrimFITSFile.compile Wrote {outname}",file=sys.stderr)
                 self.filecount += 1
