@@ -140,6 +140,7 @@ class IRAFSection(object):
 
     def secslice(self):                                   # IRAFSection::secslice
         """return a proper slice"""
+        #print(f"slicex={self.slicex} ,slicey={self.slicey}")
         return (self.slicex, self.slicey)
 
     ### IRAFSection.secslice
@@ -149,24 +150,23 @@ class IRAFSection(object):
            secdef='[10:100,20:200]'
            set up the parts and slices in numpy format
         """
-        if(0): pdb.set_trace()
         if(secdef is None):
             secdef = self.secdef
-        s = self._clean.sub('',secdef)
-        secparts = s.split(',')                 # PDB-DEBUG
+        s        = self._clean.sub('',secdef)
+        secparts = s.split(':')                 # PDB-DEBUG
         try:
-            parts1   = secparts[0].split(':')+['']  # [v,?,''] or [v,''] at least 2
-            parts2   = secparts[1].split(':')+['']
-            parts1[0] = self.convert(parts1[0],        0)  # ints, numpy range values.
-            parts1[1] = self.convert(parts1[1],self.naxis1 - 1)
-            parts2[0] = self.convert(parts2[0],        0)
-            parts2[1] = self.convert(parts2[1],self.naxis2 - 1)
+            parts1      = secparts[0].split(',')+['']  # [v,?,''] or [v,''] at least 2
+            parts2      = secparts[1].split(',')+['']
+            parts1[0]   = self.convert(parts1[0],        0)  # ints, numpy range values.
+            parts1[1]   = self.convert(parts1[1],self.naxis1 - 1)
+            parts2[0]   = self.convert(parts2[0],        0)
+            parts2[1]   = self.convert(parts2[1],self.naxis2 - 1)
             self.slicex = slice(parts1[0],parts1[1])
             self.slicey = slice(parts2[0],parts2[1])
         except Exception as e:
-            print("secparts ", secparts)
-            print("parts1 ", parts1)
-            print("parts2 ", parts2)
+            print(f"secparts {secparts}")
+            print(f"parts1 {parts1}")
+            print(f"parts2 {parts2}")
             raise  IRAFSectionException("IRAFSection.compile: " + e.__str__(),secparts)
 
     ### IRAFSection.compile()
@@ -249,34 +249,35 @@ class TrimFITSFileException(Exception):
 class TrimFITSFile(object):
     """ Trim a fits file.
     """
-    def __init__(self,pargs,poptions):                               # TrimFITSFile::__init__()
-        """Initialize this class."""
-        msg            = ""
+    def __init__(self,pargs,poptions={}):                            # TrimFITSFile::__init__()
+        """Args are the non-switch arguments, presumed to be filenames,
+        poptions is the options structure containing the switches.
+        """
+        msg            = ""                                         # bread crumb trail
 
-        ### TrimFITSFile.__init__()
-        tmpsec = poptions['section']
+        tmpsec = poptions.get('section',None)                       # get the option or none
         if(tmpsec == None):
-            if( 'TRIMSEC' not in os.envrion):
+            if( 'TRIMSEC' not in os.environ): # PDB-DEBUG
                 msg = "TrimFITSFile: No idea for trimsection use environment, or set options.section.\n"
             else:
                 tmpsec = os.getenv('TRIMSEC')
         if(len(args) == 0):
             msg += "TrimFITSFile: No files given.\n"
 
-        self.args           = pargs                                # list of files or sources
-        self.options        = poptions;                            # call from main with options.__dict__
-        self.usection       = self.options.get('section',None)                     # user supplied section
-        self.envsection     = os.getenv('TRIMESEC')
-        self.sectionchoices = [self.usection, self.envsection]
+        self.args           = pargs                                 # list of files or sources
+        self.options        = poptions;                             # call from main with options.__dict__
+        self.usection       = self.options.get('section',None)      # user supplied section
+        self.envsection     = os.getenv('TRIMESEC')                 # Take -s over env var.
+        self.sectionchoices = [self.usection, self.envsection]      # remember both
         self.files          = []                                    # allow at-files with prefix concat
         self.verboseflag    = self.options.get('verboseflag',False)
         self.prefix         = self.options.get('prefix',None)
         self.force          = self.options.get('force',None)
-        self.convdate       = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) # when we did the trims
-        self.filecount      = 0
+        self.convdate       = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()) # when we did these trims
+        self.filecount      = 0                                     # keep track of count of candidates
         if(self.usection is None):
-            self.usection = os.getenv('TRIMESEC')             # check for environment variable
-        self.section        = None                            # instance global
+            self.usection = os.getenv('TRIMESEC')                   # check for environment variable
+        self.section        = None                                  # instance global
         # TRIMSEC may be in the files...
         if(msg != ""):
             raise  TrimFITSFileException(msg)
@@ -306,32 +307,44 @@ class TrimFITSFile(object):
 
     def compile(self):
         """Do the actual work"""
+        newfiles = [] # PDB-DEBUG
+        for filename in self.files:                                 # take care of wild cards...
+            if('*' in filename):                                    # ... more for pdb.
+                import glob
+                newfiles = newfiles + glob.glob(filename)
+            else:
+                newfiles.append(filename)
+
+        self.files = newfiles
 
         for filename in self.files:
             if(self.options.get('verboseflag')):
                 print("TrimFITSFile.compile Processing {}".format(filename))
             try:
-                hint    = "Opening file {}.format(filename)"
-                self.section = None
+                hint             = "Opening file {}.format(filename)"
+                self.section     = None
                 with fits.open(filename) as f:                 # open the fits file
-                    d            = f[0].data.T                 # put into IRAF order (zero based!)
+                    d            = f[0].data.T                 # 'T'ranspose into IRAF order (zero based!)
                     h            = f[0].header                 # grab header naxis{1,2}
-                hint   = "Critical checks:"
+                hint             = "Critical checks:"
                 if(h['NAXIS'] == 1):
                     raise  SectionException("{} NAXIS1 and NAXIS2 are needed to trim".format(filename))
-                #print(hint,self.sectionchoices)
-                mysection        = [x for x in self.sectionchoices if x is not None]
-                #print(hint,mysection)
-                hint   = "Using force"
+                if(self.verboseflag) : print(hint,self.sectionchoices)
+                mysection        = [x for x in self.sectionchoices if x is not None] # choose the slice to use
+                if(self.verboseflag) : print(f"hint={hint}, section to use = {mysection}")
+                hint             = "Using force"
                 if(self.force):
                     mysection.reverse()                        # reverse choices
                 use_section      = mysection[0]
+                if(self.verboseflag) : print(f"use_section = {use_section}")
                 hint             = "Getting section"
                 self.section     = IRAFSection(h,use_section)  # brew up a value may be whole image
 
                 hint             = "Subsection of image {}".format(self.usection)
                 newslice         = self.section.secslice()          # PDB-DEBUG
+                if(self.verboseflag) : print(f"newslice={newslice}")
                 newd             = d[newslice]
+                if(self.verboseflag) : print(f"trimmed shape {newd.shape} slice={newslice}")
 
                 outname          = self.prefix + filename
                 # fix up the header.
@@ -340,19 +353,19 @@ class TrimFITSFile(object):
                 newh             = hdu.header                  # astropy.io.fits.header.Header
                 hint = "Adding a few descriptions"             # PDB-DEBUG
                 if(self.options['omitwcs']):
-                    #print("Adding wcs {}".format(self.options['omitwcs']))
+                    if(self.verboseflag) : print("Adding wcs {}".format(self.options['omitwcs']))
                     self.addwcs(newh,newslice,filename)            # add the wcs info to new header.
                 hint = "Updating the header"
                 for c in h.cards:                              # PDB -DEBUG
                     if(c[0] not in newh):                      # c[0] is keyword
                         newh.append(c)
-
-                hdu.writeto(outname,output_verify='silentfix',overwrite=True)
+                hint = "hdu.writeto()"   # PDB-DEBUG
+                fits.writeto(outname,newd.T,header=h,output_verify='silentfix',overwrite=True)
                 if(self.verboseflag):
-                    print("TrimFITSFile.compile Wrote {}".format(outname),file=sys.stderr)
+                    print(f"TrimFITSFile.compile Wrote {outname}",file=sys.stderr)
                 self.filecount += 1
             except Exception as e:
-                raise  TrimFITSFileException("trim: {}\n{}".format(hint,e.__str__()))
+                raise TrimFITSFileException(f"trim: file={filename} hint={hint}\n{e.__str__()}")
 
         return self
 
