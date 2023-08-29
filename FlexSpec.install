@@ -1,0 +1,25 @@
+#!/bin/bash
+#############################################################################
+# FlexSpec.install - copy bits we want to ~/bin
+#############################################################################
+myhome=""
+myhomes=("$SUDO_USER" "$HOME")
+if test  "${myhomes[0]}" != ""; then
+   myhome=${myhomes[0]};
+   echo found $myhome
+elif test "${myhomes[1]}" != ""; then
+   myhome=${myhomes[1]}
+   echo found $myhome
+else
+   echo "No suitable HOME found"
+   exit 1
+fi
+
+# copy the files and mark as owned by stellarmate
+if test -e "$myhome/bin" ]]; then
+   cp -pr /git/FlexSpec1/Code/bin/*  $myhome/bin
+   chown -R stellarmate:stellarmate $myhome/bin
+else
+   echo Unable to copy files to bin.
+   exit(1)
+fi
