@@ -1,0 +1,53 @@
+#!/bin/bash 
+#############################################################################
+# Must be root to run
+#############################################################################
+apt-get update                              # get the install up to date
+apt update                                  # tie in recent/all packages
+
+if test "$USER" != "root" ; then
+   echo "Must be root (sudo) to run this script."
+   exit 1
+fi
+
+if test "$(pwd)" != "/home/stellarmate" ; then 
+   echo "Will only run on stellarmate image."
+   exit 1
+fi
+
+apt install -y locate                  # find files. sudo updatedb # for recent files.
+apt install -y vim                     # default vim crap is broken
+apt install -y python3-pyqt5           # get qt for our dialogs
+
+apt install -y saods9                  # really? yes
+apt install -y sextractor              # Ads WCS to images
+apt install -y fitsverify              # Make sure fits files are correct
+apt install -y x11-apps                # test remote X clients
+apt install -y sqlite3                 # Add sqlite3 for our purposes
+
+# FlexSpec
+
+apt install -y iraf                    # for advanced users
+apt install -y python-pyraf3           # for advanced users
+
+#############################################################################
+# Install FlexSpec helpers
+#############################################################################
+apt install -y git                     # get our helpers easily
+mkdir -p /git
+chown stellarmate:stellarmage /git    # we own it.
+cd /git
+git clone https://github.com/The-SMTSci/FlexSpec1.git
+cd /home/stellarmate
+/git/FlexSpec1.install                 # install all the helpers.
+
+
+# clean up space.
+apt-get autoremove                     # clean out all un-necessary packages
+apt-get autoclean                      # drop any stored tarballs
+
+cd /home/stellarmate
+echo "set enable-bracketed-paste off" >> .inputrc  # fix stupid update
+chown stellarmate:stellarmate .inputrc             # allow cut/paste AND EXECUTE if newline.
+
+# eof
