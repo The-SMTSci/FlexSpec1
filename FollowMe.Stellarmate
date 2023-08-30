@@ -28,7 +28,7 @@ apt install -y sqlite3                 # Add sqlite3 for our purposes
 # FlexSpec
 
 apt install -y iraf                    # for advanced users
-apt install -y python-pyraf3           # for advanced users
+apt install -y python3-pyraf           # for advanced users
 
 #############################################################################
 # Install FlexSpec helpers
