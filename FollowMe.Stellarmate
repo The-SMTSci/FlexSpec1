@@ -39,7 +39,7 @@ chown stellarmate:stellarmate /git    # we own it.
 cd /git
 git clone https://github.com/The-SMTSci/FlexSpec1.git
 cd /home/stellarmate
-/git/FlexSpec.install                 # install all the helpers.
+/git/FlexSpec1/FlexSpec.install                 # install all the helpers.
 
 
 # clean up space.
