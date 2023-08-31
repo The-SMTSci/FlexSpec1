@@ -23,4 +23,8 @@ else
    echo Unable to copy files to bin.
    exit(1)
 fi
- #eof
+
+if ! test -e /home/stellarmate/Flexspec.aliases ; then
+    cp /home/stellarmate/Code/HOME/Flexspec.aliases /home/stellarmate/Flexspec.aliases;
+fi
+#eof
