@@ -1,6 +1,7 @@
 #!/bin/bash
 #############################################################################
 # FlexSpec.install - copy bits we want to ~/bin
+# must run has root
 #############################################################################
 myhome=""
 myhomes=("$SUDO_USER" "$HOME")
@@ -25,7 +26,7 @@ else
 fi
 
 if ! test -e /home/stellarmate/Flexspec.aliases ; then
-    cp /git/FlexSpec1/Code/HOME/Flexspec.aliases /home/stellarmate/Flexspec.aliases;
+    cp /git/external/FlexSpec1/Code/HOME/Flexspec.aliases /home/stellarmate/Flexspec.aliases;
     chown stellarmate:stellarmate /home/stellarmate/Flexspec.aliases
 fi
 #eof
