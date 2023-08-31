@@ -29,8 +29,9 @@ apt install -y gawk                    # awk is too good to pass on
 
 # FlexSpec
 
-apt install -y iraf                    # for advanced users
-apt install -y python3-pyraf           # for advanced users
+# install IRAF using IRAF.install from this package
+#apt install -y iraf                    # for advanced users
+#apt install -y python3-pyraf           # for advanced users
 
 #############################################################################
 # Install FlexSpec helpers
