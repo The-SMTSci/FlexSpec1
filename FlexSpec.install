@@ -25,6 +25,7 @@ else
 fi
 
 if ! test -e /home/stellarmate/Flexspec.aliases ; then
-    cp /home/stellarmate/Code/HOME/Flexspec.aliases /home/stellarmate/Flexspec.aliases;
+    cp /git/FlexSpec1/Code/HOME/Flexspec.aliases /home/stellarmate/Flexspec.aliases;
+    chown stellarmate:stellarmate /home/stellarmate/Flexspec.aliases
 fi
 #eof
