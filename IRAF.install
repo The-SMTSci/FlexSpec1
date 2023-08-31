@@ -20,6 +20,6 @@ apt install -y iraf
 apt install -i python3-pyraf
 
 cd /home/stellarmate/iraf
-cp /git/FlexSpec1/IRAF/{fit2fits.cl,flexspec.cl,iraffind,login.cl,loginuser.cl} .
+cp /git/external/FlexSpec1/IRAF/{fit2fits.cl,flexspec.cl,iraffind,login.cl,loginuser.cl} .
 
 #eof
