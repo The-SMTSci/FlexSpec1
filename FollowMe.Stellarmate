@@ -25,6 +25,7 @@ apt install -y fitsverify              # Make sure fits files are correct
 apt install -y x11-apps                # test remote X clients
 apt install -y sqlite3                 # Add sqlite3 for our purposes
 apt install -y filezilla               # allow file operations FROM the stellarmate
+apt install -y gawk                    # awk is too good to pass on
 
 # FlexSpec
 
