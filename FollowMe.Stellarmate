@@ -24,22 +24,25 @@ apt install -y sextractor              # Ads WCS to images
 apt install -y fitsverify              # Make sure fits files are correct
 apt install -y x11-apps                # test remote X clients
 apt install -y sqlite3                 # Add sqlite3 for our purposes
+apt install -y filezilla               # allow file operations FROM the stellarmate
+apt install -y gawk                    # awk is too good to pass on
 
 # FlexSpec
 
-apt install -y iraf                    # for advanced users
-apt install -y python3-pyraf           # for advanced users
+# install IRAF using IRAF.install from this package
+#apt install -y iraf                    # for advanced users
+#apt install -y python3-pyraf           # for advanced users
 
 #############################################################################
 # Install FlexSpec helpers
 #############################################################################
 apt install -y git                     # get our helpers easily
-mkdir -p /git
-chown stellarmate:stellarmate /git    # we own it.
-cd /git
+mkdir -p /git/{local,external}         # repositories, local repos are here.
+cd /git/external                       # install FlexSpec1 repo as external
 git clone https://github.com/The-SMTSci/FlexSpec1.git
+chown -R stellarmate:stellarmate /git  # we own it.
 cd /home/stellarmate
-/git/FlexSpec1/FlexSpec.install                 # install all the helpers.
+#/git/external/FlexSpec1/FlexSpec.install    # install all the helpers.
 
 
 # clean up space.

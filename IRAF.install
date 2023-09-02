@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#############################################################################
+# IRAF.install - copy bits we want to ~/bin
+#############################################################################
+myhome=""
+myhomes=("$SUDO_USER" "$HOME")
+if test  "${myhomes[0]}" != ""; then
+   myhome=${myhomes[0]};
+   echo found $myhome
+elif test "${myhomes[1]}" != ""; then
+   myhome=${myhomes[1]}
+   echo found $myhome
+else
+   echo "No suitable HOME found"
+   exit 1
+fi
+
+apt install -y iraf
+apt install -i python3-pyraf
+
+cd /home/stellarmate/iraf
+cp /git/external/FlexSpec1/IRAF/{fit2fits.cl,flexspec.cl,iraffind,login.cl,loginuser.cl} .
+
+#eof
