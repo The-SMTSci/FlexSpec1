@@ -1,6 +1,6 @@
 /******************************************************************************
 * gigo.ino -- 
-* (compile "g++ -I../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
+* (compile "g++ -I../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ hello.ino && ./gigo")
 *
 * A simple Arduino sketch to tell each port "Hello" on 1 second intervals.
 *
@@ -28,12 +28,14 @@ void setup()
 
 /******************************************************************************
 * gigo loop main loop
-*
+*  Send a message to the serial port with a count. Delay is 1 second.
 ******************************************************************************/
 void loop()
 {
-   Serial.println("Hello USB\n");
-   Serial1.println("Hello TTY\n");
+ int i;
+
+   Serial .print("Hello USB  ") ; Serial.println(i++);
+   Serial1.print("Hello TTY  ") ; Serial.println(i);
    delay(1000);
 
 } // gigo loop
@@ -42,9 +44,11 @@ void loop()
 *                                MAIN UNIT TEST
 *****************************************************************************/
 #ifdef __UNIT_TEST__
+#include <iostream>
 int main(int c, char **v)
 {
-    std::cout << "No regression tests for gigo." << std::endl;
+    std::cout << "No regression tests for hello." << std::endl;
+    loop();
     return 0;
 } // main
 

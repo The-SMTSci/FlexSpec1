@@ -1,6 +1,6 @@
 /******************************************************************************
 * gigo.ino --
-* (compile "g++ -I../../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
+* (compile "g++ -I../ -D__REGRESSION__ -g --std=c++11  -o gigo -x c++ gigo.ino && ./gigo")
 *
 * A simple program that listens on Serial and bounces its input back to
 * both the Serial and Serail1 ports. Designed to test the loopback on ports.
@@ -21,7 +21,7 @@ static char buf;
 ******************************************************************************/
 void setup()
 {
-   Serial.begin(9600);
+   Serial .begin(9600);
    Serial1.begin(9600);
    delay(3000);                // Allow port turn around time
 
@@ -33,12 +33,12 @@ void setup()
 ******************************************************************************/
 void loop()
 {
-   while(Serial.available())                // bounce back to serial
+   while(Serial.available())                // bounce back from serial
    {
       buf = Serial.read();
       Serial.print(buf,DEC);
    }
-   while(Serial1.available())               // bounce to Serial1 too.
+   while(Serial1.available())               // bounce back from Serial1 too.
    {
       buf = Serial1.read();
       Serial1.print(buf,DEC);
