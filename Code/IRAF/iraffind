@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+
+#############################################################################
+# iraffind /home/wayne/bin/iraffind -- run the find command looking for
+# each arg under /iraf/iraf.
+#
+#
+#
+#   $Revision: 1.2 $
+#   $Log: iraffind,v $
+#   Revision 1.2  2014/11/10 19:29:01  wayne
+#   Added checks for where iraf docs may reside.
+#
+#   Revision 1.1.1.1  2014/05/01 21:31:05  astro
+#   The fits utilities package
+#
+#   Revision 1.1.1.1  2011-06-14 15:50:17  wayne
+#   Package to support fits processing of files.
+#
+#
+#
+# 2011-06-12T23:21:20-0600 wlg
+# 2022-11-15T05:47:58-0700 wlg made for generic python 2.7/3
+#############################################################################
+from __future__ import print_function
+import optparse
+import os
+import sys
+
+__doc__ = """
+iraffind [-r --root irafroot] <parts of files>
+
+Checks for $HOME/'anaconda3' $HOME/'Ureka' then /iraf/iraf
+for a decent root to use. You can force this with the -r
+switch.
+
+It then builds a wildcard '*'+arg+'*', and uses the sustem
+find command to send list of candidates to stdout. 
+
+You can pipe that to grep or less to winnow thngs down.
+
+
+"""
+__author__  = 'Wayne Green'
+__version__ = '0.2'
+
+##############################################################################
+#                                    Main
+#                               Regression Tests
+##############################################################################
+
+if __name__ == "__main__":
+
+   opts = optparse.OptionParser(usage="$prog" + __doc__)
+
+   opts.add_option("-e", "--env", action="store", dest="env",
+                   default='geminiconda',
+                   help="<conda env name>     name of the conda env [geminiconda].")
+
+   opts.add_option("-p", "--path", action="store", dest="path",
+                   default='/home/wayne/anaconda3/envs',
+                   help="<conda env pathj>     path to the current iraf env.$HOME/wherev")
+
+   opts.add_option("-r", "--root", action="store", dest="root",
+                   default=None,
+                   help="<path>     force me to use this as /iraf/iraf root.")
+
+   opts.add_option("-v", "--verbose", action="store_true", dest="verboseflag",
+                   default=False,
+                   help="<bool>     be chatty about work.")
+   (options, args) = opts.parse_args()
+
+   homedir = os.getenv("HOME") + "/"   # add trailing slash
+   abspath = options.path
+   absevn  = options.env
+   root = abspath + '/' + absevn
+
+   if(not os.path.exists(root)):
+      print(f"Unable to find an iraf root at {abspath+'/'+absenv}.",file=sys.stderr)
+      print("Aborting.",file=sys.stderr)
+      sys.exit(1)
+
+
+   for a in args:
+      print(f"""Searching for {"*"+a+"*"} in {root}""")
+      os.system("find " +root+ " -iname \"*"+a+"*\"");
+
+

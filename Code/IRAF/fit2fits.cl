@@ -1,0 +1,6 @@
+!(for f in *; do if [[ "$f" =~ " " ]] ; then mv "$f" ${f// /_} ; fi ; done)
+!(shopt -s nullglob; for f in *.*.*fit    ; do mv  $f  ${f//./_}        ; done)
+!(shopt -s nullglob; for f in *-*fit      ; do mv  $f  ${f//-/m}        ; done)
+!(shopt -s nullglob; for f in *+*fit      ; do mv  $f  ${f//+/p}        ; done)
+!(shopt -s nullglob; for f in *_fit       ; do mv  $f  ${f/%_fit/.fits} ; done)
+!(shopt -s nullglob; for f in *.fit       ; do mv  $f  ${f/%.fit/.fits} ; done)
