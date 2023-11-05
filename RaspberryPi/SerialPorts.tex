@@ -1,0 +1,56 @@
+\section{RPi Serial Ports} \label{sec:RPiSerialPorts}
+
+The Raspberry Pi has 6 serial ports, available in various ways, including
+over BlueTooth connections. The ports use GPIO pins, and may be disabled
+to allow secondary functions for the GPIO pins to be permitted.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| l | l | l | l | l | l | l |}
+%\MakeShortVerb{\|}
+%\multicolumn{n}{fmt}{text for merged cols}
+\hline
+Name   &  Type       &  Models     &  Enabled    &  GPIO (TX)  &  GPIO (RX)  &  CTS/RTS    \\
+\hline
+UART0  &  PL011      &  All        &  Yes        &  14,32,36   &  15,33,37   &      \\
+UART1  &  mini-UART  &  All        &  No         &  14,32,40   &  15,33,41   &      \\
+UART2  &  PL011      &  Pi4 Only   &  No         &         0   &         3   &   2,3    \\
+UART3  &  PL011      &  Pi4 Only   &  No         &         4   &         7   &   6,7    \\
+UART4  &  PL011      &  Pi4 Only   &  No         &         8   &        11   &   10,11    \\
+UART5  &  PL011      &  Pi4 Only   &  No         &        12   &        15   &   14,15    \\
+%% ones-based: \cline{a-b}
+\hline
+%%\DeleteShortVerb{|}
+\end{tabular}
+%%\end{minipage}    %% for footnotes  r@{.}l
+\caption[WAN Firewall]{Stellarmate WAN Firewall Ports}
+\label{table:StellarmateWANFirewallPorts}
+%%} % end small etc
+\end{table}
+
+\subsection{Connecting FlexSpec1 via Serial Ports}
+
+The Serial Ports for the RPi are 3.3V and require a level shifter to be
+on the safeside. The FlexSpec1 design calls for a 5-wire cable between
+the RPi and the Arduino SBC. These include:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{| l | l |}
+\hline
+RPi      &  RPi                         \\
++5 V     &  Power                       \\ 
+GND      &  Signal/Electrical Ground    \\ 
+Tx       &  Commands                    \\ 
+Rx       &  Response                    \\ 
+Reset    &  Reboot FlexSpec1            \\ 
+%% ones-based: \cline{a-b}
+\hline
+\end{tabular}
+\caption[RPi/Ardiuno Cable]{The Cable has a footprint on the FlexSpec
+PCBA. Pins are shown for programming clarity. The pins on the Arduino
+are lables and NOT traditional pin numbers. Be careful.}
+\label{table:RPi/ArdiunoCable}
+\end{table}
+
+

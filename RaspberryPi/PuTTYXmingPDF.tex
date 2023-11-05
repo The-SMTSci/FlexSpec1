@@ -1,0 +1,218 @@
+\documentclass[letter,11pt,oneside]{article}
+%%% HEREHEREHERE
+%%% APPENDIX
+%%% (insert (format "\n%% %s\n" (buffer-file-name)))
+% /home/git/external/FlexBerry/documentation/tex/PuttyXMingDoc/PuTTYXmingPDF.tex
+
+
+%%% (occur "\\(\\\\[a-z]*section\\|appendix\\|input\\|\\<include\\>\\)")
+
+%%\documentclass[11pt,twocolumn]{article}
+%%\usepackage[inline]{asymptote}       %% Inline asymptote diagrams
+%%\usepackage{wglatex}                 %% Use this one and kill others.
+\usepackage{xcolor}                     %% colored letters {\color{red}{{text}}
+\usepackage{fancybox}              %% headers/footers
+\usepackage{fancyhdr}                  %% headers/footers
+\usepackage{datetime}                  %% pick up tex date time 
+\usepackage{lastpage}                  %% support page of ...lastpage
+\usepackage{times}                     %% native times roman fonts
+\usepackage{textcomp}                  %% trademark
+\usepackage{amssymb,amsmath}           %% greek alphabet
+\usepackage{parskip}                   %% blank lines between paragraphs, no indent
+\usepackage{shortvrb}                  %% short verb use for tables
+\usepackage{lscape}                    %% landscape for tables.
+\usepackage{longtable}                 %% permit tables to span pages wg-longtable
+\usepackage{multicol}                  %% Enhance footnotes/endnotes
+\usepackage{url}                       %% Make URLs uniform and links in PDFs
+\usepackage{enumerate}                 %% Allow letters/decorations for enumerations
+\usepackage{endnotes}                  %% Enhance footnotes/endnotes
+\usepackage{listings}                  %% Make URLs uniform and links in PDFs
+\pdfadjustspacing=1                    %% force LaTeX-like character spacing
+\usepackage{geometry}                  %% allow margins to be relaxed
+%%\usepackage{wrapfig}                 %% permit wrapping figures.
+%%\usepackage{subfigure}               %% images side by side.
+\geometry{margin=1in}                  %% Allow narrower margins etc.
+\usepackage[T1]{fontenc}               %% Better Verbatim Font.
+\renewcommand*\ttdefault{txtt}        %% 
+\usepackage[colorlinks=true]{hyperref} %% Make huperlinks within a PDF
+\renewcommand*\ttdefault{txtt}     %%
+\usepackage{natbib}                    %% bibitems
+\usepackage{upquote}                   %% make programmer's quoetes in verbatim sections.
+
+%% include background image (wg-document-page-background) 
+
+\usepackage{graphicx}            %% Include pictures into a document
+%% (wg-texdoc-inserttikz)
+
+
+\def\documentisdraft{DRAFT}
+
+%% (wg-texdoc-isdraft)
+
+
+\def\drafttest{DRAFT}
+\def\wgdocdate{25 Aug, 2023}
+\def\wgdocdatetime{\wgdocdate at \currenttime}
+\ifx\documentisdraft\drafttest
+\usepackage[left]{lineno}   %%%%%%%%%%%%% DRAFT
+\usepackage{draftwatermark}
+%%\SetWatermarkScale{5.0}
+%%\SetWatermarkColor[gray]{0.3}
+\fi
+
+%% (wg-texdoc-insert-fancy-headers)
+
+%%\usepackage[bookmarks]{hyperref} %% Make huperlinks within a PDF
+%%\usepackage{makeidx}             %% Make an index uncomment following line
+%%\makeindex                       %%.. yeah this one, too. index{key} in text
+%%
+
+\makeatletter
+\newcommand\llbox[1]{%
+  \@tfor\@ii:=#1\do{%
+    {\color{verbcolor}\Ovalbox{\strut\@ii}}%
+  }%
+}
+\makeatother
+
+
+\definecolor{verbcolor}{rgb}{0.6,0,0}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\newcommand\debate[1]{\textcolor{darkgreen}{DEBATE: #1} \marginpar{\textcolor{red}{DEBATE} }}
+\newcommand{\ltodo}[2]{\marginpar{\textcolor{red}{ACTION: #1}\endnote{#2}}}
+\renewcommand{\thefigure}{\thesection-\arabic{figure}}
+\newcommand{\menu}{\ensuremath{\;\rightarrow\;}}
+\newcommand{\dhl}[1]{{\color{verbcolor}{\texttt#1}}}
+\definecolor{wglightgreen}{rgb}{0.88, 0.58, 0.88}
+\newcommand{\wgtextbox}[1]{\noindent\fcolorbox{darkgreen}{wglightgreen}{%
+    \minipage[t]{\dimexpr0.80\linewidth-2\fboxsep-2\fboxrule\relax}
+        {#1}
+    \endminipage}}
+
+%%(wg-latex-snippet)
+
+%%(wg-add-inline-images)  %% add inline images to the mix
+
+
+
+
+%%Begin User Definitions: Hint: ~/.latex.defs and  latex.defs  
+%%End User Definitions:
+
+%% (wg-texdoc-adjust-paper-width)
+%% (wg-texdoc-insert-hypersetup)
+
+%%% PDF Fields uncomment \usepackage[bookmarks]{hyperref} above.
+\hypersetup{
+colorlinks=true,
+linkcolor=blue,
+citecolor=red,
+urlcolor=blue,
+pdfauthor = {Copyright(c) 2020. All rights reserved. Wayne Green},
+pdftitle = {A TeX Document},
+pdfsubject = {My Subject Stuff here},
+pdfkeywords = {Keyword1, Keyword2, ...},
+pdfcreator = {LaTeX with hyperref package},
+pdfproducer = {dvips + ps2pdf}}
+
+%% (wg-latex-tablet-page)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+
+%% (wg-latex-pretty-title-page)
+%% (wg-texdoc-titleblock)
+
+
+\title{FlexSpec1 Manual Arduino Control with PuTTY and Xming on Windows}
+\author{Wayne Green}
+\settimeformat{hhmmsstime}
+\date{\today ~ ~ \currenttime~ MT}
+\maketitle
+
+%%\begin{abstract}
+This document covers using a Win1X machine to control a Raspberry Pi
+over the Internet.
+
+As of October 2023 we are leaning to using the
+StellarMate\footnote{\url{https://stellarmate.com/}} product together
+with PuTTY\footnote{\url{https://www.putty.org/}}\footnote{\dhl{sudo
+    apt install putty -y}}. These notes were developed for for our
+roll-your-own interface.
+
+Stellarmate package has many support features already installed. Jasem
+Mutlaq, the author, is heavily involved with Kstars, libindi and Ekos
+-- so the integration is very strong. We have successfully used the
+package in both stand-alone mode on the Raspberry Pi (RPi), with
+X-Windows
+XMing\footnote{\url{https://sourceforge.net/projects/xming/}} support,
+in its 'split' mode -- where a basic interface is provided between a
+Win1X system and a remote libinbdi-server running on the RPi. As of
+October 2023 we tested between Boulder CO, Phoenix AZ, Portland OR and
+Newcastle upon Tyne, UK.
+
+
+%%\end{abstract}
+\include{StellarMatePorts.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% table of contents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+\pagenumbering{roman}   % i,ii,etc
+%%\pagenumbering{gobble}   %ignore page numbers for a while
+\pdfbookmark[0]{Table of Contents}{MyTOC} % if usepackage{hyperref} in use.
+\tableofcontents
+\listoffigures
+%\listoftables
+\newpage
+
+
+\setcounter{section}{0}
+\pagenumbering{arabic}
+
+
+\ifx\documentisdraft\drafttest
+\linenumbers    %%%%%%%%%%%%% DRAFT
+\fi
+
+\input{PuTTYXming.tex}
+
+\input{Firewall.tex}
+
+\input{SerialPorts.tex}
+
+\input{Security.tex}
+
+
+
+%%\appendix
+%%\renewcommand \thesection{\Alph{section}}
+
+%% use a bibitem approach to the references publications etc.
+%% (wg-bibitem)
+
+%%\clearpage
+\addcontentsline{toc}{section}{References}
+\renewcommand*{\refname}{My Bibliography and References}
+\bibliographystyle{apalike}	% bibliographystyle{apalike} and \usepackage{natbib}
+\bibliography{MasterBib}	% expects file "MasterBib.bib"
+
+
+
+%%\begin{thebibliography}{80}
+%%\usepackage{natbib}   %% bibitems
+%%\end{thebibliography}
+
+%%\clearpage
+%%\addcontentsline{toc}{section}{Index}
+%%\printindex %% www.cs.usask.ca/resources/tutorials/latex/notes/toc-index.pdf
+
+% /home/git/external/FlexBerry/documentation/tex/PuttyXMingDoc/PuTTYXmingPDF.tex
+
+%% (wg-texdoc-endnotes)
+\end{document}

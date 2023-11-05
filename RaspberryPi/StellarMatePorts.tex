@@ -1,0 +1,19 @@
+\begin{table}[h!]
+\centering
+\begin{tabular}{| l | l | l |}
+\hline
+Service           & Port            &  WAN/Internet Control        \\ 
+\hline
+SSH               & 5624            & Required for Flexspec        \\ 
+INDI Web Manager  & 8624            & Not required                 \\ 
+INDI Server       & 7624            & Not required                 \\ 
+EkosLive Server   & 3000            & Not required                 \\ 
+Web VNC           & 6080            & Not required                 \\ 
+VNC               & 5900            & Not required                 \\ 
+Serial            & /dev/ttyS<n>    & Arduino Serial1 pins on RPi  \\ 
+Serial            & /dev/ttyACM0    & Arduino Serial USB           \\ 
+\hline
+\end{tabular}
+\caption[Stellarmate Wan Ports]{Stellarmate Wan Firewall Requirements}
+\label{table:StellarmateWanFirewallRequirements}
+\end{table}

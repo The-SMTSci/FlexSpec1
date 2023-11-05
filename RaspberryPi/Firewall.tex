@@ -1,0 +1,85 @@
+\newpage
+\section{WAN Firewall}
+
+Never open a large range of ports. Stellarmate uses ports 5624-8624,
+that includes (Internet Relay Chat RFC-1469) at 6667.
+
+
+\include{StellarMatePorts.tex}
+
+\subsection{Handy Network Commands }
+
+The original program to manage and display information about networks
+was called \dhl{ifconfig} for ``interface configuration''. This has
+been replaced recently with the newer \dhl{ip} to ``show / manipulate
+routing, network devices, interfaces and tunnels``. 
+
+\begin{table}[h!]
+\centering
+\begingroup % \fontsize{6pt}{6pt}
+\selectfont
+\begin{tabular}{| l | l |}
+\hline
+command       & action \\
+\hline
+arp           & address resolution protocol                                       \\
+dig           & DNS lookup                                                        \\
+netstat       & Print network connections, routing tables, interface statistics,  \\
+              & masquerade connections, and multicast memberships                 \\
+nslookup      & lookup DNS information                                            \\
+ping          & see if path to machine exists                                     \\
+tcpdump       & view traffic on local machine                                     \\
+tracepath     & tracepath to a remote machine: eg: \dhl{tracepath google.com}     \\
+\hline
+\end{tabular}
+\endgroup
+\caption[Handy Net Tools]{A few of many tools for network tracing.}
+\label{table:handynetcommands}
+\end{table}
+
+\newpage
+\subsection{ip vs ifconfig}
+The mapping from old ifconfig commands to new ip commands.
+
+\begin{table}[h!]
+\centering
+\begingroup % \fontsize{6pt}{6pt}
+\selectfont
+\begin{tabular}{| l | l |}
+\hline
+ifconfig command & New ip command                                                           \\
+\hline
+arp -a                              & ip neigh                                              \\ 
+arp -v                              & ip -s neigh                                           \\ 
+arp -s 192.168.1.1 1:2:3:4:5:6      & ip neigh add 192.168.1.1 lladdr 1:2:3:4:5:6 dev eth1  \\ 
+arp -i eth1 -d 192.168.1.1          & ip neigh del 192.168.1.1 dev eth1                     \\ 
+ifconfig -a                         & ip addr                                               \\ 
+ifconfig eth0 down                  & ip link set eth0 down                                 \\ 
+ifconfig eth0 up                    & ip link set eth0 up                                   \\ 
+ifconfig eth0 192.168.1.1           & ip addr add 192.168.1.1/24 dev eth0                   \\ 
+ifconfig eth0 netmask 255.255.255.0 & ip addr add 192.168.1.1/24 dev eth0                   \\ 
+ifconfig eth0 mtu 9000 i            & p link set eth0 mtu 9000                              \\ 
+ifconfig eth0:0 192.168.1.2         & ip addr add 192.168.1.2/24 dev eth0                   \\ 
+iptables                            & show and manipulate IPTABLEs \dhl{iptables -S}        \\
+netstat                             & ss                                                    \\ 
+netstat -neopa                      & ss -neopa                                             \\ 
+netstat -g                          & ip maddr                                              \\ 
+route                               & ip route                                              \\ 
+\hline
+\end{tabular}
+\endgroup
+\caption[Net-tools vs IProute2]{A ifconfig vs ip command quick summary.}
+\label{table:ifconfigvsipcommand}
+\end{table}
+
+\subsection{Modem Configuration}
+
+Each model model will use a different scheme to enable Network Address
+Translation (NAT) to connect the port from the WAN side to a
+``server'' within the LAN. Information usually includes:
+
+Start Port \\
+End   Port \\
+Server IP4 Address \\
+Server IP6 Address \\
+
