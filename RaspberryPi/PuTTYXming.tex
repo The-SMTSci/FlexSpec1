@@ -247,66 +247,8 @@ On the Windows pane, enter a new configuration for this machine.
 \label{figure:XmingConfig}
 \end{figure}
 
-
-\newpage
-\section{SSH on the Raspberry Pi}
-
-The StellarMate image has all necessary ports open and ready for use.
-The firewall has been set to pass all relevant ports.
-
-See subsection \ref{sec:StellarMate} below.
-
-\subsection{Non-StellarMate Raspberry Pi's}
-
-Note: this section is complicated by the details needed to open
-home firewalls to the internet using the local Telco's interface
-routers. Each router is different, and the Telco changes its mind
-frequently.
-
-This command will list the full name for hosts that are on the network.
-Here we're looking for our machine \dhl{pier15} that will appear
-as \dhl{pier15.hsd1.co.comcast.net}:
-
-{\color{verbcolor}{\verb={sudo nmap -sP 10.1.10.0/24 | awk -e '/^Nmap/ {print $5;}'}=}}
-
-If ssh issues a:
-
-\dhl{ssh: connect to host <machine>.local port 22: Connection refused}
-
-use the keyboard/mouse for the raspbian machine and run the command
-\dhl{sudo raspi-config}, then under Interface options, \dhl{I2 SSH} \llbox{{TAB}}, enable.
-
-
-SSH (Secure SHell), originates on port 22. The port needs to be allowed
-through the Raspbian's ``uncomplicated firewall'' \dhl{ufw} task. Root
-permissions are required.
-
-\begingroup \fontsize{10pt}{10pt}
-\selectfont
-%%\begin{Verbatim} [commandchars=\\\{\}]
-\begin{verbatim} 
-sudo ufw list       # see all the current ports
-sudo ufw allow ssh  # allow the port to work.
-\end{verbatim}
-\endgroup
-%% \end{Verbatim}
-
-\subsection{Raspberry Pi -- Raspbian SSH}
-
-Enable SSH through the Raspberry Pi Configuration menu:
-\dhl{Preferences $\rightarrow$ Raspberry Pi Configuration} Click on ``Interfaces'':
-and select \dhl{Enabled} next to SSH.
-
-Use the command \dhl{sudo nano /etc/ssh/sshd\_config} find
-and X11Forwarding set the value to yes 
-
-\dhl{ X11Forwarding yes}.
-
-Save.
-
-\dhl{sudo systemctl restart ssh}
-
-% https://techsphinx.com/raspberry-Pi/enable-x11-forwarding-on-raspberry-Pi/
+\input{Raspberry.tex
+}
 
 \subsection{StellarMate} \label{sec:StellarMate}
 

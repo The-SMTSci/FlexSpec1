@@ -1,0 +1,151 @@
+
+Details for the Raspberry Pi.
+
+\newpage
+\section{Raspberry Pi}
+
+Details related to the Raspberry Pi.
+
+
+\subsection{SSH on Raspberry Pi}
+
+The StellarMate image has all necessary ports open and ready for use.
+The firewall has been set to pass all relevant ports.
+
+See subsection \ref{sec:StellarMate} below.
+
+\subsection{Non-StellarMate Raspberry Pi's}
+
+Note: this section is complicated by the details needed to open
+home firewalls to the internet using the local Telco's interface
+routers. Each router is different, and the Telco changes its mind
+frequently.
+
+This command will list the full name for hosts that are on the network.
+Here we're looking for our machine \dhl{pier15} that will appear
+as \dhl{pier15.hsd1.co.comcast.net}:
+
+{\color{verbcolor}{\verb={sudo nmap -sP 10.1.10.0/24 | awk -e '/^Nmap/ {print $5;}'}=}}
+
+If ssh issues a:
+
+\dhl{ssh: connect to host <machine>.local port 22: Connection refused}
+
+use the keyboard/mouse for the raspbian machine and run the command
+\dhl{sudo raspi-config}, then under Interface options, \dhl{I2 SSH} \llbox{{TAB}}, enable.
+
+
+SSH (Secure SHell), originates on port 22. The port needs to be allowed
+through the Raspbian's ``uncomplicated firewall'' \dhl{ufw} task. Root
+permissions are required.
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+sudo ufw list       # see all the current ports
+sudo ufw allow ssh  # allow the port to work.
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+\subsection{Raspberry Pi -- Raspbian SSH}
+
+Enable SSH through the Raspberry Pi Configuration menu:
+\dhl{Preferences $\rightarrow$ Raspberry Pi Configuration} Click on ``Interfaces'':
+and select \dhl{Enabled} next to SSH.
+
+Use the command \dhl{sudo nano /etc/ssh/sshd\_config} find
+and X11Forwarding set the value to yes 
+
+\dhl{ X11Forwarding yes}.
+
+Save.
+
+\dhl{sudo systemctl restart ssh}
+
+% https://techsphinx.com/raspberry-Pi/enable-x11-forwarding-on-raspberry-Pi/
+
+\subsection{Serial Ports}
+
+At end of file:
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+dtoverlay=disable-bt
+dtoverlay=uart1
+dtoverlay=uart2
+droverlay=uart3
+dtoverlay=uart4
+dtoverlay=uart5
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+Pinouts:
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+0/1    14/15   Same Uart
+2       0/1
+3       4/5
+4       8/9
+5      12/13
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+
+To disable the Bluetooth 
+
+\dhl{sudo systemctl disable hciuart}
+
+\dhl{/boot/cmdline.txt:}
+
+add \dhl{console=ttyS0,115200} to the main line.
+
+\newpage
+\subsection{Raspberry External Pin Functions}
+
+\begingroup \fontsize{10pt}{10pt}
+\selectfont
+%%\begin{Verbatim} [commandchars=\\\{\}]
+\begin{verbatim} 
+  ALT0       ALT1       ALT2       ALT3       ALT4       ALT5      
+ 0 SDA0       SA5        PCLK       SPI3_CE0_N TXD2       SDA6      
+ 1 SCL0       SA4        DE         SPI3_MISO  RXD2       SCL6      
+ 2 SDA1       SA3        LCD_VSYNC  SPI3_MOSI  CTS2       SDA3      
+ 3 SCL1       SA2        LCD_HSYNC  SPI3_SCLK  RTS2       SCL3      
+ 4 GPCLK0     SA1        DPI_D0     SPI4_CE0_N TXD3       SDA3      
+ 5 GPCLK1     SAO        DPI_D1     SPI4_MISO  RXD3       SCL3      
+ 6 GPCLK2     SOE_N      DPI_D2     SPI4_MOSI  CTS3       SDA4      
+ 7 SPI0_CE1_N SWE_N      DPI_D3     SPI4_SCLK  RTS3       SCL4      
+ 8 SPI0_CE0_N SDO        DPI_D4     _          TXD4       SDA4      
+ 9 SPI0_MISO  SD1        DPI_D5     _          RXD4       SCL4      
+10 SPI0_MOSI  SD2        DPI_D6     _          CTS4       SDA5      
+11 SPI0_SCLK  SD3        DPI_D7     _          RTS4       SCL5      
+12 PWM0       SD4        DPI_D8     SPI5_CE0_N TXD5       SDA5      
+13 PWM1       SD5        DPI_D9     SPI5_MISO  RXD5       SCL5      
+14 TXD0       SD6        DPI_D10    SPI5_MOSI  CTS5       TXD1      
+15 RXD0       SD7        DPI_D11    SPI5_SCLK  RTS5       RXD1      
+16 FL0        SD8        DPI_D12    CTS0       SPI1_CE2_N CTS1      
+17 FL1        SD9        DPI_D13    RTS0       SPI1_CE1_N RTS1      
+18 PCM_CLK    SD10       DPI_D14    SPI6_CE0_N SPI1_CE0_N PWM0      
+19 PCM_FS     SD11       DPI_D15    SPI6_MISO  SPI1_MISO  PWM1      
+20 PCM_DIN    SD12       DPI_D16    SPI6_MOSI  SPIl_MOSI  GPCLK0    
+21 PCM_DOUT   SD13       DPI_D17    SPI6_SCLK  SPI1_SCLK  GPCLK1    
+22 SD0_CLK    SD14       DPI_D18    SD1_CLK    ARM_TRST   SDA6      
+23 SD0_XMD    SD15       DPI_D19    SD1_CMD    ARM_RTCK   SCL6      
+24 SD0_DATO   SD16       DPI_D20    SD1_DAT0   ARM_TDO    SPI3_CE1_N
+25 SD0_DAT1   SD17       DPI_D21    SD1_DAT1   ARM_TCK    SPI4_CE1_N
+26 SD0_DAT2   TE0        DPI_D22    SD1_DAT2   ARM_TDI    SPI5_CE1_N
+27 SD0_DAT3   TE1        DPI_D23    SD1_DAT3   ARM_TMS    SPI6_CE1_N
+\end{verbatim}
+\endgroup
+%% \end{Verbatim}
+
+

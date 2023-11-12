@@ -1,20 +1,46 @@
 #!/bin/bash 
 #############################################################################
-# Must be root to run
+# Must be root to run. Do a few basic tests and inform user in one go.
+# 2023-11-11T17:03:29-0700 wlg
 #############################################################################
-apt-get update                              # get the install up to date
-apt update                                  # tie in recent/all packages
-
+set abort=0
+set msg=""
 if test "$USER" != "root" ; then
-   echo "Must be root (sudo) to run this script."
-   exit 1
+   set msg="$msg 'Must be root (sudo) to run this script. use 'sudo -s'"
 fi
 
+# sorta make sure we're a stellarmate install
 if test "$(pwd)" != "/home/stellarmate" ; then 
-   echo "Will only run on stellarmate image."
-   exit 1
+   set msg="$msg echo Will only run on stellarmate image."
 fi
 
+if test msg != "" ; then
+    echo $msg
+    exit 1
+fi
+
+mkdir -p ~stellarmate/Configuration
+   
+apt-get update                         # get the install up to date
+apt update                             # tie in recent/all packages
+
+if ! which git ; then 
+    apt install -y git                     # get our helpers easily
+    mkdir -p /home/git
+    chown stellarmate:stellarmate /git     # make stellarmate own it.
+    cd ~stellarmate/Configuration
+    wget https://github.com/The-SMTSci/FlexBerry/blob/main/RPi/FollowMe.sh
+    wget https://github.com/The-SMTSci/FlexSpec1/blob/main/FollowMe.Stellarmate
+    chown -R stellarmate:stellarmate ~stellarmate/Configuration
+fi
+
+cd /home/git
+git clone https://github.com/The-SMTSci/FlexSpec1.git # get our whole package
+cp /home/git/FlexSpec1/RaspberryPi/PuTTYXmingPDF.pdf ~stellarmate/Desktop
+# install a manual
+chown stellarmate:stellarmate ~stellarmate/Desktop/PuTTYXmingPDF.pdf
+
+# install lots of things
 apt install -y locate                  # find files. sudo updatedb # for recent files.
 apt install -y vim                     # default vim crap is broken
 apt install -y python3-pyqt5           # get qt for our dialogs
@@ -24,33 +50,48 @@ apt install -y sextractor              # Ads WCS to images
 apt install -y fitsverify              # Make sure fits files are correct
 apt install -y x11-apps                # test remote X clients
 apt install -y sqlite3                 # Add sqlite3 for our purposes
-apt install -y filezilla               # allow file operations FROM the stellarmate
-apt install -y gawk                    # awk is too good to pass on
+apt install -y emacs                   # make Wayne happy.
 
 # FlexSpec
 
-# install IRAF using IRAF.install from this package
-#apt install -y iraf                    # for advanced users
-#apt install -y python3-pyraf           # for advanced users
+apt install -y iraf                    # for advanced users
+apt install -y python-pyraf3           # for advanced users
 
 #############################################################################
 # Install FlexSpec helpers
 #############################################################################
-apt install -y git                     # get our helpers easily
-mkdir -p /git/{local,external}         # repositories, local repos are here.
-cd /git/external                       # install FlexSpec1 repo as external
-git clone https://github.com/The-SMTSci/FlexSpec1.git
-chown -R stellarmate:stellarmate /git  # we own it.
-cd /home/stellarmate
-#/git/external/FlexSpec1/FlexSpec.install    # install all the helpers.
 
+cd /home/stellarmate                   # install only the part we want
+#/git/FlexSpec1/FlexSpec1.install       # install all the helpers.
+#rm -rf /git/FlexSpec1/                 # done with the repo remove
 
 # clean up space.
 apt-get autoremove                     # clean out all un-necessary packages
 apt-get autoclean                      # drop any stored tarballs
 
 cd /home/stellarmate
-echo "set enable-bracketed-paste off" >> .inputrc  # fix stupid update
-chown stellarmate:stellarmate .inputrc             # allow cut/paste AND EXECUTE if newline.
+if  ! grep -q "enable-bracketed-paste" .inputrc  ; then
+   echo "set enable-bracketed-paste off" >> .inputrc  # fix stupid bash new feature
+   chown stellarmate:stellarmate .inputrc             # allow cut/paste AND EXECUTE if newline.
+fi 
+
+# if using a Paramount
+apt-add-repository ppa:mutlaqja/ppa
+apt-get update 
+sudo apt-get install libindi
+
+cat >> /home/stellarmate/FS1Help.txt <<EOF
+Paramount: In TheSkyX preferences, make sure to turn off TCP Responses close socket.
+EOF
+
+# add location for all observing session files.
+mkdir -p /home/stellarmate/Desktop/Today
+chown -R stellarmate /home/stellarmate/Desktop/Today
+
+hostnamectl set-hostname flexspec1 # or other name
+reboot
+
+# make sure the user owns their stuff.
+chown -R stellarmate:stellarmate /home/git
 
 # eof
