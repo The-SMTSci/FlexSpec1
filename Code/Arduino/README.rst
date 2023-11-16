@@ -22,7 +22,7 @@ C is a proper subset of C++, so do not feel compelled to use lots of C++
 features.
 
 ARM Boards, BLE/IoT and Seeduino Xaio
-------
+-------------------------------------
 
 Boards are made to be compilent with different vendors environments. One is Mbed
 and the other is SAMD. In some cases, libraries are written to take advantage
@@ -33,7 +33,7 @@ In the main .ino file, please use the IDE to gather the version and author's
 name for each library package used. This helps to avoid confusion later.
 
 This Directory
-++++++++++++++
+--------------
 
 1. Demos
    a. hello : Print the word hello to the serial ports.
@@ -45,7 +45,7 @@ This Directory
 
 
 Serial Communications
-+++++++++++++++++++++
+---------------------
 
 The USB hardware in Arduinos, may not work well with the USB hardeare
 found in hubs and main motherboards. This does cause some issues.
