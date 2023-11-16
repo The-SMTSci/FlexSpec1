@@ -1,10 +1,14 @@
 
-String CodeVersion = "4.1";
-String CodeDate = "7/19/2023";
-String CodeLocation = "SAS_NA1_3D_Spectrograph/V2-FS1Code/demos/My-FS1_Arduino_control_code_V4.1";
+String CodeVersion = "4.1.1";
+String CodeDate = "7/20/2023";
+String CodeLocation = "SAS_NA1_3D_Spectrograph/V2-FS1Code/demos/My-FS1_Arduino_control_code_V4.1.1";
 
-//                    Soft opening and closing of the shutter
-//                        Added code version to the query command
+//                    THis code is for Gregs board V4
+//
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wreorder"
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 // IF RUNING WITH USB MAKE SURE THAT THE SERIAL MONITOR HAS "NO LINE ENDING" SELECTED
