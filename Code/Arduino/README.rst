@@ -26,8 +26,7 @@ This Directory
 
 1. Demos
    a. hello : Print the word hello to the serial ports.
-   b. gigo: Characters that are read, are printed right back. Handy for testing
-the CR/LF and baud rates
+   b. gigo: Characters that are read, are printed right back. Handy for testing the CR/LF and baud rates.
 2. MainBoard
    a. FlexSpec
 3. Kzin
