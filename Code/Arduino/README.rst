@@ -1,5 +1,5 @@
 FlexSpec1 Arduino Directory
-
+===========================
 
 An Arduino program consists of a *.ino* file, that acts like the main program.
 
@@ -22,6 +22,7 @@ C is a proper subset of C++, so do not feel compelled to use lots of C++
 features.
 
 This Directory
+++++++++++++++
 
 1. Demos
    a. hello : Print the word hello to the serial ports.
@@ -34,7 +35,7 @@ the CR/LF and baud rates
 
 
 Serial Communications
-
++++++++++++++++++++++
 
 The USB hardware in Arduinos, may not work well with the USB hardeare
 found in hubs and main motherboards. This does cause some issues.
