@@ -21,6 +21,17 @@ Avoid anything that refers to "iostream" This brings in quite a lot of code.
 C is a proper subset of C++, so do not feel compelled to use lots of C++
 features.
 
+ARM Boards, BLE/IoT and Seeduino Xaio
+------
+
+Boards are made to be compilent with different vendors environments. One is Mbed
+and the other is SAMD. In some cases, libraries are written to take advantage
+of only one environment's features! Thus code that compiles on one will fail
+on another.
+
+In the main .ino file, please use the IDE to gather the version and author's
+name for each library package used. This helps to avoid confusion later.
+
 This Directory
 ++++++++++++++
 
@@ -42,5 +53,6 @@ found in hubs and main motherboards. This does cause some issues.
 The clock rates of Arduinos are not that precise. 9600 baud may be 
 a tad bit slower/faster -- but the protocol usually does not trip
 over small differences.
+
 
 
