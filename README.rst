@@ -25,32 +25,32 @@ PL011 UARTs.
      - Tx Pin
      - Comm Port
      - Conflicts
-   *uart0 
+   * - uart0 
      - GPIO 14    8  
      - GPIO 15   10  
      - /dev/ttyAMA0 
      - Serial Console
-   *uart1 
+   * - uart1 
      - GPIO 0    27  
      - GPIO 1    28  
      - /dev/ttyAMA1 
      -
-   *uart2 
+   * - uart2 
      - GPIO 4     7  
      - GPIO 5    29  
      - /dev/ttyAMA2 
      - I2C
-   *uart3 
+   * - uart3 
      - GPIO 8    24  
      - GPIO 9    21  
      - /dev/ttyAMA3 
      -
-   *uart4 
+   * - uart4 
      - GPIO 12   32  
      - GPIO 13   33  
      - /dev/ttyAMA4 
      - SPI0
-   * uart5
+   * - uart5
      - 12
      - 13
      - /dev/ttyAMA5
