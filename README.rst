@@ -21,8 +21,8 @@ PL011 UARTs.
    :header-rows: 1
 
    * - UART
-     - RX Pin
-     - Tx Pin
+     - RX Pin (Board)
+     - Tx Pin (Board)
      - Comm Port
      - Conflicts
    * - uart0 
@@ -51,8 +51,8 @@ PL011 UARTs.
      - /dev/ttyAMA4 
      - SPI0
    * - uart5
-     - 12
-     - 13
+     - GPIO 12   14
+     - GPIO 13   15
      - /dev/ttyAMA5
      - gpio fan
 
