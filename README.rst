@@ -54,7 +54,6 @@ PL011 UARTs.
      - GPIO 12   14
      - GPIO 13   15
      - /dev/ttyAMA5
-     - gpio fan
 
 Other Interfaces
 ----------------
@@ -75,5 +74,92 @@ V0.0 - pre-release placeholder.
 .. |Documentation| image:: https://readthedocs.org/projects/pyraf/badge/?version=latest
     :target: https://flexspec1.readthedocs.io/en/latest/
     :alt: FlexSpec1 Status
+
+PuTTY Commands:
++++++++++++++++
+
+.. list-table:: PuYTTY FlexSpec1 Serial Port Commands
+   :widths: 10 25 90
+   :header-rows: 0
+
+   * - A<CR>
+     - 
+     - All functions list
+   * - B<CR>
+     - 
+     - Blue LED
+   * - C<CR>
+     - 
+     - Configuration to set the grating lines per mm
+   * - F<CR>
+     - 
+     - Focus the collimating lens
+   * - G<CR>
+     - 
+     - Green LED lights the Green
+   * - H<CR>
+     - 
+     - Home The Grating
+   * - I<CR>
+     - <PWM>
+     - Incandescent Grain of Wheat Flat lamps, PWM 0 - 100%.
+   * - J<CR>
+     - 
+     - Used to center zero order to focus on slit
+   * - L<CR>
+     - <PWM>
+     - Flat Lamp lights the LED Flat lamps, PWM 0 - 100%.
+   * - M<CR>
+     - 
+     - Reset collimating Focuses to zero
+   * - N<CR>
+     - 
+     - Neon / Calibration
+   * - O<CR>
+     - 
+     - Off Turns all lamps off
+   * - Q<CR>
+     - 
+     - Query status of the spectrometer
+   * - R<CR>
+     - <PWM>
+     - Red LED Controls The Red LED With PWM 0 - 100%
+   * - S<CR>
+     - 
+     - Shutter  (Open Close Toggle)
+   * - U<CR>
+     - <PWM>
+     - UV Boost Lights the UV Boost, PWM 0 - 100%.
+   * - V<CR>
+     - 
+     - Viewer for Slit. Backlight View the slit with backlight
+   * - W<CR>
+     - <Integer>
+     - Wavelength rotate the grating to center desired wavelength
+   * - Z<CR>
+     - 
+     - Zero Collimating lens to position = 0 (home)
+   * - 
+     - 
+     - (This should only be done once on initialization of
+   * - 
+     - 
+     - physical focus)
+   * - 
+     - 
+     - 
+   * - ?<CR>
+     - 
+     - Query the Defines the grating and collimating motor direction
+   * - 
+     - 
+     - (This should only be done once on initialization or
+   * - 
+     - 
+     - if a motor is changed depending on the manufacture
+   * - 
+     - 
+     - some motors run in oposit direction)
+
 
 
